@@ -63,6 +63,8 @@ button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}
 <div id="pass" class="ov hidden"><div class="pan"><button class="x" data-c="pass">✖</button><h2>🛂 Space Passport</h2><div id="passBody"></div></div></div>
 <div id="lab" class="ov hidden"><div class="pan"><button class="x" data-c="lab">✖</button><h2>🧪 Gravity Lab</h2><div id="labTabs"></div><canvas id="labCv" width="860" height="440"></canvas><div id="labCtl"></div><div id="labTxt"></div></div></div>
 <script type="module">
+var HOMETOWN=(function(){try{var h=JSON.parse(localStorage.getItem("realcraft_hometown_v1")||"null");return h&&h.name?String(h.name).replace(/[<>&]/g,""):"Lincoln"}catch(e){return"Lincoln"}})();
+
 // All numbers checked against NASA (science.nasa.gov, NSSDC Planetary Fact Sheet, NASA Space Place). Moon counts as of 2025.
 const B={
 sun:{n:"The Sun",e:"☀️",kind:"star",land:"none",g:28,dist:"The center of our solar system!",light:"Sunlight takes about 8 minutes to reach Earth.",
@@ -246,7 +248,7 @@ const L={scene:new THREE.Scene(),t:-1,alt:0};
  const rw=new THREE.Mesh(new THREE.PlaneGeometry(10,90),new THREE.MeshLambertMaterial({color:"#555"}));rw.rotation.x=-Math.PI/2;rw.position.set(-14,.05,0);s.add(rw);
  const pad=new THREE.Mesh(new THREE.CylinderGeometry(3,3.4,.6,16),new THREE.MeshLambertMaterial({color:"#9e9e9e"}));pad.position.y=.3;s.add(pad);
  const tw=new THREE.Mesh(new THREE.BoxGeometry(.8,9,.8),new THREE.MeshLambertMaterial({color:"#e65100"}));tw.position.set(2.6,4.5,0);s.add(tw);
- const sign=label("🚀 Lincoln Airport Launch Pad");sign.scale.set(10,1.9,1);sign.position.set(0,9,-6);s.add(sign);
+ const sign=label("🚀 "+HOMETOWN+" Airport Launch Pad");sign.scale.set(10,1.9,1);sign.position.set(0,9,-6);s.add(sign);
  const st=starfield(800,1400);st.material.transparent=true;st.material.opacity=0;s.add(st);L.stars=st;
  const cl=new THREE.MeshLambertMaterial({color:"#fff",transparent:true,opacity:.9});const r=rnd(4);L.clouds=[];for(let i=0;i<30;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(8+r()*10,1.5,5+r()*6),cl);c.position.set((r()-.5)*160,18+r()*12,(r()-.5)*160);s.add(c)}
  L.rk=rocketModel();L.rk.outer.position.y=2.1;s.add(L.rk.outer);L.rk.flame.visible=false}
@@ -291,7 +293,7 @@ function stepTravel(dt){const tv=travelling;tv.t+=dt;const u=Math.min(1,tv.t/tv.
  if(u>=1){travelling=null;cam.fov=60;cam.updateProjectionMatrix();ship.v=0;arrive(tv.k)}}
 function distLine(b){if(b.sun)return "📏 From the Sun: "+b.sun+" · ☀️ Sunlight takes about "+b.ls+" to get here.";if(b.earth)return "📏 "+b.earth+" · 💡 Light takes "+b.le+" to get here from Earth.";return "📏 "+b.dist+" "+b.light}
 function arrive(k){cur=k;info("");const b=B[k];stamp(k);
- const land={land:"🛬 Land & walk",float:"☁️ Float at the cloud tops",dock:"🧑‍🚀 Spacewalk at the station",home:"🏠 Land at home (Lincoln)",none:null}[b.land];
+ const land={land:"🛬 Land & walk",float:"☁️ Float at the cloud tops",dock:"🧑‍🚀 Spacewalk at the station",home:"🏠 Land at home ("+HOMETOWN+")",none:null}[b.land];
  let h=`<h2>${b.e} ${b.n}</h2><div>${b.fact}</div><div class="d">${distLine(b)}</div><div class="d">🏋️ ${gravLine(k)}</div><div class="bt">`;
  if(land)h+=`<button id="cLand" style="background:#76ff03">${land}</button>`;if(b.moon2)h+=`<button id="cMoon">🧊 Visit ${B[b.moon2].n.replace(/ \(.*\)/,"")}</button>`;
  h+=`<button id="cLearn" style="background:#4fc3f7">📖 Learn more</button><button id="cX">✖ Keep flying</button></div>`;

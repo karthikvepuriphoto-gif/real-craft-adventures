@@ -71,7 +71,8 @@ small{font-size:9px;color:#ccc}
 <button class="hb" style="background:#2f7fd0" onclick="location.href='workshop.html'"><b>🛠️</b>Workshop<small>Build in 3D</small></button>
 <button class="hb" style="background:#8e24aa" onclick="location.href='mansion.html'"><b>🏰</b>Mansion<small>Find 10 gems</small></button>
 <button class="hb" style="background:#e53935" onclick="location.href='workshop.html#drive'"><b>🏎️</b>Race Track<small>Drive your car</small></button>
-<button class="hb" style="background:#00897b;grid-column:1/-1" onclick="location.href='buildworld.html'"><b>🌍</b>Build World<small>Create in Lincoln</small></button></div>
+<button class="hb" style="background:#00897b;grid-column:1/-1" onclick="location.href='buildworld.html'"><b>🌍</b>Build World<small id="bwSub">Create in Lincoln</small></button></div>
+<button class="hb" style="background:#ef6c00;width:100%;margin:8px 0" onclick="window.pickHometown&&pickHometown()"><b>🏙️</b>Hometown: <span id="htLbl">Lincoln</span><small>Tap to change your city</small></button>
 <button class="hb" style="background:#5e35b1;width:100%;margin:8px 0" onclick="location.href='timemachine.html'"><b>⏳</b>Time Machine<small>Big Bang, dinosaurs, Lincoln, Moon + Inventors Lab</small></button>
 <button class="hb" style="background:#283593;width:100%;margin:8px 0" onclick="location.href='atom.html'"><b>⚛️</b>Atom Explorer<small>Shrink into a copper wire</small></button>
 <button class="hb" style="background:#0277bd;width:100%;margin:8px 0" onclick="location.href='sea.html'"><b>🌊</b>Sea Mode<small>Dive with whales & fish</small></button>
@@ -103,6 +104,10 @@ small{font-size:9px;color:#ccc}
 <div id="toast" class="hidden"></div>
 <div id="celebrate" class="hidden"></div>
 <script>
+var HT0=null;(function(){try{HT0=JSON.parse(localStorage.getItem("realcraft_hometown_v1")||"null")}catch(e){}if(!HT0&&(localStorage.getItem("realcraft_buildworld_v1")||localStorage.getItem("questcraft_save_v1"))){HT0={id:"lincoln",name:"Lincoln"};localStorage.setItem("realcraft_hometown_v1",JSON.stringify(HT0))}window.__htNeedPick=!HT0})();
+var HTNAME=HT0&&HT0.name?String(HT0.name).replace(/[<>&]/g,""):"Lincoln",HTLIN=!HT0||HT0.id==="lincoln";
+</script>
+<script>
 const GAME_TITLE = "Real Craft Adventures";   // <- change the game name here
 const KEY = "questcraft_save_v1";
 
@@ -122,6 +127,7 @@ const BIOMES = [
  {id:"trail",name:"Bike Trail",ic:"🚲",color:"#4a8a6a",quest:"Ride or walk a trail and spot 5 different trees.",item:"🪵 Oak Log",xp:30},
 ];
 
+if(!HTLIN){const RN={pioneers:["Big City Park","🌳","Spot 3 kinds of birds or animal tracks at a big park."],zoo:["Zoo","🦒",null],lake:["Lake or River","🌊","Walk by the water and count the ducks, geese or boats."],kahoa:["My School","🏫","Invent a new recess game and teach it to a friend at school!"],capitol:["State Capitol or City Hall","🏛️","Find a statue or a flag and count the steps at the entrance!"],garden:["Flower Garden","🌷",null],museum:["Natural History Museum","🦣","Find a dinosaur or mammoth fossil. Draw it!"]};for(const b of BIOMES){const r=RN[b.id];if(r){b.name=r[0];b.ic=r[1];if(r[2])b.quest=r[2]}}}
 const MISSIONS = [
  ["Gather 5 different leaves","🍂 Leaf Stack"],["Build a shelter for a stuffed animal","🛖 Mini Shelter"],
  ["Find 3 rocks of different colors","🪨 Rock Set"],["Build a tower of 20 blocks/LEGO/cups","🧱 Tower Block"],
@@ -344,5 +350,11 @@ const btn=document.createElement("button");btn.id="musicBtn";btn.addEventListene
 window.Music={play,setRate:r=>{rate=r},isOn:()=>on,setOn,get ctx(){return ctx},get cur(){return cur},tracks:Object.keys(T)};
 })();
 Music.play("home");
+</script>
+<script type="module">
+import {openPicker,htName,getHometown} from "./hometown.js";
+const upd=()=>{const n=htName(getHometown());const a=document.getElementById("htLbl"),b=document.getElementById("bwSub");if(a)a.textContent=n;if(b)b.textContent="Create in "+n};upd();
+window.pickHometown=()=>openPicker(()=>location.reload());
+if(window.__htNeedPick)setTimeout(()=>openPicker(()=>location.reload(),{first:true}),300);
 </script>
 </body></html>
