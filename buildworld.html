@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Build World · Real Craft Adventures</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;touch-action:none;-webkit-user-select:none;user-select:none}
-html,body{margin:0;height:100%;overflow:hidden;font-family:'Press Start 2P',monospace;background:#1b5e20;color:#fff}
-#view{position:fixed;inset:0}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;font-family:'Press Start 2P',monospace;background:#1b5e20;color:#fff}
+#view{position:fixed;inset:0}#view canvas{display:block;width:100%!important;height:100%!important;touch-action:none}
+#goto{position:fixed;top:120px;left:8px;display:flex;flex-direction:column;gap:6px;align-items:center;z-index:9;font-size:9px}#goto span{background:rgba(0,0,0,.55);padding:6px;border-radius:4px}#goto button{min-height:44px}
+#zoom{position:fixed;right:96px;bottom:110px;display:flex;flex-direction:column;gap:8px;z-index:6}#zoom button{width:56px;height:56px;font-size:22px;padding:0}
+#help{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:flex;align-items:center;justify-content:center}#help.hidden{display:none}#help .card{background:#fff;color:#000;border:4px solid #000;border-radius:12px;padding:20px;max-width:min(520px,90vw);font-size:11px;line-height:2}#help .card b{color:#2e7d32}
 #top{position:fixed;top:0;left:0;right:70px;display:flex;flex-wrap:wrap;gap:6px;padding:8px;z-index:10;pointer-events:none}
 #top>*{pointer-events:auto}
 button{font-family:inherit;font-size:9px;border:3px solid #000;background:#fff;color:#000;padding:8px 10px;min-height:44px;cursor:pointer;border-radius:6px}
@@ -40,6 +43,9 @@ button.go{background:#43a047;color:#fff}
  <button id="btnSlot">💾 Slot 1</button>
  <button id="btnReset">🔄 Reset</button>
  <button id="btnCar">🏎️ My Car</button>
+ <button id="btnHelp">❓ Help</button>
+</div>
+<div id="goto"><span>🚀 Go to:</span><button data-go="home">🏡 Home</button><button data-go="kahoa">🏫 Kahoa</button><button data-go="park">🌳 Park</button><button data-go="capitol">🏛️ Capitol</button>
 </div>
 <div id="modes">
  <button id="modePlace" class="on">🧱 Place</button>
@@ -53,6 +59,9 @@ button.go{background:#43a047;color:#fff}
  <button id="btnAction" class="go" title="Place or break">✋</button>
 </div>
 <div id="look">👉 Drag to look · tap to build</div>
+<div id="zoom"><button id="zIn" title="Zoom in">➕</button><button id="zOut" title="Zoom out">➖</button></div>
+<div id="help" class="hidden"><div class="card"><h3>🌍 How to play</h3>
+🕹️ <b>Move:</b> drag the round stick (bottom left)<br>👉 <b>Look:</b> drag anywhere on the world<br>👆 <b>Build:</b> tap a block. <b>🧱 Place</b> adds a block, <b>⛏️ Break</b> removes one<br>🎨 <b>Pick a block</b> from the bar at the bottom<br>⬆️ <b>Jump</b> · 🕊️ <b>Fly</b> · ➕➖ <b>Zoom</b><br>🔒 Locked blocks unlock when you do real quests!<br><br><button class="go" id="helpOk" style="font-size:12px">Let's build!</button></div></div>
 <div id="toast" class="hidden"></div>
 <script type="module">
 import * as THREE from "three";
@@ -170,8 +179,8 @@ function garage(cx,cz){
 
 // ---- chunk meshing ----
 const scene=new THREE.Scene();scene.background=new THREE.Color("#87ceeb");scene.fog=new THREE.Fog("#87ceeb",40,70);
-const cam=new THREE.PerspectiveCamera(60,1,.1,120);
-const ren=new THREE.WebGLRenderer({antialias:false,powerPreference:"high-performance"});ren.setPixelRatio(Math.min(2,devicePixelRatio));
+const cam=new THREE.PerspectiveCamera(70,1,.1,90);
+const ren=new THREE.WebGLRenderer({antialias:false,powerPreference:"high-performance"});ren.setPixelRatio(Math.min(1.5,devicePixelRatio||1));
 const view=document.getElementById("view");view.appendChild(ren.domElement);
 const sun=new THREE.DirectionalLight("#fff8e1",1.1);sun.position.set(30,50,20);scene.add(sun,new THREE.HemisphereLight("#ffffff","#7cb342",.9),new THREE.AmbientLight("#ffffff",.25));
 const mats={};function mat(id){if(mats[id])return mats[id];const B=BLOCKS[id];const m=new THREE.MeshLambertMaterial({color:B.c||"#fff",transparent:!!B.a,opacity:B.a||1,depthWrite:!B.a});mats[id]=m;return m}
@@ -218,7 +227,7 @@ function avatar(){const g=new THREE.Group(),add=(w,h,d,c,x,y,z)=>{const m=new TH
  add(.5,.5,.5,"#ffcc99",0,1.72,0);add(.52,.15,.52,"#5d4037",0,2,0);for(const s of[-1,1])add(.08,.08,.02,"#212121",s*.12,1.75,.26);add(.16,.04,.02,"#c62828",0,1.6,.26);
  legs.forEach(l=>{l.geometry.translate(0,-.3,0);l.position.y=.7});arms.forEach(a=>{a.geometry.translate(0,-.3,0);a.position.y=1.4});scene.add(g);return{g,legs,arms}}
 const av=avatar();
-const P={x:0,y:1,z:8,yaw:Math.PI,cy:Math.PI,cp:.25,vy:0,ground:true,fly:false};
+const P={x:0,y:1,z:8,yaw:Math.PI,cy:0,cp:.7,vy:0,ground:true,fly:false};
 
 function solid(x,y,z){const id=get(Math.floor(x),Math.floor(y),Math.floor(z));return id&&id!==18&&id!==6}
 function collide(nx,ny,nz){const r=.3,h=1.7;for(let y=0;y<=h;y+=.4)for(const[dx,dz]of[[-r,0],[r,0],[0,-r],[0,r]])if(solid(nx+dx,ny+y,nz+dz))return true;return false}
@@ -231,7 +240,7 @@ const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeomet
 
 function aim(){
   const origin=new THREE.Vector3(P.x,P.y+1.4,P.z);
-  const dir=new THREE.Vector3(-Math.sin(P.cy)*Math.cos(P.cp),Math.sin(P.cp),-Math.cos(P.cy)*Math.cos(P.cp)).normalize();
+  const dir=new THREE.Vector3(-Math.sin(P.cy)*Math.cos(P.cp*.6),-Math.sin(P.cp*.6)-.25,-Math.cos(P.cy)*Math.cos(P.cp*.6)).normalize();
   // voxel DDA
   let x=Math.floor(origin.x),y=Math.floor(origin.y),z=Math.floor(origin.z);
   const stepX=dir.x>0?1:-1,stepY=dir.y>0?1:-1,stepZ=dir.z>0?1:-1;
@@ -249,6 +258,11 @@ function aim(){
   if(hit){outline.visible=true;outline.position.set(hit.x+.5,hit.y+.5,hit.z+.5)}else outline.visible=false;
 }
 
+function tapAt(cx,cy){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),cam);ray.far=40;
+ const ms=[];for(const c of chunks.values())ms.push(...c.g.children);const h=ray.intersectObjects(ms,false)[0];if(!h)return;const n=h.face.normal;
+ const x=Math.floor(h.point.x-n.x*.01),y=Math.floor(h.point.y-n.y*.01),z=Math.floor(h.point.z-n.z*.01);
+ if(Math.hypot(x+.5-P.x,z+.5-P.z,y-P.y)>12)return toast("🚶 Walk closer to build there!");target={x,y,z,nx:Math.round(n.x),ny:Math.round(n.y),nz:Math.round(n.z)};outline.position.set(x+.5,y+.5,z+.5);outline.visible=true;holdT=performance.now();doAction()}
+let holdT=0,lookT=0;
 function doAction(){
   if(!target)return toast("👀 Look at a block first!");
   if(mode==="break"){
@@ -300,6 +314,8 @@ function renderHotbar(){
 }
 
 // ---- controls ----
+const tapBtn=(id,f)=>{const b=document.getElementById(id);b.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();f()})};
+
 const joy=document.getElementById("joy"),knob=document.getElementById("knob");let jid=null;
 joy.addEventListener("pointerdown",e=>{jid=e.pointerId;joy.setPointerCapture(jid);mvJoy(e)});
 joy.addEventListener("pointermove",e=>{if(e.pointerId===jid)mvJoy(e)});
@@ -307,32 +323,40 @@ const endJ=e=>{if(e.pointerId!==jid)return;jid=null;inp.jx=inp.jy=0;knob.style.l
 joy.addEventListener("pointerup",endJ);joy.addEventListener("pointercancel",endJ);
 function mvJoy(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const m=Math.hypot(dx,dy),R=55;if(m>R){dx*=R/m;dy*=R/m}inp.jx=dx/R;inp.jy=-dy/R;knob.style.left=45+dx+"px";knob.style.top=45+dy+"px"}
 
-const cv=ren.domElement;let look=null;
-cv.addEventListener("pointerdown",e=>{if(e.target.closest&&e.target.closest("#joy,#ui"))return;look={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now()};cv.setPointerCapture(e.pointerId)});
-cv.addEventListener("pointermove",e=>{if(!look||e.pointerId!==look.id)return;P.cy-=(e.clientX-look.x)*0.005;P.cp=Math.max(-1.2,Math.min(1.2,P.cp-(e.clientY-look.y)*0.005));look.x=e.clientX;look.y=e.clientY});
-cv.addEventListener("pointerup",e=>{if(!look||e.pointerId!==look.id)return;if(performance.now()-look.t<220&&Math.hypot(e.clientX-look.x,e.clientY-look.y)<8)doAction();look=null});
+const cv=ren.domElement;let look=null;const pts=new Map();let pinch0=0;
+cv.addEventListener("pointerdown",e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);if(pts.size===2){const[a,b]=[...pts.values()];pinch0=Math.hypot(a[0]-b[0],a[1]-b[1]);look=null}});
+cv.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,[e.clientX,e.clientY]);if(pts.size===2&&pinch0){const[a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);camDist=Math.max(3,Math.min(14,camDist*pinch0/d));pinch0=d}});
+const upP=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch0=0};cv.addEventListener("pointerup",upP);cv.addEventListener("pointercancel",upP);
+cv.addEventListener("pointerdown",e=>{if(pts.size>1)return;if(e.target.closest&&e.target.closest("#joy,#ui"))return;look={id:e.pointerId,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:performance.now(),moved:false};cv.setPointerCapture(e.pointerId)});
+cv.addEventListener("pointermove",e=>{if(!look||e.pointerId!==look.id)return;if(Math.hypot(e.clientX-look.sx,e.clientY-look.sy)>10)look.moved=true;if(!look.moved)return;P.cy-=(e.clientX-look.x)*0.0035;P.cp=Math.max(-.2,Math.min(1.2,P.cp+(e.clientY-look.y)*0.003));lookT=performance.now();look.x=e.clientX;look.y=e.clientY});
+cv.addEventListener("pointerup",e=>{if(!look||e.pointerId!==look.id)return;if(!look.moved&&performance.now()-look.t<350)tapAt(e.clientX,e.clientY);look=null});
 
 addEventListener("keydown",e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;inp.keys[k]=true;if(k===" "||k==="Space"){inp.jump=1;e.preventDefault()}if(k>="1"&&k<="9"){sel=BASIC[+k-1]||sel;renderHotbar()}if(k==="f")toggleFly();if(k==="e")doAction();if(e.key.startsWith("Arrow"))e.preventDefault()});
 addEventListener("keyup",e=>{inp.keys[e.key.length===1?e.key.toLowerCase():e.key]=false});
 
-document.getElementById("btnJump").onclick=()=>inp.jump=1;
-document.getElementById("btnFly").onclick=toggleFly;
-document.getElementById("modePlace").onclick=()=>{mode="place";document.getElementById("modePlace").classList.add("on");document.getElementById("modeBreak").classList.remove("on")};
-document.getElementById("modeBreak").onclick=()=>{mode="break";document.getElementById("modeBreak").classList.add("on");document.getElementById("modePlace").classList.remove("on")};
-document.getElementById("btnAction").onclick=doAction;
+tapBtn("btnJump",()=>inp.jump=1);tapBtn("zIn",()=>camDist=Math.max(3,camDist-1.5));tapBtn("zOut",()=>camDist=Math.min(14,camDist+1.5));
+document.getElementById("helpOk").onclick=()=>{document.getElementById("help").classList.add("hidden");localStorage.setItem("realcraft_bw_help","1")};document.getElementById("btnHelp").onclick=()=>document.getElementById("help").classList.remove("hidden");
+if(!localStorage.getItem("realcraft_bw_help"))document.getElementById("help").classList.remove("hidden");
+tapBtn("btnFly",toggleFly);
+tapBtn("modePlace",()=>{mode="place";document.getElementById("modePlace").classList.add("on");document.getElementById("modeBreak").classList.remove("on")});
+tapBtn("modeBreak",()=>{mode="break";document.getElementById("modeBreak").classList.add("on");document.getElementById("modePlace").classList.remove("on")});
+tapBtn("btnAction",doAction);
 document.getElementById("btnCar").onclick=placeCar;
 document.getElementById("btnReset").onclick=()=>{if(confirm("Reset this world to Lincoln? Your builds in this slot will be erased.")){const all=JSON.parse(localStorage.getItem(KEYW)||"{}");all.slots=all.slots||[{},{},{}];all.slots[slot]={};localStorage.setItem(KEYW,JSON.stringify(all));loadSlot(slot);toast("🌍 Fresh Lincoln world!")}};
 document.getElementById("btnSlot").onclick=()=>{slot=(slot+1)%3;loadSlot(slot);document.getElementById("btnSlot").textContent="💾 Slot "+(slot+1)};
 
 function toggleFly(){P.fly=!P.fly;document.getElementById("btnFly").classList.toggle("on",P.fly);toast(P.fly?"🕊️ Fly mode on!":"🦶 Walk mode");beep(700,.05)}
 
+const GO={home:[0.5,-9.5,Math.PI],kahoa:[16.5,-11.5,0],park:[-9.5,13.5,-Math.PI/2],capitol:[0.5,9.5,0]};
+document.querySelectorAll("#goto button").forEach(b=>b.addEventListener("pointerdown",e=>{e.preventDefault();const g=GO[b.dataset.go];P.x=g[0];P.z=g[1];P.y=1;P.vy=0;P.fly=false;P.yaw=g[2];P.cy=g[2]-Math.PI;P.cp=.7;camInit=false;let y=1;while(collide(P.x,y,P.z)&&y<H)y++;P.y=y;toast("🚀 Zoom! "+b.textContent);beep(880,.08)}));
 // ---- loop ----
-let last=performance.now(),camInit=false;
+let last=performance.now(),camInit=false,camDist=11;
 function step(dt,t){
   let fx=inp.jx,fy=inp.jy;const k=inp.keys;if(k.w||k.ArrowUp)fy=1;if(k.s||k.ArrowDown)fy=-1;if(k.a)fx=-1;if(k.d)fx=1;if(k.ArrowLeft)P.cy+=dt*2;if(k.ArrowRight)P.cy-=dt*2;
   const mag=Math.min(1,Math.hypot(fx,fy)),sp=P.fly?8:5.2;
   if(mag>.05){const fwd=[-Math.sin(P.cy),-Math.cos(P.cy)],rt=[Math.cos(P.cy),-Math.sin(P.cy)];const dx=(fwd[0]*fy+rt[0]*fx),dz=(fwd[1]*fy+rt[1]*fx),n=Math.hypot(dx,dz)||1;
-    const vx=dx/n*sp*mag*dt,vz=dz/n*sp*mag*dt;if(!collide(P.x+vx,P.y,P.z))P.x+=vx;if(!collide(P.x,P.y,P.z+vz))P.z+=vz;
+    const vx=dx/n*sp*mag*dt,vz=dz/n*sp*mag*dt;const tryMv=(ax,az)=>{if(!collide(P.x+ax,P.y,P.z+az)){P.x+=ax;P.z+=az;return}if((P.ground||P.fly)&&!collide(P.x+ax,P.y+1.05,P.z+az)&&!collide(P.x,P.y+1.05,P.z)){P.y=Math.floor(P.y)+1;P.x+=ax;P.z+=az}};tryMv(vx,0);tryMv(0,vz);
+    if(fy>.3&&Math.abs(fx)<.5&&performance.now()-lookT>1200){let dd=(P.yaw-Math.PI)-P.cy;dd=Math.atan2(Math.sin(dd),Math.cos(dd));P.cy+=dd*Math.min(1,dt*1.2)}
     const want=Math.atan2(dx,dz);let d=want-P.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));P.yaw+=d*Math.min(1,dt*10)}
   if(P.fly){if(inp.jump||k[" "])P.y+=sp*dt;if(k.shift)P.y=Math.max(0,P.y-sp*dt);P.vy=0}
   else{
@@ -347,15 +371,17 @@ function step(dt,t){
   const sw=mag>.05&&!P.fly?Math.sin(t*10)*.55*mag:0;av.legs[0].rotation.x=sw;av.legs[1].rotation.x=-sw;av.arms[0].rotation.x=-sw;av.arms[1].rotation.x=sw;
 
   // camera
-  let dist=6.5;const tv=new THREE.Vector3(P.x+Math.sin(P.cy)*dist*Math.cos(P.cp),P.y+1.6+Math.sin(P.cp)*dist,P.z+Math.cos(P.cy)*dist*Math.cos(P.cp));
+  let dist=camDist;const tv=new THREE.Vector3(P.x+Math.sin(P.cy)*dist*Math.cos(P.cp),P.y+1.6+Math.sin(P.cp)*dist,P.z+Math.cos(P.cy)*dist*Math.cos(P.cp));
   // pull in if blocked
   for(let s=.8;s<dist;s+=.25){const cx=P.x+Math.sin(P.cy)*s*Math.cos(P.cp),cy=P.y+1.6+Math.sin(P.cp)*s,cz=P.z+Math.cos(P.cy)*s*Math.cos(P.cp);if(solid(cx,cy,cz)){tv.set(P.x+Math.sin(P.cy)*(s-.4)*Math.cos(P.cp),P.y+1.6+Math.sin(P.cp)*(s-.4),P.z+Math.cos(P.cy)*(s-.4)*Math.cos(P.cp));break}}
   if(camInit)cam.position.lerp(tv,Math.min(1,dt*8));else{cam.position.copy(tv);camInit=true}cam.lookAt(P.x,P.y+1.35,P.z);
-  aim();rebuildDirty(3);
+  if(performance.now()-holdT>1500)aim();rebuildDirty(3);
 }
-function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;step(dt,t/1000);const w=view.clientWidth,h=view.clientHeight;if(ren.domElement.width!==w||ren.domElement.height!==h){ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}ren.render(scene,cam);requestAnimationFrame(frame)}
-function resize(){ren.setSize(view.clientWidth,view.clientHeight,false);cam.aspect=view.clientWidth/view.clientHeight;cam.updateProjectionMatrix()}
-addEventListener("resize",resize);resize();
+let vw=0,vh=0;function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;step(dt,t/1000);if(innerWidth!==vw||innerHeight!==vh)resize();ren.render(scene,cam);requestAnimationFrame(frame)}
+function resize(){vw=innerWidth;vh=innerHeight;ren.setSize(vw,vh,true);cam.aspect=vw/vh;cam.updateProjectionMatrix()}
+addEventListener("resize",resize);addEventListener("orientationchange",()=>setTimeout(resize,200));if(window.visualViewport)visualViewport.addEventListener("resize",resize);resize();
+["gesturestart","gesturechange","gestureend"].forEach(e=>document.addEventListener(e,ev=>ev.preventDefault(),{passive:false}));document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
+document.addEventListener("touchmove",e=>{if(!e.target.closest("#hotbar"))e.preventDefault()},{passive:false});
 
 // boot
 const all0=JSON.parse(localStorage.getItem(KEYW)||"{}");slot=all0.slot||0;
@@ -363,7 +389,7 @@ loadSlot(slot);document.getElementById("btnSlot").textContent="💾 Slot "+(slot
 requestAnimationFrame(frame);
 if(window.Music)Music.play("build");
 
-window.BW={get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks};
+window.BW={GO,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks};
 
 </script>
 <script>
