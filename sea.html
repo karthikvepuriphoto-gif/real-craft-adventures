@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="icon" href="data:,"><title>Sea Mode · Real Craft Adventures</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;touch-action:none;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;-webkit-touch-callout:none;font-family:'Press Start 2P',monospace;background:#0277bd;color:#fff}
+#view{position:fixed;inset:0}#view canvas{display:block;width:100%!important;height:100%!important}
+button{font-family:inherit;font-size:11px;border:3px solid #000;border-radius:8px;padding:10px 12px;background:#ffca28;color:#000;box-shadow:0 3px 0 #000;cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}
+.hidden{display:none!important}
+#top{position:fixed;left:8px;top:8px;z-index:20;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 80px)}
+#top button{font-size:10px;padding:9px 10px}
+#stars{position:fixed;right:70px;top:16px;z-index:20;font-size:12px;color:#ffeb3b;text-shadow:2px 2px 0 #000}
+#info{position:fixed;top:64px;left:0;right:0;margin:auto;width:fit-content;max-width:92%;background:rgba(0,0,0,.65);color:#ffeb3b;padding:8px 12px;border-radius:8px;font-size:10px;line-height:1.6;z-index:15;pointer-events:none;text-align:center}
+#joy{position:fixed;left:24px;bottom:28px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.15);border:3px solid rgba(255,255,255,.5);z-index:18}
+#knob{position:absolute;left:45px;top:45px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.8);border:3px solid #000}
+#act{position:fixed;right:24px;bottom:34px;z-index:18;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+#act button{font-size:13px;padding:16px 18px;min-width:120px}
+#near{position:fixed;left:0;right:0;bottom:190px;margin:auto;width:fit-content;z-index:19;font-size:13px;background:#76ff03;animation:pulse 1s infinite alternate}@keyframes pulse{to{transform:scale(1.07)}}
+#meter{position:fixed;left:180px;bottom:30px;z-index:16;background:rgba(0,0,0,.7);border:3px solid #fff;border-radius:10px;padding:10px;font-size:10px;line-height:1.7;max-width:min(430px,calc(100% - 340px))}
+#meter b{color:#ffeb3b}
+#count{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:110px;color:#ffeb3b;text-shadow:6px 6px 0 #000;z-index:17;pointer-events:none}
+#layer{position:fixed;left:0;right:0;bottom:30px;margin:auto;width:fit-content;max-width:80%;background:rgba(0,0,0,.7);border:3px solid #4fc3f7;border-radius:10px;padding:12px;font-size:11px;line-height:1.7;z-index:16;text-align:center}
+#alt{position:fixed;right:20px;top:70px;z-index:16;font-size:11px;background:rgba(0,0,0,.6);padding:8px;border-radius:8px;line-height:1.7}
+#skip{position:fixed;right:20px;bottom:30px;z-index:18}
+#card{position:fixed;left:0;right:0;bottom:16px;margin:auto;width:min(640px,94%);background:#fff;color:#000;border:4px solid #000;border-radius:12px;padding:14px;z-index:30;font-family:system-ui,sans-serif;font-size:16px;line-height:1.45;box-shadow:0 5px 0 #000}
+#card h2{font-family:'Press Start 2P',monospace;font-size:15px;margin:0 0 8px}#card .d{font-size:14px;color:#1565c0;margin:6px 0}#card .bt{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;display:flex;align-items:center;justify-content:center}
+.pan{background:#fff;color:#000;border:4px solid #000;border-radius:12px;width:min(900px,96%);max-height:92%;overflow-y:auto;touch-action:pan-y;padding:16px;position:relative;font-family:system-ui,sans-serif;font-size:16px;line-height:1.5}
+.pan *{touch-action:pan-y}
+.pan h2{font-family:'Press Start 2P',monospace;font-size:15px;margin:4px 60px 12px 0;line-height:1.5}
+.x{position:absolute;right:8px;top:8px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.tcard{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;min-height:104px;position:relative;font-family:system-ui,sans-serif;font-size:13px;background:#e3f2fd}
+.tcard .te{font-size:34px}.tcard small{font-size:11px;color:#555}.tcard i{position:absolute;top:4px;right:6px;font-style:normal}.tcard.no{opacity:.45}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin:10px 0}.stats div{background:#f3e5f5;border:2px solid #000;border-radius:8px;padding:8px;font-size:14px}.stats b{display:block;font-size:12px;color:#6a1b9a}
+.qz{background:#fff8e1;border:2px solid #000;border-radius:8px;padding:8px;margin:8px 0}.qz button{font-family:system-ui,sans-serif;font-size:14px;margin:4px;background:#e0e0e0}.qz button.right{background:#76ff03}.qz button.wrong{background:#ff8a80}
+.sizecmp{display:flex;align-items:flex-end;gap:16px;margin:8px 0;min-height:40px}.sizecmp span{display:inline-block;border-radius:50%;border:2px solid #000}
+#labTabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}#labTabs button{font-size:10px}#labTabs button.on{background:#76ff03}
+#labCv{width:100%;height:auto;background:#05051a;border:3px solid #000;border-radius:8px;display:block;touch-action:none}
+#labCtl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}#labCtl input[type=range]{width:240px;touch-action:none}
+#labTxt{font-size:15px;min-height:44px}
+#toast{position:fixed;left:0;right:0;top:110px;margin:auto;width:fit-content;max-width:90%;background:#ffeb3b;color:#000;border:3px solid #000;border-radius:8px;padding:10px 14px;font-size:11px;z-index:80;line-height:1.6;text-align:center}
+@media (max-width:820px){#meter{left:12px;bottom:190px;max-width:calc(100% - 24px)}#top button{font-size:9px;padding:8px}}
+#depth{position:fixed;right:70px;top:44px;z-index:16;font-size:10px;background:rgba(0,0,0,.6);padding:8px;border-radius:8px;line-height:1.8;text-align:right}#depth b{color:#ffeb3b}
+#act button{font-size:12px;padding:12px 14px;min-width:150px}#act button.on{background:#76ff03}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+</head><body>
+<div id="view"></div>
+<div id="top"><button id="bHome">🏠 Home</button><button id="bZone">🧭 Dive to</button><button id="bLab">🧪 Ocean Lab</button><button id="bBook">📖 Animal Book</button><button id="bPass">🛂 Ocean Passport</button></div>
+<div id="stars">⭐ 0</div>
+<div id="info" class="hidden"></div>
+<div id="depth"></div>
+<div id="joy"><div id="knob"></div></div>
+<div id="act"><button id="bUp">⬆️ Up</button><button id="bDown">⬇️ Down</button><button id="bLight">🔦 Light: ON</button><button id="bDiver" class="hidden">🤿 Swim as diver</button></div>
+<button id="near" class="hidden"></button>
+<div id="toast" class="hidden"></div>
+<div id="zones" class="ov hidden"><div class="pan"><button class="x" data-c="zones">✖</button><h2>🧭 Dive to…</h2><div class="tgrid" id="zoneBody"></div></div></div>
+<div id="pass" class="ov hidden"><div class="pan"><button class="x" data-c="pass">✖</button><h2>🛂 Ocean Passport</h2><div id="passBody"></div></div></div>
+<div id="lab" class="ov hidden"><div class="pan"><button class="x" data-c="lab">✖</button><h2>🧪 Ocean Lab</h2><div id="labTabs"></div><canvas id="labCv" width="860" height="440"></canvas><div id="labCtl"></div><div id="labTxt"></div></div></div>
+<script type="module">
+import * as THREE from "three";
+import {loadAvatar,buildAvatar} from "./avatar.js";
+import {ANIMALS,ZONES,makeAnimal,animate,showCard,hideCard,openBook,loadBook} from "./animalbook.js";
+localStorage.setItem("realcraft_sea_visited","1");
+const $=id=>document.getElementById(id);
+const ren=new THREE.WebGLRenderer({antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,1.5));ren.setSize(innerWidth,innerHeight);$("view").appendChild(ren.domElement);
+const cam=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,400);
+addEventListener("resize",()=>{ren.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()});
+let actx=null;const AC=window.AudioContext||window.webkitAudioContext;
+function beep(f=520,d=.1,type="triangle",f2){try{actx=actx||new AC();const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;if(f2)o.frequency.exponentialRampToValueAtTime(f2,actx.currentTime+d);g.gain.value=.05;g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d+.02)}catch(e){}}
+function bubble(){if(window.Music&&!Music.isOn())return;beep(300+Math.random()*300,.12,"sine",900+Math.random()*500)}
+let toastT=0;function toast(t,ms=3500){const e=$("toast");e.innerHTML=t;e.classList.remove("hidden");clearTimeout(toastT);toastT=setTimeout(()=>e.classList.add("hidden"),ms)}
+function info(t){const e=$("info");if(!t)e.classList.add("hidden");else{e.innerHTML=t;e.classList.remove("hidden")}}
+const KEYST="realcraft_bw_stars",KEYSEA="realcraft_sea_pp_v1";
+const stars=()=>+localStorage.getItem(KEYST)||0;function showStars(){$("stars").textContent="⭐ "+stars()}showStars();addEventListener("starschange",showStars);
+function addStars(n){localStorage.setItem(KEYST,stars()+n);showStars()}
+function loadPP(){try{const p=JSON.parse(localStorage.getItem(KEYSEA));if(p&&p.stamps)return Object.assign({trash:{}},p)}catch(e){}return{stamps:{},trash:{}}}
+function savePP(p){localStorage.setItem(KEYSEA,JSON.stringify(p))}
+const LABN={lab_glow:["✨","Glow Lab"],lab_pressure:["🥤","Pressure Cup"],lab_echo:["🐬","Echolocation"],cleanup:["♻️","Reef Clean-Up"],diver:["🤿","First Dive"]};
+function stamp(k){const p=loadPP();if(p.stamps[k])return false;p.stamps[k]=Date.now();savePP(p);addStars(1);toast("🛂 Ocean Passport stamp: "+(ZONES[k]||(LABN[k]||[])[1]||k)+"! ⭐+1");beep(880,.1);setTimeout(()=>beep(1175,.15),120);return true}
+// ---------- world ----------
+const scene=new THREE.Scene();scene.fog=new THREE.Fog("#4fc3f7",10,110);scene.background=new THREE.Color("#4fc3f7");
+const amb=new THREE.AmbientLight("#ffffff",.6),hemi=new THREE.HemisphereLight("#bfefff","#1a3a5a",.8),sunL=new THREE.DirectionalLight("#ffffff",.8);sunL.position.set(20,60,10);scene.add(amb,hemi,sunL);
+function realDepth(y){const d=-y,P=[[0,0],[80,200],[160,1000],[260,4000],[360,6000],[440,10935]];if(d<=0)return 0;for(let i=1;i<P.length;i++)if(d<=P[i][0]){const[a,b]=P[i-1],[c,e]=P[i];return b+(d-a)/(c-a)*(e-b)}return 10935}
+function region(x,z){return x<-40?"reef":x>40?(z<0?"kelp":"polar"):"open"}
+function floorY(x,z){const r=region(x,z);if(r==="reef")return -12+Math.sin(x*.3)*Math.cos(z*.25)*1.2;if(r==="kelp")return -14+Math.sin(z*.2)*.8;if(r==="polar")return -20+Math.cos(x*.2)*.8;
+ const ax=Math.abs(x);let base=(ax<12&&Math.abs(z)<70)?-440:-360;const sh=x<0?-12:(z<0?-14:-20);if(ax>30)base=base+(sh-base)*Math.min(1,(ax-30)/10);return base+Math.sin(x*.2+z*.13)*2}
+function zoneAt(x,y,z){const m=realDepth(y);if(m<200){const r=region(x,z);return r}if(m<1000)return"twilight";if(m<4000)return"midnight";return"abyss"}
+{const geo=new THREE.PlaneGeometry(300,300,150,150);geo.rotateX(-Math.PI/2);const p=geo.attributes.position,col=new Float32Array(p.count*3),c=new THREE.Color();
+ for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),y=floorY(x,z);p.setY(i,y);const r=region(x,z);c.set(r==="reef"?"#f0e0b0":r==="kelp"?"#8d7b5a":r==="polar"?"#cfd8dc":y<-400?"#3e2723":"#5d5048");c.offsetHSL(0,0,(Math.random()-.5)*.06);col.set([c.r,c.g,c.b],i*3)}
+ geo.setAttribute("color",new THREE.BufferAttribute(col,3));geo.computeVertexNormals();scene.add(new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true})))}
+// water surface + polar ice
+{const s=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshBasicMaterial({color:"#b3e5fc",transparent:true,opacity:.55,side:THREE.DoubleSide,fog:false}));s.rotation.x=Math.PI/2;s.position.y=0;scene.add(s);
+ const ice=new THREE.MeshLambertMaterial({color:"#f5fbff"});for(let x=44;x<150;x+=8)for(let z=4;z<150;z+=8){if((x*7+z*3)%5===0)continue;const b=new THREE.Mesh(new THREE.BoxGeometry(7.6,1.6+Math.random(),7.6),ice);b.position.set(x,.2,z);scene.add(b)}}
+// decor: coral, anemones, kelp, rocks, vents
+const rnd=(s=>()=>{s=(s*16807)%2147483647;return s/2147483647})(12345);
+{const CC=["#ff7043","#ec407a","#ab47bc","#ffca28","#26c6da","#66bb6a"];for(let i=0;i<160;i++){const x=-145+rnd()*100,z=-145+rnd()*290,y=floorY(x,z),c=CC[i%6],t=i%3;let m;
+  if(t===0){m=new THREE.Mesh(new THREE.ConeGeometry(.5+rnd()*.6,1.5+rnd()*2,5),new THREE.MeshLambertMaterial({color:c}))}else if(t===1){m=new THREE.Mesh(new THREE.DodecahedronGeometry(.6+rnd()*.8,0),new THREE.MeshLambertMaterial({color:c}))}else{m=new THREE.Group();for(let j=0;j<5;j++){const b=new THREE.Mesh(new THREE.CylinderGeometry(.12,.15,1.5+rnd(),5),new THREE.MeshLambertMaterial({color:c}));b.position.set((rnd()-.5)*.8,.7,(rnd()-.5)*.8);b.rotation.z=(rnd()-.5)*.7;m.add(b)}}
+  m.position.set(x,y+.5,z);scene.add(m)}
+ const kelp=new THREE.MeshLambertMaterial({color:"#689f38"});const kg=new THREE.BoxGeometry(.25,1,.25);for(let i=0;i<120;i++){const x=42+rnd()*105,z=-145+rnd()*140,y=floorY(x,z),h=8+rnd()*5;const m=new THREE.Mesh(kg,kelp);m.scale.y=Math.abs(y)-.5;m.position.set(x,y+(Math.abs(y)-.5)/2,z);scene.add(m);for(let j=0;j<4;j++){const l=new THREE.Mesh(new THREE.BoxGeometry(.6,.08,.3),kelp);l.position.set(x+.3,y+2+j*2.8,z);l.rotation.y=j;scene.add(l)}}
+ const rock=new THREE.MeshLambertMaterial({color:"#4e342e"});for(let i=0;i<5;i++){const x=-6+rnd()*12,z=-50+i*22,y=floorY(x,z);const v=new THREE.Mesh(new THREE.CylinderGeometry(.8,1.6,6,6),rock);v.position.set(x,y+3,z);scene.add(v);const sm=new THREE.Mesh(new THREE.ConeGeometry(1.4,8,6),new THREE.MeshBasicMaterial({color:"#212121",transparent:true,opacity:.5}));sm.position.set(x,y+9,z);sm.rotation.x=Math.PI;scene.add(sm)}}
+// labels in world
+function label(t,x,y,z,s=1){const c=document.createElement("canvas");c.width=512;c.height=80;const g=c.getContext("2d");g.fillStyle="rgba(0,0,0,.6)";g.fillRect(0,0,512,80);g.fillStyle="#ffeb3b";g.font="bold 34px system-ui";g.textAlign="center";g.fillText(t,256,52);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),fog:false}));sp.scale.set(10*s,1.6*s,1);sp.position.set(x,y,z);scene.add(sp);return sp}
+label("🌋 Mariana Trench (deepest place)",0,-400,0,1.4);label("🔥 Hydrothermal vents",0,-330,-10);label("🦑 Giant Squid exhibit",-8,-200,25);
+// ---------- animals ----------
+// [key, count, x, y, z, radius, height]
+const SPAWN=[["clownfish",4,-90,-10,-40,3,1],["bluetang",8,-80,-7,10,10,2],["parrotfish",4,-110,-8,-10,8,2],["seaturtle",2,-95,-6,40,14,2],["seahorse",3,-70,-10,-70,2,.5],["octopus",1,-120,-10.5,-60,1,.3],["reefshark",2,-100,-7,0,25,2],["stingray",2,-85,-11,-20,10,.3],["dolphin",4,-80,-2,60,20,1],
+ ["seaotter",3,90,-.8,-60,6,0],["garibaldi",5,80,-10,-90,8,2],["sealion",2,110,-4,-40,14,2],
+ ["bluewhale",1,0,-40,-70,18,3],["humpback",1,0,-28,70,16,3],["whaleshark",1,0,-20,0,14,3],["tuna",8,5,-15,-25,12,3],["jellyfish",8,-5,-30,30,10,6],["manta",2,0,-12,-110,14,3],
+ ["squid",5,10,-110,10,14,6],["lanternfish",14,-10,-120,-20,16,8],["anglerfish",3,0,-200,-15,8,4],["lanternfish",10,4,-196,-10,12,5],["giantsquid",1,-8,-210,25,8,3],["tubeworm",5,0,-357,-10,0,0],
+ ["emperor",5,90,-4,60,10,2],["orca",2,100,-8,90,25,3],["narwhal",2,120,-6,110,14,2],["beluga",2,80,-6,120,14,2],["kingpenguin",3,70,-3,30,7,1]];
+const AN=[];const hitList=[];
+for(const[k,n,x,y,z,R,h]of SPAWN)for(let i=0;i<n;i++){const r=makeAnimal(k);r.ph=Math.random()*6;r.c=new THREE.Vector3(x,y,z);r.R=R*(k==="tubeworm"?0:1);r.h=h;r.a=i*(Math.PI*2/n)*(["bluetang","tuna","lanternfish","garibaldi"].includes(k)?.15:1);r.spd=(k==="bluewhale"||k==="humpback"||k==="whaleshark")?.05:.25+Math.random()*.1;r.off=new THREE.Vector3((Math.random()-.5)*2,(Math.random()-.5)*1.5,(Math.random()-.5)*2);
+ if(k==="tubeworm")r.g.position.set(x+(i-2)*3,floorY(x+(i-2)*3,z+i),z+i);if(k==="octopus"||k==="seahorse"||k==="clownfish"){}r.g.traverse(o=>o.userData.k=k);scene.add(r.g);AN.push(r);hitList.push(r.g)}
+// anemone homes for clownfish
+for(let i=0;i<4;i++){const g=new THREE.Group();for(let j=0;j<14;j++){const t=new THREE.Mesh(new THREE.CylinderGeometry(.05,.08,.9,4),new THREE.MeshLambertMaterial({color:"#f06292"}));const a=j/14*Math.PI*2;t.position.set(Math.cos(a)*.4,.4,Math.sin(a)*.4);t.rotation.set(Math.sin(a)*.4,0,-Math.cos(a)*.4);g.add(t)}g.position.set(-90+(i-1.5)*1.2,floorY(-90,-40),-40+(i%2));scene.add(g)}
+// trash for clean-up
+const TRASH=[];{const pp=loadPP();const items=[[-75,-50],[-100,20],[-120,-30],[-60,30],[-88,-80],[70,-70],[100,-110],[60,-30],[-130,60],[-70,-110]];items.forEach(([x,z],i)=>{if(pp.trash[i])return;const t=i%3,m=t===0?new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,.8,8),new THREE.MeshLambertMaterial({color:"#81d4fa",transparent:true,opacity:.8})):t===1?new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.35,8),new THREE.MeshLambertMaterial({color:"#e53935"})):new THREE.Mesh(new THREE.PlaneGeometry(.9,.9),new THREE.MeshLambertMaterial({color:"#ffffff",side:THREE.DoubleSide,transparent:true,opacity:.8}));m.position.set(x,floorY(x,z)+.4,z);m.rotation.z=1.2;scene.add(m);TRASH.push({m,i})})}
+// ---------- submarine + diver ----------
+const sub=new THREE.Group();{const y=new THREE.MeshLambertMaterial({color:"#ffca28"});const b=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),y);b.scale.set(1,1,1.6);sub.add(b);const w=new THREE.Mesh(new THREE.SphereGeometry(.45,12,8),new THREE.MeshLambertMaterial({color:"#4fc3f7",emissive:"#01579b"}));w.position.set(0,.25,1.3);sub.add(w);
+ const tw=new THREE.Mesh(new THREE.CylinderGeometry(.35,.4,.7,10),y);tw.position.y=1.1;sub.add(tw);const per=new THREE.Mesh(new THREE.BoxGeometry(.1,.7,.1),y);per.position.set(0,1.7,.2);sub.add(per);
+ const pr=new THREE.Group();pr.position.z=-1.7;for(let i=0;i<3;i++){const bl=new THREE.Mesh(new THREE.BoxGeometry(.12,.8,.05),new THREE.MeshLambertMaterial({color:"#ff7043"}));bl.rotation.z=i*Math.PI/3*2;pr.add(bl)}sub.add(pr);sub.userData.prop=pr;
+ for(const x of[-1,1]){const f=new THREE.Mesh(new THREE.BoxGeometry(.8,.08,.5),y);f.position.set(x*1,0,-.9);sub.add(f)}}
+scene.add(sub);
+const lamp=new THREE.SpotLight("#fff8e1",40,60,.5,.5,1.5);lamp.position.set(0,0,1.6);sub.add(lamp);const lampT=new THREE.Object3D();lampT.position.set(0,-1,12);sub.add(lampT);lamp.target=lampT;
+const diverSpec=Object.assign(loadAvatar(),{top:"wetsuit",bottom:"jeans",bottomColor:"#212121",shoes:"boots",shoeColor:"#212121",glasses:"goggles",hat:"none",backpack:true,cape:false,scarf:false,local:null});
+const DV=buildAvatar(scene,diverSpec);DV.g.visible=false;const tank=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.7,10),new THREE.MeshLambertMaterial({color:"#fdd835"}));tank.position.set(0,1.2,-.32);DV.g.add(tank);
+const P={pos:new THREE.Vector3(-80,-5,-20),yaw:0,v:0,diver:false};
+// ---------- input ----------
+const joy={x:0,y:0,id:null};{const J=$("joy"),K=$("knob");const set=e=>{const r=J.getBoundingClientRect();let dx=e.clientX-r.left-70,dy=e.clientY-r.top-70;const L=Math.hypot(dx,dy);if(L>50){dx*=50/L;dy*=50/L}joy.x=dx/50;joy.y=dy/50;K.style.left=45+dx+"px";K.style.top=45+dy+"px"};
+ J.addEventListener("pointerdown",e=>{joy.id=e.pointerId;J.setPointerCapture(e.pointerId);set(e)});J.addEventListener("pointermove",e=>{if(e.pointerId===joy.id)set(e)});const end=e=>{if(e.pointerId!==joy.id)return;joy.id=null;joy.x=joy.y=0;K.style.left=K.style.top="45px"};J.addEventListener("pointerup",end);J.addEventListener("pointercancel",end)}
+const hold={up:0,down:0};for(const[id,k]of[["bUp","up"],["bDown","down"]]){const b=$(id);b.addEventListener("pointerdown",e=>{e.preventDefault();hold[k]=1;b.classList.add("on")});["pointerup","pointercancel","pointerleave"].forEach(t=>b.addEventListener(t,()=>{hold[k]=0;b.classList.remove("on")}))}
+const keys={};addEventListener("keydown",e=>keys[e.key.toLowerCase()]=1);addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
+let lightOn=true;function setLight(v){lightOn=v;lamp.visible=v;$("bLight").textContent=v?"🔦 Light: ON":"🌑 Light: OFF";$("bLight").classList.toggle("on",!v);if(!v&&realDepth(P.pos.y)>=200)info("✨ Lights off! See the animals that glow? That's bioluminescence.");}
+$("bLight").onclick=()=>setLight(!lightOn);
+$("bDiver").onclick=()=>{P.diver=!P.diver;sub.visible=!P.diver;DV.g.visible=P.diver;$("bDiver").textContent=P.diver?"🚢 Back in the sub":"🤿 Swim as diver";if(P.diver){stamp("diver");info("🤿 Scuba time! Divers stay in shallow water because the water pushes harder the deeper you go.");setTimeout(()=>info(""),5000)}};
+// tap animals
+const ray=new THREE.Raycaster();let down=null;
+ren.domElement.addEventListener("pointerdown",e=>{down={x:e.clientX,y:e.clientY,t:performance.now()}});
+ren.domElement.addEventListener("pointerup",e=>{if(!down)return;const d=Math.hypot(e.clientX-down.x,e.clientY-down.y);if(d<12&&performance.now()-down.t<500)tap(e.clientX,e.clientY);down=null});
+function tap(cx,cy){ray.setFromCamera(new THREE.Vector2(cx/innerWidth*2-1,-cy/innerHeight*2+1),cam);ray.far=70;const vis=hitList.filter(g=>g.visible);const h=ray.intersectObjects(vis,true)[0];if(h&&h.object.userData.k)meetAnimal(h.object.userData.k)}
+function meetAnimal(k){const isNew=showCard(k);if(isNew){beep(988,.1);setTimeout(()=>beep(1319,.15),110)}else bubble()}
+// ---------- zones ----------
+const ZPOS={reef:[-80,-6,-10],kelp:[85,-6,-70],open:[0,-20,-30],twilight:[0,-115,0],midnight:[0,-200,10],abyss:[0,-350,-25],polar:[85,-5,60]};
+const ZFACT={reef:"🪸 Coral reefs are alive! Corals are tiny animals that build reefs together. Find the trash and clean the reef!",kelp:"🌿 Giant kelp is a kind of algae that can grow up to 2 feet in a single day!",open:"🌊 The ocean covers about 71% of Earth. Its average depth is about 12,000 feet.",
+ twilight:"🌆 Twilight Zone (about 650 to 3,300 ft): only a little blue light reaches here. Try 🌑 lights off!",midnight:"🌑 Midnight Zone (below 3,300 ft): it's totally dark. The only light comes from animals that glow!",
+ abyss:"🌋 Challenger Deep in the Mariana Trench is about 35,900 ft deep. Mount Everest could fit inside with more than a mile to spare!",polar:"🧊 Polar Ice: penguins really live near the South Pole, and narwhals and belugas live in the Arctic. Here they're neighbors just for the game!"};
+let curZone=null;
+function renderZones(){const p=loadPP();$("zoneBody").innerHTML=Object.keys(ZONES).map(z=>`<button class="tcard" data-z="${z}"><span class="te">${ZONES[z].split(" ")[0]}</span>${ZONES[z].replace(/^\S+ /,"")}<small>${zoneDepthTxt(z)}</small>${p.stamps[z]?"<i>✅</i>":""}</button>`).join("");$("zoneBody").querySelectorAll(".tcard").forEach(b=>b.onclick=()=>diveTo(b.dataset.z))}
+function zoneDepthTxt(z){return{reef:"0–100 ft",kelp:"shallow coast",open:"sunlit surface",twilight:"650–3,300 ft",midnight:"3,300–13,100 ft",abyss:"13,100–35,900 ft",polar:"under the ice"}[z]}
+let dive=null;function diveTo(z){$("zones").classList.add("hidden");if(P.diver)$("bDiver").click();const[x,y,zz]=ZPOS[z];dive={from:P.pos.clone(),to:new THREE.Vector3(x,y,zz),t:0,T:Math.min(5,1.5+P.pos.distanceTo(new THREE.Vector3(x,y,zz))/120)};bubble();info("🫧 Diving to "+ZONES[z]+"…")}
+$("bZone").onclick=()=>{renderZones();$("zones").classList.remove("hidden")};
+// ---------- overlays ----------
+document.querySelectorAll(".x").forEach(b=>b.onclick=()=>{$(b.dataset.c).classList.add("hidden");if(b.dataset.c==="lab")labStop()});
+$("bBook").onclick=()=>openBook("sea");
+function openPassport(){const p=loadPP(),b=loadBook();const all=Object.keys(ZONES).map(z=>[z,ZONES[z].split(" ")[0],ZONES[z].replace(/^\S+ /,"")]).concat(Object.keys(LABN).map(k=>[k,LABN[k][0],LABN[k][1]]));const got=all.filter(a=>p.stamps[a[0]]).length;const sea=Object.keys(ANIMALS).filter(k=>ANIMALS[k].t==="sea"),sg=sea.filter(k=>b.got[k]).length;
+ $("passBody").innerHTML=`<p>Stamps: <b>${got} / ${all.length}</b> · Sea animals found: <b>${sg} / ${sea.length}</b> · Trash cleaned: <b>${Object.keys(p.trash).length} / 10</b> · ⭐ ${stars()}</p><p><button id="ppBook">📖 Open Animal Book</button></p><div class="tgrid">`+all.map(([k,e,n])=>`<div class="tcard ${p.stamps[k]?"":"no"}"><span class="te">${p.stamps[k]?e:"❔"}</span>${n}<small>${p.stamps[k]?"Stamped!":"Not yet"}</small></div>`).join("")+"</div>";
+ $("ppBook").onclick=()=>openBook("sea");$("pass").classList.remove("hidden")}
+$("bPass").onclick=openPassport;
+$("bHome").onclick=()=>{location.href="buildworld.html#sub"};
+// ---------- Ocean Lab ----------
+const cv=$("labCv"),g2=cv.getContext("2d");let lab=null,labRAF=0;
+const TABS=[["glow","✨ Glow"],["pressure","🥤 Pressure Cup"],["echo","🐬 Echolocation"],["facts","🌍 Ocean Facts"]];
+$("labTabs").innerHTML=TABS.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join("");$("labTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>labOpen(b.dataset.t));
+$("bLab").onclick=()=>{$("lab").classList.remove("hidden");labOpen("glow")};
+function labStop(){cancelAnimationFrame(labRAF);lab=null}
+cv.addEventListener("pointerdown",e=>{if(!lab)return;const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*cv.width,y=(e.clientY-r.top)/r.height*cv.height;
+ if(lab.t==="glow"){for(let i=0;i<14;i++)lab.sp.push({x,y,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,l:1,c:Math.random()<.5?"#40ffff":"#76ff03"});beep(1200+Math.random()*400,.08,"sine");if(++lab.n>=5)stamp("lab_glow")}});
+function labOpen(t){labStop();$("labTabs").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));lab={t,t0:performance.now(),sp:[],n:0};const ctl=$("labCtl"),txt=$("labTxt");ctl.innerHTML="";
+ if(t==="glow")txt.innerHTML="Tap the dark water to make it sparkle! Lots of deep-sea animals make their own light. This is called <b>bioluminescence</b>. Scientists at MBARI found that about three out of four animals in the deep sea they studied can glow!";
+ if(t==="pressure"){ctl.innerHTML=`Depth: <input id="lD" type="range" min="0" max="10935" step="5" value="0"> <b id="lDv"></b>`;lab.d=0;const s=$("lD");s.oninput=()=>{lab.d=+s.value;if(lab.d>2000)stamp("lab_pressure")};
+  txt.innerHTML="Ocean explorers send foam cups down on deep dives. The deeper they go, the more the water squeezes them, so they come back tiny! Every 33 feet down, the pressure goes up by the weight of the whole sky pushing on you (1 atmosphere)."}
+ if(t==="echo"){ctl.innerHTML=`<button id="lClick" style="background:#76ff03">🐬 Click!</button>`;lab.fx=420+Math.random()*380;lab.wave=null;lab.found=false;$("lClick").onclick=()=>{lab.wave={r:0,back:null};beep(1800,.05,"square")};
+  txt.innerHTML="Dolphins make clicking sounds and listen for the echo bouncing back. That's <b>echolocation</b>! Sound travels about 1,500 meters per second in seawater, around 4 times faster than in air."}
+ if(t==="facts"){txt.innerHTML="";}
+ const loop=()=>{if(!lab)return;labDraw();labRAF=requestAnimationFrame(loop)};loop()}
+function labDraw(){const W=cv.width,H=cv.height,t=(performance.now()-lab.t0)/1000;g2.clearRect(0,0,W,H);g2.font="bold 18px system-ui";
+ if(lab.t==="glow"){g2.fillStyle="#000814";g2.fillRect(0,0,W,H);for(const s of lab.sp){s.x+=s.vx;s.y+=s.vy;s.l-=.012;g2.globalAlpha=Math.max(0,s.l);g2.fillStyle=s.c;g2.beginPath();g2.arc(s.x,s.y,4,0,7);g2.fill()}g2.globalAlpha=1;lab.sp=lab.sp.filter(s=>s.l>0);
+  for(let i=0;i<5;i++){const x=(i*190+t*30)%W,y=120+Math.sin(t+i)*60+i*40;g2.globalAlpha=.5+.5*Math.sin(t*3+i);g2.fillStyle="#40ffff";g2.beginPath();g2.arc(x,y,3,0,7);g2.arc(x+10,y+4,3,0,7);g2.fill()}g2.globalAlpha=1;g2.fillStyle="#ffeb3b";g2.fillText("Tap the water! ✨",14,26)}
+ if(lab.t==="pressure"){const d=lab.d,atm=1+d/10.06,psi=Math.round(atm*14.7),ft=Math.round(d*3.281);g2.fillStyle=`rgb(${Math.max(0,80-d/40)|0},${Math.max(10,180-d/30)|0},${Math.max(30,230-d/25)|0})`;g2.fillRect(0,0,W,H);
+  const sc=Math.max(.35,1-.65*Math.min(1,d/2500)),cx=W/2,cy=H/2+40,h=200*sc,tw=150*sc,bw=100*sc;g2.fillStyle="#fafafa";g2.beginPath();g2.moveTo(cx-tw/2,cy-h/2);g2.lineTo(cx+tw/2,cy-h/2);g2.lineTo(cx+bw/2,cy+h/2);g2.lineTo(cx-bw/2,cy+h/2);g2.closePath();g2.fill();g2.strokeStyle="#bbb";g2.stroke();
+  g2.fillStyle="#fff";g2.fillText(`Depth: ${ft.toLocaleString()} ft (${d.toLocaleString()} m)`,14,26);g2.fillText(`Pressure: about ${Math.round(atm).toLocaleString()} atmospheres (${psi.toLocaleString()} pounds per square inch)`,14,50);$("lDv").textContent=ft.toLocaleString()+" ft";
+  g2.fillText(d>=10900?"🏆 The bottom of Challenger Deep: more than 8 tons pushing on every square inch!":"Cup size: "+Math.round(sc*100)+"%",14,H-20)}
+ if(lab.t==="echo"){g2.fillStyle="#01579b";g2.fillRect(0,0,W,H);g2.font="48px system-ui";g2.fillText("🐬",30,H/2+16);const w=lab.wave;if(w){w.r+=6;g2.strokeStyle="rgba(255,255,255,.7)";g2.lineWidth=3;if(!w.back){g2.beginPath();g2.arc(80,H/2,w.r,-.6,.6);g2.stroke();if(80+w.r>=lab.fx){w.back=0;lab.found=true;beep(1400,.05,"square")}}else{w.back+=6;g2.beginPath();g2.arc(lab.fx,H/2,w.back,Math.PI-.6,Math.PI+.6);g2.stroke();if(lab.fx-w.back<=80){lab.wave=null;stamp("lab_echo")}}}
+  g2.font="40px system-ui";g2.globalAlpha=lab.found?1:.12;g2.fillText("🐟",lab.fx,H/2+14);g2.globalAlpha=1;g2.font="bold 18px system-ui";g2.fillStyle="#fff";
+  if(lab.found){const m=Math.round((lab.fx-80)/2),s=(2*m/1500);g2.fillText(`Echo came back in ${s.toFixed(2)} seconds, so the fish is about ${m} meters away!`,14,26)}else g2.fillText("A fish is hiding in the murky water. Tap 🐬 Click! to find it.",14,26)}
+ if(lab.t==="facts"){g2.fillStyle="#e1f5fe";g2.fillRect(0,0,W,H);g2.fillStyle="#01579b";g2.font="bold 17px system-ui";const F=["🌍 The ocean covers about 71% of Earth's surface.","🧂 Salty? Rain wears down rocks on land, and rivers carry the salt to the sea. Seafloor vents add some too.","🌙 Tides: the Moon's gravity pulls on the ocean, so the water rises and falls about twice a day.","🪸 Coral reefs are alive! Corals are tiny animals related to jellyfish.","⬇️ Pressure: every 33 feet deeper, the water pushes harder by about one more 'sky' of air.","🌊 The average ocean is about 12,000 feet deep. The deepest spot is about 35,900 feet.","♻️ Keep the ocean clean: use reusable bottles and bags, and pick up trash at the beach!"];F.forEach((f,i)=>{g2.fillText(f,16,40+i*56)})}}
+// ---------- main loop ----------
+const clock=new THREE.Clock();let bubT=0,camInit=false;
+function step(dt){const t=clock.elapsedTime;
+ if(dive){dive.t+=dt;const u=Math.min(1,dive.t/dive.T),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;P.pos.lerpVectors(dive.from,dive.to,e);const dir=dive.to.clone().sub(dive.from);if(dir.x||dir.z)P.yaw+=((Math.atan2(dir.x,dir.z))-P.yaw)*Math.min(1,dt*3);if(u>=1){dive=null;info("")}}
+ else{const tx=joy.x+(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),ty=joy.y+(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);P.yaw-=tx*1.6*dt;const sp=P.diver?3.5:9;P.v+=((-ty*sp)-P.v)*Math.min(1,dt*3);
+  P.pos.x+=Math.sin(P.yaw)*P.v*dt;P.pos.z+=Math.cos(P.yaw)*P.v*dt;const vy=((hold.up||keys.e?1:0)-(hold.down||keys.q?1:0))*(P.diver?3:7);P.pos.y+=vy*dt;
+  if(Math.abs(P.v)>1||vy){bubT-=dt;if(bubT<0){bubT=2+Math.random()*2;bubble()}}}
+ P.pos.x=Math.max(-145,Math.min(145,P.pos.x));P.pos.z=Math.max(-145,Math.min(145,P.pos.z));const fl=floorY(P.pos.x,P.pos.z)+1.3;const top=region(P.pos.x,P.pos.z)==="polar"?-1.6:-.6;P.pos.y=Math.max(fl,Math.min(top,P.pos.y));
+ if(P.diver)P.pos.y=Math.max(P.pos.y,-16);
+ // shallow diver option
+ const z=zoneAt(P.pos.x,P.pos.y,P.pos.z),shallow=["reef","kelp","polar"].includes(z)&&P.pos.y>-16;$("bDiver").classList.toggle("hidden",!shallow&&!P.diver);
+ if(z!==curZone){curZone=z;stamp(z);info(ZFACT[z]);clearTimeout(step._t);step._t=setTimeout(()=>info(""),7000)}
+ sub.position.copy(P.pos);sub.rotation.set(0,P.yaw,-joy.x*.15);sub.userData.prop.rotation.z+=dt*(4+Math.abs(P.v)*2);
+ if(P.diver){DV.g.position.copy(P.pos).add(new THREE.Vector3(0,-.6,0));DV.g.rotation.set(Math.PI/2*.75,P.yaw,0,"YXZ");(DV.legs||[]).forEach((l,i)=>l.rotation.x=Math.sin(t*6+i*Math.PI)*.5)}
+ // environment by depth
+ const m=realDepth(P.pos.y),k=Math.min(1,m/200),k2=Math.min(1,Math.max(0,(m-200)/800));const c=new THREE.Color("#4fc3f7").lerp(new THREE.Color("#0d47a1"),k).lerp(new THREE.Color("#000510"),k2);if(z==="polar")c.lerp(new THREE.Color("#b3e5fc"),.3);
+ scene.background.copy(c);scene.fog.color.copy(c);scene.fog.far=110-k2*55;amb.intensity=.6*(1-k2)+.04;hemi.intensity=.8*(1-k*0.4)*(1-k2);sunL.intensity=.8*(1-k2);
+ const ft=Math.round(m*3.281),atm=1+m/10.06;$("depth").innerHTML=`Depth <b>${ft.toLocaleString()} ft</b><br>(${Math.round(m).toLocaleString()} m)<br>Pressure <b>${atm<10?atm.toFixed(1):Math.round(atm).toLocaleString()}×</b> surface<br>${ZONES[z]}`;
+ // animals
+ let near=null,nd=1e9;for(const r of AN){const vis=r.c.distanceTo(P.pos)<(m>1000?70:110);r.g.visible=vis;if(!vis)continue;if(r.R>0){r.a+=r.spd*dt*(r.R>10?.4:1);const ox=Math.cos(r.a)*r.R,oz=Math.sin(r.a)*r.R,oy=Math.sin(r.a*1.7)*r.h;r.g.position.set(r.c.x+ox+r.off.x,r.c.y+oy+r.off.y,r.c.z+oz+r.off.z);r.g.rotation.y=Math.atan2(-Math.sin(r.a),Math.cos(r.a))+(r.spd>0?0:Math.PI);if(r.ray||r.peng)r.g.rotation.y+=0}
+  else if(r.k!=="tubeworm"){r.g.position.set(r.c.x+r.off.x,r.c.y+Math.sin(t+r.ph)*.3,r.c.z+r.off.z);r.g.rotation.y=t*.2+r.ph}
+  if(r.k==="seaotter"){r.g.rotation.z=Math.PI}animate(r,t+r.ph);const d=r.g.position.distanceTo(P.pos);if(d<(["bluewhale","humpback","whaleshark"].includes(r.k)?16:6)&&d<nd){nd=d;near=r.k}}
+ if(near!==nearK){nearK=near;const n=$("near");if(near){n.textContent="👋 Meet the "+ANIMALS[near].n+"!";n.classList.remove("hidden")}else n.classList.add("hidden")}
+ // trash
+ for(const tr of TRASH){if(!tr.m.parent)continue;if(tr.m.position.distanceTo(P.pos)<3.2){scene.remove(tr.m);const p=loadPP();p.trash[tr.i]=1;savePP(p);addStars(1);const n=Object.keys(p.trash).length;toast(`♻️ You picked up trash! ${n}/10 cleaned. ⭐+1`);beep(700,.08);if(n>=10)stamp("cleanup")}}
+ // camera
+ const back=P.diver?5:11,want=P.pos.clone().add(new THREE.Vector3(-Math.sin(P.yaw)*back,P.diver?1.8:3.6,-Math.cos(P.yaw)*back));if(!camInit){cam.position.copy(want);camInit=true}else cam.position.lerp(want,Math.min(1,dt*4));cam.position.y=Math.min(cam.position.y,-.3);cam.lookAt(P.pos.clone().add(new THREE.Vector3(Math.sin(P.yaw)*4,0,Math.cos(P.yaw)*4)))}
+let nearK=null;$("near").onclick=()=>{if(nearK)meetAnimal(nearK)};
+function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDelta());step(dt);ren.render(scene,cam)}
+window.SEA={P,AN,ANIMALS,diveTo,meetAnimal,loadPP,zone:()=>curZone,setLight,dive:()=>dive,realDepth,openBook,openPassport,labOpen:t=>{$("lab").classList.remove("hidden");labOpen(t)},TRASH,cam};
+info("🌊 Welcome to Sea Mode! Steer with the stick, use ⬆️⬇️ to go up and down, and tap animals to meet them.");setTimeout(()=>info(""),6000);
+frame();
+</script>
+<script>
+/* Real Craft Adventures: tiny in-browser chiptune music (original tunes, no files) */
+(function(){
+const KEY="realcraft_music_v1";let on=localStorage.getItem(KEY)!=="off";
+let ctx=null,master=null,cur=null,want="home",timer=null,rate=1;const voices={};
+// note: semitones from A4 (0=A4); null=rest. Each step is an 8th note.
+const T={
+ build:{bpm:120,w:"square",m:[0,4,7,12,null,7,9,7, 5,9,12,null,9,7,5,4, 2,5,9,14,null,12,9,7, 4,7,12,11,12,null,null,null],b:[-24,null,-12,null,-17,null,-12,null, -19,null,-7,null,-17,null,-5,null, -22,null,-10,null,-17,null,-5,null, -20,null,-8,null,-24,null,null,null]},
+ home:{bpm:132,w:"square",m:[3,7,10,15,14,10,7,null, 5,8,12,17,15,12,8,null, 3,7,10,15,17,15,14,10, 12,10,8,7,5,null,3,null],b:[-21,-21,-14,-14,-16,-16,-9,-9, -19,-19,-12,-12,-14,-14,-7,-7, -21,-21,-14,-14,-16,-16,-9,-9, -16,-16,-14,-14,-21,-21,-21,null]},
+ workshop:{bpm:92,w:"triangle",m:[0,null,4,null,7,null,4,null, 2,null,5,null,9,null,5,null, 0,null,4,null,7,null,11,9, 7,null,5,null,4,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -24,null,null,null,-17,null,null,null, -19,null,null,null,-24,null,null,null]},
+ race:{bpm:160,w:"square",m:[7,7,12,7,14,12,7,5, 7,7,12,7,16,14,12,null, 5,5,9,5,12,9,5,4, 5,7,9,12,14,null,12,null],b:[-17,-5,-17,-5,-17,-5,-17,-5, -17,-5,-17,-5,-17,-5,-17,-5, -19,-7,-19,-7,-19,-7,-19,-7, -15,-3,-15,-3,-14,-2,-14,-2]},
+ mansion:{bpm:116,w:"square",m:[10,null,14,17,null,14,10,null, 12,null,15,19,null,15,12,null, 10,12,14,15,17,null,19,17, 15,14,12,null,10,null,null,null],b:[-14,null,-7,null,-14,null,-7,null, -12,null,-5,null,-12,null,-5,null, -14,null,-7,null,-11,null,-4,null, -16,null,-9,null,-14,null,null,null]},
+ spooky:{bpm:126,w:"triangle",m:[0,3,7,3,8,7,3,null, 0,3,7,3,6,5,3,null, 0,null,12,11,10,null,7,null, 8,7,5,3,2,null,0,null],b:[-24,null,-17,null,-24,null,-17,null, -20,null,-13,null,-22,null,-17,null, -24,null,-17,null,-21,null,-14,null, -19,null,-17,null,-24,null,null,null]},
+ sky:{bpm:104,w:"triangle",m:[7,null,12,14,16,null,14,12, 9,null,12,null,14,null,null,null, 5,null,9,12,14,null,12,9, 7,null,4,null,7,null,null,null],b:[-17,null,-10,null,-12,null,-5,null, -15,null,-8,null,-10,null,-3,null, -19,null,-12,null,-14,null,-7,null, -17,null,-10,null,-17,null,null,null]},
+ ocean:{bpm:72,w:"sine",m:[7,null,12,null,16,null,14,12, 9,null,12,null,14,null,null,null, 5,null,9,null,12,null,11,9, 7,null,4,null,7,null,null,null],b:[-17,null,null,null,-10,null,null,null, -15,null,null,null,-8,null,null,null, -19,null,null,null,-12,null,null,null, -17,null,null,null,-10,null,null,null],bell:true},
+ space:{bpm:84,w:"triangle",m:[0,7,12,16,19,16,12,7, 2,9,14,17,21,17,14,9, -3,4,9,12,16,12,9,4, -1,7,11,14,19,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -27,null,null,null,-20,null,null,null, -25,null,null,null,-17,null,null,null],bell:true},
+ xmas:{bpm:138,w:"square",m:[7,11,14,11,7,null,9,null, 7,11,14,16,14,null,null,null, 12,11,9,7,9,null,11,null, 7,9,11,9,7,null,null,null],b:[-17,-10,-17,-10,-15,-8,-15,-8, -17,-10,-17,-10,-12,-5,-12,-5, -12,-5,-12,-5,-15,-8,-15,-8, -17,-10,-17,-10,-17,null,null,null],bell:true}
+};
+const hz=n=>440*Math.pow(2,n/12);
+function init(){if(ctx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ctx=new AC();master=ctx.createGain();master.gain.value=.25*.35;master.connect(ctx.destination);timer=setInterval(tick,100)}
+function voice(name){if(!voices[name]){const g=ctx.createGain();g.gain.value=0;g.connect(master);voices[name]={g,step:0,next:ctx.currentTime+.05}}return voices[name]}
+function note(v,f,t,d,w,vol){const o=ctx.createOscillator(),e=ctx.createGain();o.type=w;o.frequency.value=f;e.gain.setValueAtTime(vol,t);e.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(e);e.connect(v.g);o.start(t);o.stop(t+d+.02)}
+function tick(){if(!ctx||ctx.state!=="running")return;const now=ctx.currentTime;
+ for(const name in voices){const v=voices[name];if(name!==cur&&v.g.gain.value<.01)continue;const tr=T[name],sp=60/tr.bpm/2/(name==="race"?rate:1);if(v.next<now-.5)v.next=now+.05;
+  while(v.next<now+.3){const i=v.step%tr.m.length,m=tr.m[i],b=tr.b[i];if(m!=null)note(v,hz(m),v.next,sp*.9,tr.w,.5);if(b!=null)note(v,hz(b),v.next,sp*.95,"triangle",.7);if(tr.bell&&i%4===0)note(v,hz(m!=null?m+24:31),v.next,.25,"sine",.18);if(i%2===0&&tr.bpm>120)note(v,hz(40+(i%4?0:4)),v.next,.03,"square",.08);v.next+=sp;v.step++}}}
+function apply(){if(!ctx)return;const t=ctx.currentTime;for(const name in voices){const g=voices[name].g.gain;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(on&&name===cur?1:0,t+1.2)}}
+function play(name){want=name;if(!ctx)return;if(name===cur)return;cur=name;const v=voice(name);if(v.g.gain.value<.01){v.step=0;v.next=ctx.currentTime+.05}apply()}
+function unlock(){init();if(!ctx)return;if(on&&!document.hidden)ctx.resume();play(want)}
+["pointerdown","touchend","keydown"].forEach(e=>addEventListener(e,unlock,{passive:true}));
+document.addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else if(on)ctx.resume()});
+function setOn(v){on=v;localStorage.setItem(KEY,on?"on":"off");btn.textContent=on?"🎵":"🔇";btn.title=btn.ariaLabel=on?"Music on (tap to turn off)":"Music off (tap to turn on)";btn.classList.toggle("off",!on);if(ctx){apply();if(on)ctx.resume();else setTimeout(()=>{if(!on)ctx.suspend()},1300)}}
+const st=document.createElement("style");st.textContent="#musicBtn{position:fixed;right:8px;top:8px;z-index:9999;width:54px;height:54px;border-radius:50%;border:3px solid #000;background:#ffca28;font-size:28px;line-height:1;padding:0;box-shadow:0 3px 0 #000;cursor:pointer}#musicBtn.off{background:#9e9e9e}";document.head.appendChild(st);
+const btn=document.createElement("button");btn.id="musicBtn";btn.addEventListener("click",e=>{e.stopPropagation();unlock();setOn(!on)});
+(document.body?Promise.resolve():new Promise(r=>addEventListener("DOMContentLoaded",r))).then(()=>{document.body.appendChild(btn);setOn(on)});
+window.Music={play,setRate:r=>{rate=r},isOn:()=>on,setOn,get ctx(){return ctx},get cur(){return cur},tracks:Object.keys(T)};
+})();
+Music.play("ocean");
+</script>
+</body></html>

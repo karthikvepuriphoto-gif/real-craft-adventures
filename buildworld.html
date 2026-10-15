@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="icon" href="data:,">
 <title>Build World · Real Craft Adventures</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
@@ -96,6 +97,7 @@ body.away #goto,body.away #btnSlot,body.away #btnReset,body.away #btnCar,body.aw
 <script type="module">
 import * as THREE from "three";
 import {buildAvatar,buildAvatarInto,openDressUp,offerLocalOutfit,revertLocalOutfit,loadAvatar} from "./avatar.js";
+import {ANIMALS,showCard,hideCard,openBook,makeAnimal,animate as animateAnimal} from "./animalbook.js";
 
 const W=128,H=48,CS=16,NC=W/CS; // world size, height, chunk
 const OX=W/2,OZ=W/2,VER=2;
@@ -365,7 +367,7 @@ function aim(){
   if(hit){outline.visible=true;outline.position.set(hit.x+.5,hit.y+.5,hit.z+.5)}else outline.visible=false;
 }
 
-function tapAt(cx,cy){if(ride)return;const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),cam);ray.far=40;
+function tapAt(cx,cy){if(ride)return;if(tapAnimal(cx,cy))return;const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),cam);ray.far=40;
  const h=ray.intersectObjects(nearMeshes(1),false)[0];if(!h)return;const n=h.face.normal;
  const x=Math.floor(h.point.x-n.x*.01),y=Math.floor(h.point.y-n.y*.01),z=Math.floor(h.point.z-n.z*.01);
  if(Math.hypot(x+.5-P.x,z+.5-P.z,y-P.y)>12)return toast("🚶 Walk closer to build there!");target={x,y,z,nx:Math.round(n.x),ny:Math.round(n.y),nz:Math.round(n.z)};outline.position.set(x+.5,y+.5,z+.5);outline.visible=true;holdT=performance.now();doAction()}
@@ -464,7 +466,12 @@ gp.querySelectorAll("button").forEach(b=>b.addEventListener("pointerdown",e=>{e.
 // vehicle UI
 function nearVeh(){let best=null,bd=4.5;for(const v of VEH){if(!v.g.visible)continue;const d=Math.hypot(v.x-P.x,v.z-P.z);if(d<bd&&Math.abs(v.y-P.y)<3){bd=d;best=v}}return best}
 const getInBtn=document.getElementById("getIn");let nearV=null;
-tapBtn("getIn",()=>{if(nearV)getIn(nearV);else if(nearRocket)goSpace()});
+tapBtn("getIn",()=>{if(nearV)getIn(nearV);else if(nearRocket)goSpace();else if(nearSub)location.href="sea.html"});
+// --- Sea Mode submarine dock at Holmes Lake (opens sea.html) ---
+const SUB={x:44,z:-16};let nearSub=false;
+{const g=new THREE.Group(),y=new THREE.MeshLambertMaterial({color:"#ffca28"});const b=new THREE.Mesh(new THREE.SphereGeometry(1.2,14,10),y);b.scale.set(1,.9,1.8);g.add(b);const t=new THREE.Mesh(new THREE.CylinderGeometry(.45,.5,.8,10),y);t.position.y=1.2;g.add(t);
+ const w=new THREE.Mesh(new THREE.SphereGeometry(.45,10,8),new THREE.MeshLambertMaterial({color:"#4fc3f7"}));w.position.set(0,.3,1.9);g.add(w);g.position.set(SUB.x,groundTop(SUB.x,SUB.z)+.2,SUB.z);g.rotation.y=Math.PI/2;scene.add(g);SUB.g=g;
+ try{const lb=label("🌊 Submarine to the Sea",SUB.x,groundTop(SUB.x,SUB.z)+4,SUB.z);if(lb&&!lb.parent)scene.add(lb)}catch(e){}}
 // --- Space Mode rocket at Lincoln Airport (opens space.html) ---
 const ROCKET={x:-36.5,z:-41.5};let nearRocket=false;
 function goSpace(){try{saveNow()}catch(e){}location.href="space.html"}
@@ -564,6 +571,7 @@ function step(dt,t){
   // vehicles nearby?
   const nv=nearVeh();if(nv!==nearV){nearV=nv;getInBtn.classList.toggle("hidden",!nv);if(nv)getInBtn.textContent=(nv.t==="heli"?"🚁 Get in the helicopter!":"✈️ Get in the plane!")}
   {const nr=!nearV&&!away&&Math.hypot(P.x-ROCKET.x,P.z-ROCKET.z)<4;if(nr){if(!nearRocket||getInBtn.classList.contains("hidden")){getInBtn.textContent="🚀 Get in the rocket!";getInBtn.classList.remove("hidden")}}else if(nearRocket&&!nearV)getInBtn.classList.add("hidden");nearRocket=nr}
+  {const ns=!nearV&&!nearRocket&&!away&&Math.hypot(P.x-SUB.x,P.z-SUB.z)<4.5;if(ns){if(!nearSub||getInBtn.classList.contains("hidden")){getInBtn.textContent="🌊 Get in the submarine!";getInBtn.classList.remove("hidden")}}else if(nearSub&&!nearV&&!nearRocket)getInBtn.classList.add("hidden");nearSub=ns}
   }
   if(ride&&nearV){nearV=null;getInBtn.classList.add("hidden")}
   {const nw=performance.now();for(const o of _fd){const hit=!ride&&nw-o.userData.ft<150,m=o.material;m.opacity+=((hit?.22:(o.userData.om.opacity))-m.opacity)*Math.min(1,dt*10);m.depthWrite=m.opacity>.95;if(!hit&&Math.abs(m.opacity-o.userData.om.opacity)<.02){m.dispose();o.material=o.userData.om;o.userData.fm=0;_fd.delete(o)}}}
@@ -577,7 +585,7 @@ function step(dt,t){
   {const _v=new THREE.Vector3();for(const o of SPR){const d=cam.position.distanceTo(o.position);_v.copy(o.position).project(cam);o.visible=!o.userData.hideAway&&!topView&&d>(ride?16:7)&&d<cam.far*.85&&_v.z<1&&_v.z>-1}for(const o of DSPR){const d=cam.position.distanceTo(o.position);o.visible=!topView&&d>5&&d<cam.far*.9}}
   if(away)peopleStep(t);if(!(ride&&ride.t==="plane"))updSmoke(dt);
 }
-let vw=0,vh=0;function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;step(dt,t/1000);if(innerWidth!==vw||innerHeight!==vh)resize();ren.render(scene,cam);requestAnimationFrame(frame)}
+let vw=0,vh=0;function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;step(dt,t/1000);animalTick(dt,t/1000);if(innerWidth!==vw||innerHeight!==vh)resize();ren.render(scene,cam);requestAnimationFrame(frame)}
 function resize(){vw=innerWidth;vh=innerHeight;ren.setSize(vw,vh,true);cam.aspect=vw/vh;cam.updateProjectionMatrix()}
 addEventListener("resize",resize);addEventListener("orientationchange",()=>setTimeout(resize,200));if(window.visualViewport)visualViewport.addEventListener("resize",resize);resize();
 ["gesturestart","gesturechange","gestureend"].forEach(e=>document.addEventListener(e,ev=>ev.preventDefault(),{passive:false}));document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
@@ -790,6 +798,13 @@ kennedy:{n:"Kennedy Space Center",e:"🚀",city:"Florida",country:"USA",cont:"No
  cool:["The Vehicle Assembly Building's doors are the tallest in the world.","Alligators and birds live in the wildlife refuge around the center.","Rockets launch toward the east, over the Atlantic Ocean."],
  quiz:[["Which mission first landed people on the Moon?",["Apollo 11","Apollo 1","Lincoln 1"],0],["Which state is it in?",["Florida","Nebraska","Alaska"],0]]}
 });
+PLACES.omaha={n:"Omaha, Nebraska",e:"🦍",city:"Omaha, Nebraska",country:"USA",cont:"North America",ll:[41.2565,-95.9345],hello:"Hello",lang:"English",
+ fact:"Omaha's Henry Doorly Zoo and Aquarium has the Desert Dome, the world's largest indoor desert!",
+ when:"The zoo's Lied Jungle indoor rainforest opened in 1992, the aquarium opened in 1995, and the Desert Dome opened in 2002.",
+ why:"Families come for the zoo's indoor desert, rainforest and aquarium, plus Omaha's Old Market with its brick streets and a walking bridge that crosses into Iowa.",
+ big:"The Lied Jungle is 80 feet tall, about one-fifth as tall as the Nebraska State Capitol (400 feet). The Desert Dome is 13 stories tall, and the aquarium's shark tunnel is 70 feet long.",
+ cool:["Under the Desert Dome is Kingdoms of the Night, the world's largest exhibit for nighttime (nocturnal) animals.","On the Bob Kerrey Pedestrian Bridge you can stand with one foot in Nebraska and one in Iowa!","The Old Market's brick streets and warehouses date back to the 1880s."],
+ quiz:[["What is inside the zoo's giant dome?",["A desert","An ocean","A volcano"],0],["The Bob Kerrey Bridge connects Nebraska and...",["Iowa","Texas","Ohio"],0]]};
 const FAM={place:"Fremont",city:"Fremont, California",ll:[37.5485,-121.9886],aunt:"Inni"};
 PLACES.fremont={n:"Fremont, California",e:"💛",city:FAM.city,country:"USA",cont:"North America",ll:FAM.ll,hello:"Hello",lang:"English",grand:1,
  fact:"Welcome to Fremont, where "+FAM.aunt+" lives! Wave hello, then fly to Mission Peak and Lake Elizabeth.",
@@ -798,7 +813,7 @@ PLACES.fremont={n:"Fremont, California",e:"💛",city:FAM.city,country:"USA",con
  big:"Mission Peak is about 2,500 feet tall, more than 6 Nebraska Capitols (400 feet) stacked up! Hikers climb it for the view of the Bay Area.",
  cool:["Lake Elizabeth is in Fremont's Central Park, with ducks, geese and (in summer) paddle boats.","Fremont is in the San Francisco Bay Area, near the Golden Gate Bridge.","A famous pole stands near the top of Mission Peak, and hikers love taking pictures with it."],
  quiz:[["Which hill do hikers climb in Fremont?",["Mission Peak","Mount Fuji","Mount Rushmore"],0],["What lake is in Fremont's Central Park?",["Lake Elizabeth","Holmes Lake","Lake Michigan"],0]]};
-const SECTIONS=[["🌍 World",["eiffel","taj","pyramids","bigben","wall","sydney","rio","fuji","colosseum","pisa","machu"]],["🇺🇸 USA",["liberty","goldengate","rushmore","grandcanyon","dc","spaceneedle","arch","hollywood","yellowstone","niagara","chicago","kennedy"]],["🇮🇳 India",["taj","charminar","grand","indiagate","gateway","mysore"]],["❤️ Family",["grand","fremont"]]];
+const SECTIONS=[["🌍 World",["eiffel","taj","pyramids","bigben","wall","sydney","rio","fuji","colosseum","pisa","machu"]],["🇺🇸 USA",["liberty","goldengate","rushmore","grandcanyon","dc","spaceneedle","arch","hollywood","yellowstone","niagara","chicago","kennedy","omaha"]],["🇮🇳 India",["taj","charminar","grand","indiagate","gateway","mysore"]],["❤️ Family",["grand","fremont"]]];
 
 // ======== WORLD TRIP + TRICKS ========
 const KEYP="realcraft_passport_v1",KEYST="realcraft_bw_stars";
@@ -917,6 +932,17 @@ grand(){flat(-OX,OX-1,-OZ,OZ-1,1);flat(-OX,OX-1,-56,-52,28);flat(-3,3,-52,40,28)
  for(let z=-48;z<=40;z+=6){treeG(-6,z);treeG(6,z)}forest(80,34,(x,z)=>clear(x,z,1),(x,z,h)=>treeG(x,z,h,[16,14,11][Math.abs(x+z)%3]));pad(-14,-2);
  person(10,6,"#7b1fa2","#4a148c","#bdbdbd",GRAND.grandma,"Namaskaram! I'm "+GRAND.grandma+". So happy you came!");person(14,6,"#1565c0","#eeeeee","#9e9e9e",GRAND.grandpa,"Namaskaram! I'm "+GRAND.grandpa+". Want to fly around together?");
  dlabel("Welcome! "+grandNames()+" ❤️",12,10,6,1.8);return{sp:[0,26,-58],lm:[0,20,0],r:28,ry:22,pad:[-14,-2]}},
+omaha(){flat(-OX,OX-1,-OZ,OZ-1,1);
+ flat(46,OX-1,-OZ,OZ-1,18);for(let x=30;x<OX;x++){const z=Math.round(-10+Math.sin((x-30)/34*Math.PI)*3);set(x,6,z,15);set(x,6,z+1,15);set(x,7,z,3);set(x,7,z+1,3)}for(const x of[40,54]){const z=Math.round(-10+Math.sin((x-30)/34*Math.PI)*3);for(let y=1;y<=20;y++)set(x,y,z,15)}for(let x=26;x<30;x++)for(let y=1;y<=5;y++)set(x,y,-10,3);
+ dlabel("Bob Kerrey Pedestrian Bridge",47,23,-8,1.3);dlabel("Iowa ➜",60,10,-6,1);dlabel("Missouri River",55,3,20,1);
+ flat(10,40,-44,-20,7);const R=rng(77);for(let x=12;x<=36;x+=8)for(const z of[-42,-28]){const h=5+(R()*5|0);box(x,x+5,1,h,z,z+5,[7,7,5,3][R()*4|0],true);for(let y=2;y<h;y+=2)for(let i=x+1;i<x+5;i+=2)set(i,y,z+5,6)}dlabel("Old Market",24,12,-22,1.3);
+ flat(10,40,-14,10,1);for(let x=16;x<=34;x++)for(let z=-6;z<=2;z++)if(((x-25)/9)**2+((z+2)/4)**2<1)set(x,0,z,18);for(const[x,z]of[[12,-12],[38,-12],[12,8],[38,8],[20,8],[30,-12]])treeG(x,z);for(let i=0;i<6;i++)set(36,1+i,4-i,8);dlabel("Gene Leahy Mall",25,6,4,1.1);
+ box(-6,4,1,6,-50,-42,14);dlabel("Joslyn Art Museum",-1,9,-46,1);
+ {const cx=-30,cz=-28,r=14;for(let x=-r;x<=r;x++)for(let z=-r;z<=r;z++){if(Math.hypot(x,z)<r)set(cx+x,0,cz+z,17);for(let y=1;y<=r;y++){const d=Math.hypot(x,y,z);if(d<=r+.3&&d>r-1)set(cx+x,y,cz+z,((x+y+z)&3)===0?15:6)}}for(let y=1;y<=3;y++)set(cx,y,cz-r,0);dlabel("Desert Dome",cx,r+4,cz,1.4);dlabel("🌙 Kingdoms of the Night (under the dome)",cx,3,cz-r-2,1)}
+ {box(-58,-40,1,16,0,16,6,true);for(const[x,z]of[[-54,4],[-46,6],[-50,12],[-44,12],[-55,11]])treeG(x,z,6);for(let y=1;y<=12;y++)set(-41,y,8,18);dlabel("Lied Jungle",-49,19,8,1.3)}
+ {box(-32,-12,1,9,6,22,12,true);box(-31,-13,1,8,7,21,18);for(let z=7;z<=21;z++){for(let y=1;y<=3;y++)for(let x=-23;x<=-21;x++)set(x,y,z,0);for(let x=-24;x<=-20;x++)set(x,4,z,6);for(let y=1;y<=3;y++){set(-24,y,z,6);set(-20,y,z,6)}}for(let y=1;y<=3;y++)for(let x=-23;x<=-21;x++)set(x,y,6,0);dlabel("Aquarium + Shark Tunnel",-22,12,14,1.2)}
+ for(const[x0,z0,n]of[[-60,26,"Gorillas"],[-38,26,"Elephants"],[-16,26,"Giraffes"],[-60,44,"Big Cats"]]){for(let x=x0;x<=x0+18;x++){set(x,1,z0,4);set(x,1,z0+14,4)}for(let z=z0;z<=z0+14;z++){set(x0,1,z,4);set(x0+18,1,z,4)}dlabel(n,x0+9,5,z0+7,1)}
+ omahaAnimals();pad(0,-10);return{sp:[0,26,-58],lm:[-30,16,-28],r:26,ry:16,pad:[0,-10]}},
 fremont(){flat(-OX,OX-1,-OZ,OZ-1,1);terrain((x,z)=>{const d=Math.hypot(x-30,z-44);return d<34?30-d*.85:0},1,2,(x,z,h)=>h>8?33:1);{const g=groundTop(30,44);for(let y=g;y<g+4;y++)set(30,y,44,15)}dlabel("Mission Peak",30,40,44,1.2);
  for(let x=-50;x<=-20;x++)for(let z=10;z<=34;z++){const e=((x+35)/15)**2+((z-22)/12)**2;if(e<1)set(x,0,z,18)}dlabel("Lake Elizabeth",-35,6,22,1.2);for(let i=0;i<3;i++)box(-40+i*5,-39+i*5,1,1,20,21,[8,10,12][i]);
  flat(-OX,OX-1,-6,-4,28);flat(-2,0,-OZ,OZ-1,28);const R=rng(35);for(let x=-56;x<=56;x+=10)for(const z of[-20,-34,-48]){if(Math.abs(x+1)>4)smallHouse(x,z,[15,10,14,12,9,5][R()*6|0],[7,36,8][R()*3|0]);treeG(x+4,z+3)}
@@ -926,7 +952,7 @@ fremont(){flat(-OX,OX-1,-OZ,OZ-1,1);terrain((x,z)=>{const d=Math.hypot(x-30,z-44
 // --- travel ---
 let destInfo=null;
 function destVehicles(show){VEH[0].g.visible=VEH[1].g.visible=show;ringObjs.forEach((r,i)=>r.visible=show&&!ringGot.includes(i));for(const s of SPR)s.userData.hideAway=!show;for(const r of ringObjs)r.userData.hideAway=!show}
-function clearDest(){for(const o of destObjs){scene.remove(o);o.geometry&&o.geometry.dispose()}for(const s of DSPR){scene.remove(s);s.material.map.dispose();s.material.dispose()}destObjs=[];DSPR=[];destRings=[];people=[]}
+function clearDest(){DA.length=0;try{hideCard()}catch(e){}for(const o of destObjs){scene.remove(o);o.geometry&&o.geometry.dispose()}for(const s of DSPR){scene.remove(s);s.material.map.dispose();s.material.dispose()}destObjs=[];DSPR=[];destRings=[];people=[]}
 function genDest(k){for(const q of smP)q.life=Math.min(q.life,.001);vox.fill(0);count=0;for(const c of chunks.values())c.dirty=true;clearDest();const info=DB[k]();destInfo=info;rings6(info.lm[0],info.lm[2],info.r,info.ry);return info}
 function travel(k){if(!PLACES[k]||travelling)return;closeOv("trip");const from=away;if(!away)saveNow();playTravel(from||"lincoln",k,()=>{away=k;document.body.classList.add("away");destVehicles(false);const info=genDest(k);const v=VEH[2];if(ride!==v){if(ride)exitNow(true);getIn(v)}
   v.x=info.sp[0];v.z=info.sp[2];v.y=info.sp[1];v.h=Math.atan2(info.lm[0]-v.x,info.lm[2]-v.z);v.s=14;landing=false;P.x=v.x;P.z=v.z;P.y=v.y;camInit=false;rebuildNear(60);drawMapBase();
@@ -985,12 +1011,29 @@ function peopleStep(t){for(const p of people){p.arm.rotation.z=Math.PI*.85+Math.
  for(const o of destObjs)if(o.userData.geyser){const c=(t%14);const h=c<4?Math.sin(c/4*Math.PI)*20:0;o.scale.set(1,Math.max(.01,h),1);o.position.y=3+h/2;o.visible=h>.2}}
 function destRingStep(v){for(const r of destRings){if(!r.m.visible)continue;r.m.rotation.y+=.01;if(Math.hypot(v.x-r.x,v.y+1.2-r.y,v.z-r.z)<3.4){r.m.visible=false;const pp=loadPP();(pp.rings[away]=pp.rings[away]||[]).push(r.i);savePP(pp);addStars(1);beep(988,.12);setTimeout(()=>beep(1318,.15),120);const n=pp.rings[away].length;toast(n>=6?"🏆 All 6 rings at "+PLACES[away].n+"!":"⭐ Ring "+n+" of 6!")}}}
 
+// --- Animals: zoo, Pioneers Park bison, Omaha zoo (Animal Book shared with Sea Mode) ---
+const ZA=[],DA=[];const VOXAN=[["giraffe",43,9],["elephant",51.5,9],["lion",56,11],["bison",-47,12],["bison",-43,16],["bison",-50,16]];
+function placeAnimal(list,k,x,z,o={}){const r=makeAnimal(k);r.k=k;const s=o.s||.9;r.g.scale.setScalar(s);const y=o.y!=null?o.y:groundTop(x,z);r.g.position.set(x,y,z);r.g.rotation.y=o.ry||0;r.home={x,y,z,R:o.R||0};r.ph=Math.random()*6;r.g.traverse(m=>m.userData.ak=k);scene.add(r.g);if(list===DA)destObjs.push(r.g);list.push(r);return r}
+placeAnimal(ZA,"redpanda",40,5,{s:.8,R:1});placeAnimal(ZA,"humboldt",46,13,{R:1});placeAnimal(ZA,"humboldt",47.5,13.5,{R:1});placeAnimal(ZA,"spidermonkey",57,5,{s:.8});placeAnimal(ZA,"tiger",52,13.5,{s:.7,R:2});
+function omahaAnimals(){const A=(k,x,z,o)=>placeAnimal(DA,k,x,z,o);
+ A("gorilla",-55,32,{s:1});A("gorilla",-50,36,{s:.8});A("elephant",-32,32,{s:1.1,R:2});A("elephant",-27,36,{s:.8,R:2});A("giraffe",-10,31,{s:1,R:2});A("giraffe",-6,35,{s:.9,R:2});A("lion",-54,50,{s:.9,R:2});A("tiger",-47,52,{s:.9,R:2});
+ A("meerkat",-33,-28,{s:1.2});A("meerkat",-31,-27,{s:1.2});A("meerkat",-29,-29,{s:1.2});A("spidermonkey",-50,8,{s:.8});
+ A("reefshark",-26,12,{s:.9,y:4,R:4});A("reefshark",-18,16,{s:.8,y:5,R:4});A("seaturtle",-28,18,{s:1,y:5,R:3});A("kingpenguin",-15,9,{s:.8,y:1});A("kingpenguin",-14,10,{s:.8,y:1});A("stingray",-17,12,{s:1,y:1.5,R:2})}
+let meetBtn=null,nearAnimalK=null;
+function animalTick(dt,t){for(const r of ZA)r.g.visible=!away;const all=away?DA:ZA;
+ for(const r of all){if(r.home.R){const a=t*.3+r.ph;r.g.position.x=r.home.x+Math.cos(a)*r.home.R;r.g.position.z=r.home.z+Math.sin(a)*r.home.R;r.g.rotation.y=-a}try{animateAnimal(r,t+r.ph)}catch(e){}}
+ if(!meetBtn){meetBtn=document.createElement("button");meetBtn.id="meetBtn";meetBtn.style.cssText="position:fixed;left:0;right:0;bottom:240px;margin:auto;width:fit-content;font-size:14px;background:#4fc3f7;padding:12px 18px;z-index:12;box-shadow:0 4px 0 #000;display:none";document.body.appendChild(meetBtn);meetBtn.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();if(nearAnimalK)showCard(nearAnimalK)})}
+ let best=null,bd=5;if(!ride){for(const r of all){const d=Math.hypot(r.g.position.x-P.x,r.g.position.z-P.z);if(d<bd&&Math.abs(r.g.position.y-P.y)<6){bd=d;best=r.k}}if(!away)for(const[k,x,z]of VOXAN){const d=Math.hypot(x-P.x,z-P.z);if(d<bd){bd=d;best=k}}}
+ if(best!==nearAnimalK){nearAnimalK=best;meetBtn.style.display=best?"block":"none";if(best)meetBtn.textContent=ANIMALS[best].e+" Meet the "+ANIMALS[best].n+"!"}}
+function tapAnimal(cx,cy){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),cam);const far=ray.far;ray.far=30;const h=ray.intersectObjects((away?DA:ZA).map(a=>a.g),true)[0];ray.far=far;if(h&&h.object.userData.ak){showCard(h.object.userData.ak);return true}return false}
+window.BWA={ZA,DA,VOXAN,tapAnimal,nearAnimal:()=>nearAnimalK};
 // trip UI wiring
 tapBtn("tLoop",()=>doTrick("loop"));tapBtn("tRoll",()=>doTrick("roll"));tapBtn("tFlip",()=>doTrick("flip"));tapBtn("tSpin",()=>doTrick("spin"));tapBtn("tSmoke",cycleSmoke);document.getElementById("tTrip").onclick=openTrip;tapBtn("flyHome",flyHome);
 document.getElementById("btnPass").onclick=openPassport;document.querySelectorAll(".ovClose").forEach(b=>b.onclick=()=>closeOv(b.dataset.c));
 document.getElementById("askYes").onclick=()=>{closeOv("askHome");flyHome()};document.getElementById("askNo").onclick=()=>closeOv("askHome");
 {const mk=(t,f)=>{const b=document.createElement("button");b.textContent=t;b.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();gp.classList.add("hidden");document.getElementById("goBtn").classList.remove("on");f()});gp.appendChild(b)};
- mk("🌍 World Trip",()=>{if(ride&&ride.t==="plane")openTrip();else{goTo("airport");toast("✈️ Walk to the plane, get in, then tap 🌍 World Trip!")}});mk("🛂 Passport",openPassport);mk("🚀 Space Mode",()=>{goTo("airport");P.x=ROCKET.x+3;P.z=ROCKET.z+1;toast("🚀 Walk up to the rocket and tap Get in!")})}
+ mk("🌍 World Trip",()=>{if(ride&&ride.t==="plane")openTrip();else{goTo("airport");toast("✈️ Walk to the plane, get in, then tap 🌍 World Trip!")}});mk("🛂 Passport",openPassport);mk("📖 Animal Book",()=>openBook("land"));mk("🌊 Sea Mode",()=>{goTo("lake");P.x=SUB.x-3;P.z=SUB.z;toast("🌊 Walk to the yellow submarine and tap Get in!")});mk("🚀 Space Mode",()=>{goTo("airport");P.x=ROCKET.x+3;P.z=ROCKET.z+1;toast("🚀 Walk up to the rocket and tap Get in!")})}
+if(location.hash==="#sub")setTimeout(()=>{try{goTo("lake");P.x=SUB.x-3;P.z=SUB.z;P.y=groundTop(P.x,P.z)+.1;history.replaceState(null,"",location.pathname)}catch(e){}},600);
 if(location.hash==="#rocket")setTimeout(()=>{try{goTo("airport");P.x=ROCKET.x+3;P.z=ROCKET.z+1;P.y=groundTop(P.x,P.z)+.1;history.replaceState(null,"",location.pathname)}catch(e){}},600);
 // boot
 let all0={};try{all0=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}slot=all0.slot||0;

@@ -30,7 +30,7 @@ export const OPT={
  face:{smile:"😊 Smile",grin:"😁 Grin",wink:"😉 Wink",wow:"😮 Wow",cool:"😎 Cool",sleepy:"😴 Sleepy"},
  glasses:{none:"None",round:"👓 Round",square:"Square",sun:"🕶️ Sun",goggles:"🥽 Goggles"},
  hat:{none:"None",cap:"🧢 Cap",beret:"Beret",cowboy:"🤠 Cowboy",sunhat:"Explorer",chef:"👨‍🍳 Chef",helmet:"⛑️ Fire helmet",sailor:"⚓ Sailor",beanie:"Beanie",turban:"Turban",headband:"Headband",party:"🥳 Party",space:"🧑‍🚀 Space helmet"},
- top:{tee:"T-shirt",hoodie:"Hoodie",striped:"Striped",plaid:"Plaid",jersey:"🏈 Jersey",kurta:"Kurta",sherwani:"Sherwani",happi:"Happi coat",fiesta:"Fiesta shirt",carnival:"Carnival",explorer:"Explorer",astronaut:"🚀 Space suit",chef:"Chef coat",firefighter:"🚒 Firefighter",doctor:"🩺 Doctor",sailor:"⚓ Sailor",hero:"🦸 Hero"},
+ top:{tee:"T-shirt",hoodie:"Hoodie",striped:"Striped",plaid:"Plaid",jersey:"🏈 Jersey",kurta:"Kurta",sherwani:"Sherwani",happi:"Happi coat",fiesta:"Fiesta shirt",carnival:"Carnival",explorer:"Explorer",astronaut:"🚀 Space suit",wetsuit:"🤿 Wetsuit",chef:"Chef coat",firefighter:"🚒 Firefighter",doctor:"🩺 Doctor",sailor:"⚓ Sailor",hero:"🦸 Hero"},
  bottom:{jeans:"Pants",shorts:"Shorts",pajama:"Pajama",dhoti:"Dhoti",skirt:"Skirt",cargo:"Cargo",space:"Space pants"},
  shoes:{sneakers:"Sneakers",boots:"Boots",sandals:"Sandals",mojari:"Mojari",space:"Space boots"}};
 
@@ -48,6 +48,7 @@ export const SETS={
  rio:{n:"Rio carnival",e:"🎉",p:{top:"carnival",topColor:"#00c853",bottom:"shorts",bottomColor:"#fdd835",hat:"party",shoes:"sneakers",shoeColor:"#fdd835",cape:false}},
  fiesta:{n:"Fiesta",e:"🪅",p:{top:"fiesta",topColor:"#fafafa",bottom:"jeans",bottomColor:"#795548",hat:"none",shoes:"boots",cape:false}},
  astronaut:{n:"Astronaut",e:"🧑‍🚀",p:{top:"astronaut",bottom:"space",shoes:"space",hat:"space",backpack:true,accColor:"#eeeeee",glasses:"none",cape:false,scarf:false},lock:{stamps:["kennedy"],hint:"Visit Kennedy Space Center on World Trip (or launch to space!)",space:true}},
+ diver:{n:"Scuba diver",e:"🤿",p:{top:"wetsuit",bottom:"jeans",bottomColor:"#212121",shoes:"boots",shoeColor:"#212121",glasses:"goggles",hat:"none",backpack:true,accColor:"#fdd835",cape:false,scarf:false},lock:{sea:true,hint:"Dive in 🌊 Sea Mode"}},
  hero:{n:"Superhero",e:"🦸",p:{top:"hero",topColor:"#1e88e5",bottom:"jeans",bottomColor:"#1565c0",shoes:"boots",cape:true,accColor:"#e53935",hat:"none",backpack:false},lock:{stars:5,hint:"Collect 5 ⭐ (fly through rings or ace quizzes)"}},
  chef:{n:"Chef",e:"👩‍🍳",p:{top:"chef",bottom:"jeans",bottomColor:"#212121",hat:"chef",shoes:"sneakers",shoeColor:"#212121",cape:false,backpack:false}},
  firefighter:{n:"Firefighter",e:"🚒",p:{top:"firefighter",bottom:"cargo",hat:"helmet",shoes:"boots",cape:false,backpack:false,scarf:false}},
@@ -59,7 +60,7 @@ export const PLACE_SET={eiffel:"paris",taj:"india",charminar:"india",indiagate:"
  kennedy:"astronaut",liberty:"sailor",sydney:"sailor"};
 function stampsNow(){try{return JSON.parse(localStorage.getItem("realcraft_passport_v1")||"{}").stamps||{}}catch(e){return {}}}
 function starsNow(){let r=0;try{r=JSON.parse(localStorage.getItem("realcraft_bw_rings")||"[]").length}catch(e){}return (+localStorage.getItem("realcraft_bw_stars")||0)+r}
-export function isUnlocked(k){const L=SETS[k].lock;if(!L)return true;if(L.space&&localStorage.getItem("realcraft_space_visited"))return true;
+export function isUnlocked(k){const L=SETS[k].lock;if(!L)return true;if(L.space&&localStorage.getItem("realcraft_space_visited"))return true;if(L.sea)return !!localStorage.getItem("realcraft_sea_visited");
  if(L.stamps){const s=stampsNow();return L.stamps.some(x=>s[x])}if(L.stars)return starsNow()>=L.stars;return true}
 
 // ---------- 3D build ----------
@@ -88,6 +89,7 @@ const TOPS={
  firefighter:{sl:"long",base:"#6d5a2f",fixed:true,tex:(g)=>{g.fillStyle="#ffeb3b";g.fillRect(0,26,32,3);g.fillRect(0,32,32,3);g.fillStyle="#9e9e9e";g.fillRect(0,27,32,1);g.fillRect(0,33,32,1);g.fillStyle="#212121";g.fillRect(15,0,2,40)},arm:(g)=>{g.fillStyle="#ffeb3b";g.fillRect(0,22,8,3)}},
  doctor:{sl:"long",long:true,base:"#fafafa",fixed:true,tex:(g)=>{g.fillStyle="#26a69a";g.fillRect(10,0,12,40);g.fillStyle="#455a64";g.fillRect(9,4,1,14);g.fillRect(22,4,1,14);g.fillRect(9,18,14,1);g.fillStyle="#b0bec5";g.fillRect(14,18,4,4);g.fillStyle="#1e88e5";g.fillRect(24,10,4,1)},skirtTex:(g)=>{g.fillStyle="#bdbdbd";g.fillRect(15,0,2,16)}},
  sailor:{sl:"short",base:"#fafafa",fixed:true,tex:(g)=>{g.fillStyle="#1a237e";g.fillRect(0,0,32,6);g.beginPath();g.moveTo(6,0);g.lineTo(16,14);g.lineTo(26,0);g.fill();g.fillStyle="#e53935";g.fillRect(13,12,6,4)}},
+ wetsuit:{sl:"long",tex:(g,c)=>{g.fillStyle="#212121";g.fillRect(0,0,6,40);g.fillRect(26,0,6,40);g.fillRect(0,30,32,10);g.fillStyle="#fdd835";g.fillRect(15,0,2,26)},arm:(g)=>{g.fillStyle="#212121";g.fillRect(0,20,8,20)}},
  hero:{sl:"long",tex:(g)=>{g.fillStyle="#fdd835";g.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?4:10;g.lineTo(16+Math.cos(a)*r,16+Math.sin(a)*r)}g.fill();g.fillStyle="#fdd835";g.fillRect(0,34,32,3)}}};
 export function topBase(s){const T=TOPS[s.top]||TOPS.tee;return T.fixed?T.base:(T.base&&s.top==="striped"?T.base:s.topColor)}
 export function buildAvatarInto(av,s){const g=av.g;while(g.children.length){const c=g.children.pop();c.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{m.map&&m.map.dispose();m.dispose()})}})}
