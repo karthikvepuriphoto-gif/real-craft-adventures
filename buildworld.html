@@ -61,6 +61,7 @@ body.away #goto,body.away #btnSlot,body.away #btnReset,body.away #btnCar,body.aw
  <button id="btnReset">🔄 Reset</button>
  <button id="btnCar">🏎️ My Car</button>
  <button id="btnPass">🛂 Passport</button>
+ <button id="btnChar">👕 Character</button>
  <button id="btnHelp">❓ Help</button>
 </div>
 <div id="goto"><button id="goBtn">🚀 Go to…</button><div id="gopanel" class="hidden"></div></div>
@@ -94,6 +95,7 @@ body.away #goto,body.away #btnSlot,body.away #btnReset,body.away #btnCar,body.aw
 <div id="askHome" class="ov hidden"><div class="card2"><h3>🏠 Fly home to Lincoln?</h3><button class="go" id="askYes">🏠 Yes, fly home</button> <button id="askNo">🌍 Keep exploring</button></div></div>
 <script type="module">
 import * as THREE from "three";
+import {buildAvatar,buildAvatarInto,openDressUp,offerLocalOutfit,revertLocalOutfit,loadAvatar} from "./avatar.js";
 
 const W=128,H=48,CS=16,NC=W/CS; // world size, height, chunk
 const OX=W/2,OZ=W/2,VER=2;
@@ -313,7 +315,7 @@ function avatar(){const g=new THREE.Group(),add=(w,h,d,c,x,y,z)=>bx(g,w,h,d,c,x,
  const legs=[add(.25,.7,.25,"#1565c0",-.14,.35,0),add(.25,.7,.25,"#1565c0",.14,.35,0)];add(.6,.75,.35,"#43a047",0,1.08,0);const arms=[add(.2,.7,.2,"#43a047",-.42,1.1,0),add(.2,.7,.2,"#43a047",.42,1.1,0)];
  add(.5,.5,.5,"#ffcc99",0,1.72,0);add(.52,.15,.52,"#5d4037",0,2,0);for(const s of[-1,1])add(.08,.08,.02,"#212121",s*.12,1.75,.26);add(.16,.04,.02,"#c62828",0,1.6,.26);
  legs.forEach(l=>{l.geometry.translate(0,-.3,0);l.position.y=.7});arms.forEach(a=>{a.geometry.translate(0,-.3,0);a.position.y=1.4});scene.add(g);return{g,legs,arms}}
-const av=avatar();
+const av=buildAvatar(scene);const reAv=s=>buildAvatarInto(av,s);
 const P={x:0,y:1,z:8,yaw:Math.PI,cy:0,cp:.7,vy:0,ground:true,fly:false};
 
 // ---- vehicles ----
@@ -917,9 +919,9 @@ function clearDest(){for(const o of destObjs){scene.remove(o);o.geometry&&o.geom
 function genDest(k){for(const q of smP)q.life=Math.min(q.life,.001);vox.fill(0);count=0;for(const c of chunks.values())c.dirty=true;clearDest();const info=DB[k]();destInfo=info;rings6(info.lm[0],info.lm[2],info.r,info.ry);return info}
 function travel(k){if(!PLACES[k]||travelling)return;closeOv("trip");const from=away;if(!away)saveNow();playTravel(from||"lincoln",k,()=>{away=k;document.body.classList.add("away");destVehicles(false);const info=genDest(k);const v=VEH[2];if(ride!==v){if(ride)exitNow(true);getIn(v)}
   v.x=info.sp[0];v.z=info.sp[2];v.y=info.sp[1];v.h=Math.atan2(info.lm[0]-v.x,info.lm[2]-v.z);v.s=14;landing=false;P.x=v.x;P.z=v.z;P.y=v.y;camInit=false;rebuildNear(60);drawMapBase();
-  curLM=[{n:PLACES[k].e+" "+PLACES[k].n,x:info.lm[0],z:info.lm[2]}];const pp=loadPP(),first=!pp.stamps[k];if(first){pp.stamps[k]=new Date().toISOString().slice(0,10);savePP(pp)}showFact(k,first)})}
+  curLM=[{n:PLACES[k].e+" "+PLACES[k].n,x:info.lm[0],z:info.lm[2]}];const pp=loadPP(),first=!pp.stamps[k];if(first){pp.stamps[k]=new Date().toISOString().slice(0,10);savePP(pp)}showFact(k,first);offerLocalOutfit(k,s=>{reAv(s);toast("👕 Local outfit on! Change it anytime with 👕 Character")})})}
 function flyHome(){if(travelling||!away)return;for(const q of smP)q.life=Math.min(q.life,.001);closeAll();const from=away;playTravel(from,"lincoln",()=>{const v=VEH[2];away=null;document.body.classList.remove("away");clearDest();destVehicles(true);const r=ride;ride=null;loadSlot(slot);
-  v.x=-6;v.z=14;v.y=16;v.h=Math.PI;v.s=8;if(r!==v){if(r)r.g.visible=true;ride=null;getIn(v);v.x=-6;v.z=14;v.y=16;v.h=Math.PI;v.s=8}else{ride=v;av.g.visible=false;setBody()}landing=true;curLM=LM;P.x=v.x;P.z=v.z;P.y=v.y;camInit=false;toast("🏠 Welcome home to Lincoln! Landing near the helipad…")})}
+  v.x=-6;v.z=14;v.y=16;v.h=Math.PI;v.s=8;if(r!==v){if(r)r.g.visible=true;ride=null;getIn(v);v.x=-6;v.z=14;v.y=16;v.h=Math.PI;v.s=8}else{ride=v;av.g.visible=false;setBody()}landing=true;curLM=LM;P.x=v.x;P.z=v.z;P.y=v.y;camInit=false;toast("🏠 Welcome home to Lincoln! Landing near the helipad…");revertLocalOutfit(reAv)})}
 let travelling=false;
 const CONT=[[-100,45,30,18],[-60,-15,14,24],[15,50,16,8],[20,5,20,28],[90,45,45,18],[78,20,8,10],[105,12,10,10],[134,-25,16,10],[-42,72,10,6],[140,37,4,6]];
 function drawWorld(g,W2,H2){g.fillStyle="#4fc3f7";g.fillRect(0,0,W2,H2);g.fillStyle="#66bb6a";for(const[lo,la,rx,ry]of CONT){g.beginPath();g.ellipse((lo+180)/360*W2,(90-la)/180*H2,rx/360*W2,ry/180*H2,0,0,7);g.fill()}}
@@ -984,7 +986,8 @@ loadSlot(slot);document.getElementById("btnSlot").textContent="💾 Slot "+(slot
 requestAnimationFrame(frame);
 if(window.Music)Music.play("build");
 
-window.BW={GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
+document.getElementById("btnChar").onclick=()=>openDressUp({onChange:reAv});
+window.BW={av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
 
 </script>
 <script>

@@ -27,12 +27,13 @@ button.blue{background:#2f7fd0}button.go{background:#3b8d3b}
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
 <div id="top"><button class="blue" onclick="location.href='index.html'">⬅ Back</button><button class="blue" style="background:#e53935" onclick="location.href='workshop.html'">🛠️ Workshop</button>
-<span class="pill" id="gemc">💎 0/10</span><button class="go" id="mapBtn">🗺️ Treasure Map</button><button id="hsBtn" style="background:#8e24aa">👻 Hide & Seek</button></div>
+<span class="pill" id="gemc">💎 0/10</span><button class="go" id="mapBtn">🗺️ Treasure Map</button><button id="hsBtn" style="background:#8e24aa">👻 Hide & Seek</button><button id="charBtn" style="background:#00897b">👕 Character</button></div>
 <div id="room" class="hidden"></div>
 <div id="joy"><div id="knob"></div></div><div id="lookhint">👉 Drag here to look around</div>
 <div id="pop" class="hidden"></div><div id="toast" class="hidden"></div><div id="confetti" class="hidden"></div>
 <script type="module">
 import * as THREE from 'three';
+import {buildAvatar,buildAvatarInto,openDressUp} from './avatar.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 const SAVE_KEY="questcraft_save_v1",MKEY="realcraft_mansion_v1",WKEY="realcraft_workshop_v1";
 const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));document.body.prepend(renderer.domElement);
@@ -272,7 +273,7 @@ function avatar(){const g=new THREE.Group(),add=(w,h,d,c,x,y,z)=>{const m=new TH
  const legs=[add(.25,.7,.25,"#1565c0",-.14,.35,0),add(.25,.7,.25,"#1565c0",.14,.35,0)];add(.6,.75,.35,"#43a047",0,1.08,0);const arms=[add(.2,.7,.2,"#43a047",-.42,1.1,0),add(.2,.7,.2,"#43a047",.42,1.1,0)];
  add(.5,.5,.5,"#ffcc99",0,1.72,0);add(.52,.15,.52,"#5d4037",0,2,0);for(const s of[-1,1])add(.08,.08,.02,"#212121",s*.12,1.75,.26);add(.16,.04,.02,"#c62828",0,1.6,.26);
  legs.forEach(l=>l.geometry.translate(0,-.3,0));legs.forEach(l=>l.position.y=.7);arms.forEach(a=>{a.geometry.translate(0,-.3,0);a.position.y=1.4});scene.add(g);return{g,legs,arms}}
-const av=avatar();const P={x:0,y:0,z:26,yaw:Math.PI,cy:0,cp:.35};
+const av=buildAvatar(scene);document.getElementById("charBtn").onclick=()=>openDressUp({onChange:s=>buildAvatarInto(av,s)});window.MAV={av};const P={x:0,y:0,z:26,yaw:Math.PI,cy:0,cp:.35};
 const inp={jx:0,jy:0,keys:{}};
 function level(){return P.y>2?2:1}
 function hit(x,z,l){const r=.35;const sh=doors.find(d=>d.kind==="shelf");if(sh&&sh.open<.7&&l===1&&x>-18-r&&x<-16+r&&z>-9.25-r&&z<-8.75+r)return true;for(const w of walls)if(w.lvl===l&&x>w.x0-r&&x<w.x1+r&&z>w.z0-r&&z<w.z1+r)return true;return false}
