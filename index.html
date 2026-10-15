@@ -69,7 +69,8 @@ small{font-size:9px;color:#ccc}
 <div class="hubgrid"><button class="hb" style="background:#43a047" onclick="closeHub()"><b>🗺️</b>Adventures<small>Quests & missions</small></button>
 <button class="hb" style="background:#2f7fd0" onclick="location.href='workshop.html'"><b>🛠️</b>Workshop<small>Build in 3D</small></button>
 <button class="hb" style="background:#8e24aa" onclick="location.href='mansion.html'"><b>🏰</b>Mansion<small>Find 10 gems</small></button>
-<button class="hb" style="background:#e53935" onclick="location.href='workshop.html#drive'"><b>🏎️</b>Race Track<small>Drive your car</small></button></div>
+<button class="hb" style="background:#e53935" onclick="location.href='workshop.html#drive'"><b>🏎️</b>Race Track<small>Drive your car</small></button>
+<button class="hb" style="background:#00897b;grid-column:1/-1" onclick="location.href='buildworld.html'"><b>🌍</b>Build World<small>Create in Lincoln</small></button></div>
 <button onclick="tutorial(0)">❓ How to play</button></div></div>
 <nav>
 <button onclick="openHub()" style="background:#fb8c00">🏠 Home</button>
@@ -81,6 +82,7 @@ small{font-size:9px;color:#ccc}
 <button id="soundBtn">🔊</button>
 <button class="go" style="background:#2f7fd0" onclick="location.href='workshop.html'">🛠️ Workshop</button>
 <button class="go" style="background:#8e24aa" onclick="location.href='mansion.html'">🏰 Mansion</button>
+<button class="go" style="background:#00897b" onclick="location.href='buildworld.html'">🌍 Build</button>
 </nav>
 <main>
 <section id="tab-map"><small>Tap a place to see its quest. Do the quest, then check in!</small><div id="map"></div></section>
@@ -309,6 +311,7 @@ const KEY="realcraft_music_v1";let on=localStorage.getItem(KEY)!=="off";
 let ctx=null,master=null,cur=null,want="home",timer=null,rate=1;const voices={};
 // note: semitones from A4 (0=A4); null=rest. Each step is an 8th note.
 const T={
+ build:{bpm:120,w:"square",m:[0,4,7,12,null,7,9,7, 5,9,12,null,9,7,5,4, 2,5,9,14,null,12,9,7, 4,7,12,11,12,null,null,null],b:[-24,null,-12,null,-17,null,-12,null, -19,null,-7,null,-17,null,-5,null, -22,null,-10,null,-17,null,-5,null, -20,null,-8,null,-24,null,null,null]},
  home:{bpm:132,w:"square",m:[3,7,10,15,14,10,7,null, 5,8,12,17,15,12,8,null, 3,7,10,15,17,15,14,10, 12,10,8,7,5,null,3,null],b:[-21,-21,-14,-14,-16,-16,-9,-9, -19,-19,-12,-12,-14,-14,-7,-7, -21,-21,-14,-14,-16,-16,-9,-9, -16,-16,-14,-14,-21,-21,-21,null]},
  workshop:{bpm:92,w:"triangle",m:[0,null,4,null,7,null,4,null, 2,null,5,null,9,null,5,null, 0,null,4,null,7,null,11,9, 7,null,5,null,4,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -24,null,null,null,-17,null,null,null, -19,null,null,null,-24,null,null,null]},
  race:{bpm:160,w:"square",m:[7,7,12,7,14,12,7,5, 7,7,12,7,16,14,12,null, 5,5,9,5,12,9,5,4, 5,7,9,12,14,null,12,null],b:[-17,-5,-17,-5,-17,-5,-17,-5, -17,-5,-17,-5,-17,-5,-17,-5, -19,-7,-19,-7,-19,-7,-19,-7, -15,-3,-15,-3,-14,-2,-14,-2]},
