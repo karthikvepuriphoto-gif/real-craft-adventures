@@ -52,8 +52,8 @@ function addStars(n){localStorage.setItem(KEYST,(+localStorage.getItem(KEYST)||0
 export function meet(k){const b=loadBook();if(!ANIMALS[k]||b.got[k])return false;b.got[k]=Date.now();saveBook(b);addStars(1);return true}
 let css=false;function ensureCss(){if(css)return;css=true;const s=document.createElement("style");s.textContent=`
 .abOv{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:90;display:flex;align-items:center;justify-content:center}
-.abPan{background:#fff;color:#000;border:4px solid #000;border-radius:12px;width:min(880px,96%);max-height:92%;overflow-y:auto;padding:16px;position:relative;font-family:system-ui,sans-serif;font-size:16px;line-height:1.5;touch-action:pan-y}
-.abPan *{touch-action:pan-y}.abPan h2{font-family:'Press Start 2P',monospace;font-size:15px;margin:4px 60px 10px 0;line-height:1.5}
+.abPan{background:#fff;color:#000;border:4px solid #000;border-radius:12px;width:min(880px,96%);max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;overscroll-behavior:contain;overflow-y:auto;padding:16px;position:relative;font-family:system-ui,sans-serif;font-size:16px;line-height:1.5;touch-action:pan-y}
+.abPan,.abPan *{touch-action:pan-x pan-y}.abPan h2{font-family:'Press Start 2P',monospace;font-size:15px;margin:4px 60px 10px 0;line-height:1.5}
 .abPan button{font-family:'Press Start 2P',monospace;font-size:10px;border:3px solid #000;border-radius:8px;padding:9px 10px;background:#ffca28;color:#000;box-shadow:0 3px 0 #000;cursor:pointer}
 .abX{position:absolute;right:8px;top:8px}.abSp{float:right;margin-right:56px}
 .abStats{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:10px 0}.abStats div{background:#e0f7fa;border:2px solid #000;border-radius:8px;padding:8px;font-size:14px}.abStats b{display:block;font-size:12px;color:#00695c}

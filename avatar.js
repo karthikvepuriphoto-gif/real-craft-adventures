@@ -152,7 +152,7 @@ export function buildAvatarInto(av,s){const g=av.g;while(g.children.length){cons
 export function buildAvatar(scene,s=loadAvatar()){const av={g:new THREE.Group(),legs:[],arms:[]};buildAvatarInto(av,s);if(scene)scene.add(av.g);return av}
 
 // ---------- UI ----------
-const CSS=`#dzOv{position:fixed;inset:0;z-index:200;background:linear-gradient(135deg,#7e57c2,#26c6da);display:flex;font-family:system-ui,-apple-system,sans-serif;color:#222}
+const CSS=`#dzTabs,#dzTabs *{touch-action:pan-x!important}#dzBody,#dzBody *{touch-action:pan-y!important}#dzOv{height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);position:fixed;inset:0;z-index:200;background:linear-gradient(135deg,#7e57c2,#26c6da);display:flex;font-family:system-ui,-apple-system,sans-serif;color:#222}
 #dzOv.hidden,#dzOffer.hidden{display:none}#dzPrev{flex:0 0 40%;position:relative;touch-action:none}#dzPrev canvas{width:100%!important;height:100%!important;display:block}
 #dzPrev .t{position:absolute;top:10px;left:0;right:0;text-align:center;color:#fff;font:bold 22px system-ui;text-shadow:0 2px 0 #0005}
 #dzPrev .b{position:absolute;bottom:12px;left:0;right:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
