@@ -464,7 +464,17 @@ gp.querySelectorAll("button").forEach(b=>b.addEventListener("pointerdown",e=>{e.
 // vehicle UI
 function nearVeh(){let best=null,bd=4.5;for(const v of VEH){if(!v.g.visible)continue;const d=Math.hypot(v.x-P.x,v.z-P.z);if(d<bd&&Math.abs(v.y-P.y)<3){bd=d;best=v}}return best}
 const getInBtn=document.getElementById("getIn");let nearV=null;
-tapBtn("getIn",()=>{if(nearV)getIn(nearV)});
+tapBtn("getIn",()=>{if(nearV)getIn(nearV);else if(nearRocket)goSpace()});
+// --- Space Mode rocket at Lincoln Airport (opens space.html) ---
+const ROCKET={x:-36.5,z:-41.5};let nearRocket=false;
+function goSpace(){try{saveNow()}catch(e){}location.href="space.html"}
+{const g=new THREE.Group(),w=new THREE.MeshLambertMaterial({color:"#f5f5f5"}),r=new THREE.MeshLambertMaterial({color:"#e53935"});
+ const body=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,6,12),w);body.position.y=4;g.add(body);const nose=new THREE.Mesh(new THREE.ConeGeometry(.9,2.2,12),r);nose.position.y=8.1;g.add(nose);
+ for(let i=0;i<4;i++){const f=new THREE.Mesh(new THREE.BoxGeometry(.15,1.8,1.3),r),a=i*Math.PI/2;f.position.set(Math.cos(a)*1,1.9,Math.sin(a)*1);f.rotation.y=-a;g.add(f)}
+ const pad=new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,.4,16),new THREE.MeshLambertMaterial({color:"#9e9e9e"}));pad.position.y=.2;g.add(pad);
+ const win=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.1,12),new THREE.MeshLambertMaterial({color:"#4fc3f7"}));win.rotation.x=Math.PI/2;win.position.set(0,5.5,.88);g.add(win);
+ g.position.set(ROCKET.x,groundTop(ROCKET.x,ROCKET.z),ROCKET.z);scene.add(g);ROCKET.g=g;
+ try{const lb=label("🚀 Space Rocket",ROCKET.x,groundTop(ROCKET.x,ROCKET.z)+10.5,ROCKET.z);if(lb&&!lb.parent)scene.add(lb)}catch(e){}}
 function setBody(){document.body.classList.toggle("riding",!!ride);document.body.classList.toggle("heli",!!ride&&ride.t==="heli");document.body.classList.toggle("plane",!!ride&&ride.t==="plane");document.getElementById("btnTop").classList.toggle("on",topView)}
 function getIn(v){ride=v;landing=false;v.s=0;av.g.visible=false;outline.visible=false;P.fly=false;camInit=false;setBody();if(window.Music)Music.play("sky");engine(true);beep(660,.08);
   toast(v.t==="heli"?"🚁 Hold ⬆️ Up to lift off, then use the stick to fly!":"✈️ Hold ⏩ Faster to zoom down the runway and take off!")}
@@ -553,6 +563,7 @@ function step(dt,t){
   if(performance.now()-holdT>1500)aim();
   // vehicles nearby?
   const nv=nearVeh();if(nv!==nearV){nearV=nv;getInBtn.classList.toggle("hidden",!nv);if(nv)getInBtn.textContent=(nv.t==="heli"?"🚁 Get in the helicopter!":"✈️ Get in the plane!")}
+  {const nr=!nearV&&!away&&Math.hypot(P.x-ROCKET.x,P.z-ROCKET.z)<4;if(nr){if(!nearRocket||getInBtn.classList.contains("hidden")){getInBtn.textContent="🚀 Get in the rocket!";getInBtn.classList.remove("hidden")}}else if(nearRocket&&!nearV)getInBtn.classList.add("hidden");nearRocket=nr}
   }
   if(ride&&nearV){nearV=null;getInBtn.classList.add("hidden")}
   {const nw=performance.now();for(const o of _fd){const hit=!ride&&nw-o.userData.ft<150,m=o.material;m.opacity+=((hit?.22:(o.userData.om.opacity))-m.opacity)*Math.min(1,dt*10);m.depthWrite=m.opacity>.95;if(!hit&&Math.abs(m.opacity-o.userData.om.opacity)<.02){m.dispose();o.material=o.userData.om;o.userData.fm=0;_fd.delete(o)}}}
@@ -979,7 +990,8 @@ tapBtn("tLoop",()=>doTrick("loop"));tapBtn("tRoll",()=>doTrick("roll"));tapBtn("
 document.getElementById("btnPass").onclick=openPassport;document.querySelectorAll(".ovClose").forEach(b=>b.onclick=()=>closeOv(b.dataset.c));
 document.getElementById("askYes").onclick=()=>{closeOv("askHome");flyHome()};document.getElementById("askNo").onclick=()=>closeOv("askHome");
 {const mk=(t,f)=>{const b=document.createElement("button");b.textContent=t;b.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();gp.classList.add("hidden");document.getElementById("goBtn").classList.remove("on");f()});gp.appendChild(b)};
- mk("🌍 World Trip",()=>{if(ride&&ride.t==="plane")openTrip();else{goTo("airport");toast("✈️ Walk to the plane, get in, then tap 🌍 World Trip!")}});mk("🛂 Passport",openPassport)}
+ mk("🌍 World Trip",()=>{if(ride&&ride.t==="plane")openTrip();else{goTo("airport");toast("✈️ Walk to the plane, get in, then tap 🌍 World Trip!")}});mk("🛂 Passport",openPassport);mk("🚀 Space Mode",()=>{goTo("airport");P.x=ROCKET.x+3;P.z=ROCKET.z+1;toast("🚀 Walk up to the rocket and tap Get in!")})}
+if(location.hash==="#rocket")setTimeout(()=>{try{goTo("airport");P.x=ROCKET.x+3;P.z=ROCKET.z+1;P.y=groundTop(P.x,P.z)+.1;history.replaceState(null,"",location.pathname)}catch(e){}},600);
 // boot
 let all0={};try{all0=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}slot=all0.slot||0;
 loadSlot(slot);document.getElementById("btnSlot").textContent="💾 Slot "+(slot+1);

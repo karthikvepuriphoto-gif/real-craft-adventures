@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Space Mode · Real Craft Adventures</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;touch-action:none;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;-webkit-touch-callout:none;font-family:'Press Start 2P',monospace;background:#000;color:#fff}
+#view{position:fixed;inset:0}#view canvas{display:block;width:100%!important;height:100%!important}
+button{font-family:inherit;font-size:11px;border:3px solid #000;border-radius:8px;padding:10px 12px;background:#ffca28;color:#000;box-shadow:0 3px 0 #000;cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}
+.hidden{display:none!important}
+#top{position:fixed;left:8px;top:8px;z-index:20;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 80px)}
+#top button{font-size:10px;padding:9px 10px}
+#stars{position:fixed;right:70px;top:16px;z-index:20;font-size:12px;color:#ffeb3b;text-shadow:2px 2px 0 #000}
+#info{position:fixed;top:64px;left:0;right:0;margin:auto;width:fit-content;max-width:92%;background:rgba(0,0,0,.65);color:#ffeb3b;padding:8px 12px;border-radius:8px;font-size:10px;line-height:1.6;z-index:15;pointer-events:none;text-align:center}
+#joy{position:fixed;left:24px;bottom:28px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.15);border:3px solid rgba(255,255,255,.5);z-index:18}
+#knob{position:absolute;left:45px;top:45px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.8);border:3px solid #000}
+#act{position:fixed;right:24px;bottom:34px;z-index:18;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+#act button{font-size:13px;padding:16px 18px;min-width:120px}
+#near{position:fixed;left:0;right:0;bottom:190px;margin:auto;width:fit-content;z-index:19;font-size:13px;background:#76ff03;animation:pulse 1s infinite alternate}@keyframes pulse{to{transform:scale(1.07)}}
+#meter{position:fixed;left:180px;bottom:30px;z-index:16;background:rgba(0,0,0,.7);border:3px solid #fff;border-radius:10px;padding:10px;font-size:10px;line-height:1.7;max-width:min(430px,calc(100% - 340px))}
+#meter b{color:#ffeb3b}
+#count{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:110px;color:#ffeb3b;text-shadow:6px 6px 0 #000;z-index:17;pointer-events:none}
+#layer{position:fixed;left:0;right:0;bottom:30px;margin:auto;width:fit-content;max-width:80%;background:rgba(0,0,0,.7);border:3px solid #4fc3f7;border-radius:10px;padding:12px;font-size:11px;line-height:1.7;z-index:16;text-align:center}
+#alt{position:fixed;right:20px;top:70px;z-index:16;font-size:11px;background:rgba(0,0,0,.6);padding:8px;border-radius:8px;line-height:1.7}
+#skip{position:fixed;right:20px;bottom:30px;z-index:18}
+#card{position:fixed;left:0;right:0;bottom:16px;margin:auto;width:min(640px,94%);background:#fff;color:#000;border:4px solid #000;border-radius:12px;padding:14px;z-index:30;font-family:system-ui,sans-serif;font-size:16px;line-height:1.45;box-shadow:0 5px 0 #000}
+#card h2{font-family:'Press Start 2P',monospace;font-size:15px;margin:0 0 8px}#card .d{font-size:14px;color:#1565c0;margin:6px 0}#card .bt{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;display:flex;align-items:center;justify-content:center}
+.pan{background:#fff;color:#000;border:4px solid #000;border-radius:12px;width:min(900px,96%);max-height:92%;overflow-y:auto;touch-action:pan-y;padding:16px;position:relative;font-family:system-ui,sans-serif;font-size:16px;line-height:1.5}
+.pan *{touch-action:pan-y}
+.pan h2{font-family:'Press Start 2P',monospace;font-size:15px;margin:4px 60px 12px 0;line-height:1.5}
+.x{position:absolute;right:8px;top:8px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.tcard{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;min-height:104px;position:relative;font-family:system-ui,sans-serif;font-size:13px;background:#e3f2fd}
+.tcard .te{font-size:34px}.tcard small{font-size:11px;color:#555}.tcard i{position:absolute;top:4px;right:6px;font-style:normal}.tcard.no{opacity:.45}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin:10px 0}.stats div{background:#f3e5f5;border:2px solid #000;border-radius:8px;padding:8px;font-size:14px}.stats b{display:block;font-size:12px;color:#6a1b9a}
+.qz{background:#fff8e1;border:2px solid #000;border-radius:8px;padding:8px;margin:8px 0}.qz button{font-family:system-ui,sans-serif;font-size:14px;margin:4px;background:#e0e0e0}.qz button.right{background:#76ff03}.qz button.wrong{background:#ff8a80}
+.sizecmp{display:flex;align-items:flex-end;gap:16px;margin:8px 0;min-height:40px}.sizecmp span{display:inline-block;border-radius:50%;border:2px solid #000}
+#labTabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}#labTabs button{font-size:10px}#labTabs button.on{background:#76ff03}
+#labCv{width:100%;height:auto;background:#05051a;border:3px solid #000;border-radius:8px;display:block;touch-action:none}
+#labCtl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}#labCtl input[type=range]{width:240px;touch-action:none}
+#labTxt{font-size:15px;min-height:44px}
+#toast{position:fixed;left:0;right:0;top:110px;margin:auto;width:fit-content;max-width:90%;background:#ffeb3b;color:#000;border:3px solid #000;border-radius:8px;padding:10px 14px;font-size:11px;z-index:80;line-height:1.6;text-align:center}
+@media (max-width:820px){#meter{left:12px;bottom:190px;max-width:calc(100% - 24px)}#top button{font-size:9px;padding:8px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+</head><body>
+<div id="view"></div>
+<div id="top"><button id="bHome">🏠 Home</button><button id="bTravel">🧭 Travel to</button><button id="bLab">🧪 Gravity Lab</button><button id="bPass">🛂 Passport</button></div>
+<div id="stars">⭐ 0</div>
+<div id="info" class="hidden"></div>
+<div id="count" class="hidden"></div><div id="layer" class="hidden"></div><div id="alt" class="hidden"></div><button id="skip" class="hidden">⏩ Skip</button>
+<div id="joy" class="hidden"><div id="knob"></div></div>
+<div id="act" class="hidden"><button id="bJump">⬆️ Boost</button><button id="bBack" class="hidden">🚀 Back to rocket</button></div>
+<button id="near" class="hidden"></button>
+<div id="meter" class="hidden"></div>
+<div id="card" class="hidden"></div>
+<div id="toast" class="hidden"></div>
+<div id="travel" class="ov hidden"><div class="pan"><button class="x" data-c="travel">✖</button><h2>🧭 Travel to…</h2><p style="margin-top:0">Pick a place and your rocket zooms there! (Space is HUGE, so the map is squished to fit. Real distances are shown when you arrive.)</p><div class="tgrid" id="travelBody"></div></div></div>
+<div id="learn" class="ov hidden"><div class="pan"><button class="x" data-c="learn">✖</button><button id="learnSpeak" style="float:right;margin-right:52px">🔊 Read to me</button><div id="learnBody"></div></div></div>
+<div id="pass" class="ov hidden"><div class="pan"><button class="x" data-c="pass">✖</button><h2>🛂 Space Passport</h2><div id="passBody"></div></div></div>
+<div id="lab" class="ov hidden"><div class="pan"><button class="x" data-c="lab">✖</button><h2>🧪 Gravity Lab</h2><div id="labTabs"></div><canvas id="labCv" width="860" height="440"></canvas><div id="labCtl"></div><div id="labTxt"></div></div></div>
+<script type="module">
+// All numbers checked against NASA (science.nasa.gov, NSSDC Planetary Fact Sheet, NASA Space Place). Moon counts as of 2025.
+const B={
+sun:{n:"The Sun",e:"☀️",kind:"star",land:"none",g:28,dist:"The center of our solar system!",light:"Sunlight takes about 8 minutes to reach Earth.",
+ fact:"The Sun is a star: a giant, glowing ball of hot gas.",size:"About 109 Earths wide! About 1.3 million Earths could fit inside.",day:"Spins about once a month",year:"It's the middle! Everything orbits the Sun.",temp:"Surface about 10,000°F",moons:"8 planets orbit it",
+ why:"It shines because deep in its center, tiny bits of hydrogen squeeze together and give off huge amounts of light and heat.",
+ cool:["The Sun is about 4.6 billion years old.","Never look straight at the Sun, even with sunglasses! It can hurt your eyes.","The Sun holds more than 99% of all the stuff (mass) in our solar system."],
+ quiz:[["What is the Sun?",["A planet","A star","A moon"],1],["How long does sunlight take to reach Earth?",["About 8 minutes","About 8 days","About 8 seconds"],0]]},
+mercury:{n:"Mercury",e:"🪨",kind:"rock",land:"land",g:.38,sun:"36 million miles",ls:"3 minutes",
+ fact:"Mercury is the smallest planet and the closest to the Sun.",size:"About 2/5 as wide as Earth (0.38×)",day:"176 Earth days from sunrise to sunrise!",year:"88 Earth days",temp:"Up to 800°F by day, down to −290°F at night",moons:"0",
+ why:"It's gray and full of craters because it has almost no air to protect it from space rocks.",
+ cool:["Mercury has no moons.","It has almost no air, so heat escapes at night and it gets super cold.","A year on Mercury is only 88 days, the shortest of any planet."],
+ quiz:[["Which planet is closest to the Sun?",["Venus","Mercury","Mars"],1],["How many moons does Mercury have?",["0","1","2"],0]]},
+venus:{n:"Venus",e:"🌕",kind:"rock",land:"land",g:.91,sun:"67 million miles",ls:"6 minutes",
+ fact:"Venus is the hottest planet, even hotter than Mercury!",size:"Almost the same size as Earth (0.95×)",day:"117 Earth days from sunrise to sunrise",year:"225 Earth days",temp:"About 867°F, hot enough to melt lead",moons:"0",
+ why:"Thick clouds and a heavy blanket of carbon dioxide trap the Sun's heat, like a super-hot greenhouse.",
+ cool:["Venus spins backwards compared to most planets, so the Sun rises in the west.","Venus spins so slowly that one spin takes longer than its whole year!","After the Moon, Venus is the brightest natural thing in our night sky."],
+ quiz:[["What is the hottest planet?",["Mercury","Venus","Mars"],1],["Why is Venus so hot?",["Its thick air traps heat","It is the biggest planet","It has a hot moon"],0]]},
+earth:{n:"Earth",e:"🌍",kind:"rock",land:"home",g:1,sun:"93 million miles",ls:"8 minutes",
+ fact:"Earth is our home, the only planet where we know life exists!",size:"1× (that's us!) about 7,900 miles wide",day:"24 hours",year:"365 days",temp:"Average about 59°F",moons:"1",
+ why:"It looks blue because about 71% of it is covered in water. The white swirls are clouds.",
+ cool:["Earth's air (atmosphere) protects us and gives us oxygen to breathe.","Earth is the only planet not named after a Greek or Roman god.","The Moon's pull on Earth's oceans makes the tides."],
+ quiz:[["How long does Earth take to go around the Sun?",["1 day","1 month","1 year"],2],["How much of Earth is covered by water?",["About 71%","About 10%","About 50%"],0]]},
+moon:{n:"The Moon",e:"🌙",kind:"moon",land:"land",g:.17,earth:"239,000 miles from Earth",le:"about 1.3 seconds",par:"earth",
+ fact:"The Moon is Earth's only natural moon, and 12 astronauts have walked on it!",size:"About 1/4 as wide as Earth (0.27×)",day:"About 29½ Earth days from sunrise to sunrise",year:"Goes around Earth every 27 days",temp:"About 250°F in sunlight, about −208°F at night",moons:"It IS a moon!",
+ why:"It's gray and covered in craters from space rocks. It shines because it reflects sunlight.",
+ cool:["Astronauts first walked on the Moon in 1969 (Apollo 11).","The same side of the Moon always faces Earth.","There's no wind on the Moon, so astronaut footprints can last for a very long time."],
+ quiz:[["How many astronauts have walked on the Moon?",["12","3","100"],0],["Why does the Moon shine?",["It's on fire","It reflects sunlight","It has lamps"],1]]},
+iss:{n:"Space Station",e:"🛰️",kind:"station",land:"dock",g:.9,earth:"about 250 miles above Earth",le:"less than 1/500 of a second",par:"earth",
+ fact:"The International Space Station is a home and science lab where astronauts live while zooming around Earth!",size:"About as long as a football field",day:"It sees 16 sunrises and 16 sunsets every day!",year:"Goes around Earth about every 90 minutes",temp:"Comfy inside (about 70°F)",moons:"—",
+ why:"Its big flat solar panels turn sunlight into electricity.",
+ cool:["It travels about 17,500 miles per hour!","Astronauts float because the station is always falling around Earth (orbiting), not because there's no gravity.","Astronauts have lived on the station every day since November 2000."],
+ quiz:[["How often does the Space Station go around Earth?",["About every 90 minutes","Once a day","Once a year"],0],["Why do astronauts float on the station?",["There is no gravity in space","They are always falling around Earth","Magic shoes"],1]]},
+mars:{n:"Mars",e:"🔴",kind:"rock",land:"land",g:.38,sun:"142 million miles",ls:"13 minutes",
+ fact:"Mars is the Red Planet, and robot rovers are exploring it right now!",size:"About half as wide as Earth (0.53×)",day:"About 24 hours 40 minutes",year:"687 Earth days",temp:"Average about −85°F",moons:"2 (Phobos and Deimos)",
+ why:"Its dirt has lots of rusty iron in it, so the whole planet looks red.",
+ cool:["Olympus Mons on Mars is the biggest volcano in the solar system, about 3 times as tall as Mount Everest.","Mars has seasons and ice caps at its poles, like Earth.","NASA rovers like Curiosity and Perseverance drive around Mars studying rocks."],
+ quiz:[["Why is Mars red?",["Rusty dirt","Red grass","It is hot"],0],["How many moons does Mars have?",["0","2","10"],1]]},
+belt:{n:"Asteroid Belt",e:"☄️",kind:"belt",land:"none",g:0,sun:"between Mars and Jupiter (about 250 million miles)",ls:"about 22 minutes",
+ fact:"The asteroid belt is a giant ring of space rocks between Mars and Jupiter.",size:"Rocks from pebbles up to Ceres, about 590 miles wide",day:"Each asteroid spins at its own speed",year:"Most take about 3 to 6 Earth years to orbit",temp:"Very cold",moons:"Some asteroids have tiny moons!",
+ why:"They're leftover rocky pieces from when the planets formed long ago.",
+ cool:["Scientists think there are more than a million asteroids in the belt bigger than half a mile.","The asteroids are very far apart, so spacecraft fly through safely.","Ceres, the biggest object in the belt, is a dwarf planet."],
+ quiz:[["Where is the asteroid belt?",["Between Mars and Jupiter","Around the Moon","Inside the Sun"],0],["What is the biggest object in the asteroid belt?",["Ceres","Pluto","Mars"],0]]},
+jupiter:{n:"Jupiter",e:"🟠",kind:"gas",land:"float",g:2.4,sun:"484 million miles",ls:"43 minutes",moon2:"europa",
+ fact:"Jupiter is the biggest planet. More than 1,000 Earths could fit inside!",size:"About 11 Earths wide",day:"About 10 hours, the shortest day of any planet",year:"About 12 Earth years",temp:"About −166°F at the cloud tops",moons:"More than 90 (97 known in 2025)",
+ why:"Its stripes are clouds blown into bands by super-fast winds. The Great Red Spot is a giant storm.",
+ cool:["The Great Red Spot is a storm bigger than Earth that has lasted hundreds of years.","Jupiter's moon Ganymede is the biggest moon in the solar system, bigger than Mercury!","Jupiter has no solid ground to stand on. It's made mostly of gas."],
+ quiz:[["What is the biggest planet?",["Saturn","Jupiter","Earth"],1],["What is the Great Red Spot?",["A giant storm","A volcano","A red moon"],0]]},
+europa:{n:"Europa (moon of Jupiter)",e:"🧊",kind:"moon",land:"land",g:.13,sun:"484 million miles (with Jupiter)",ls:"43 minutes",par:"jupiter",
+ fact:"Europa is an icy moon of Jupiter with a huge salty ocean hidden under its ice!",size:"A little smaller than our Moon (0.25× Earth)",day:"About 3½ Earth days",year:"Goes around Jupiter every 3½ days",temp:"About −260°F at the surface",moons:"It IS a moon!",
+ why:"Its surface is ice, criss-crossed with long cracks and lines.",
+ cool:["Europa's hidden ocean may have more water than all of Earth's oceans.","NASA's Europa Clipper spacecraft launched in 2024 to study it.","Scientists think Europa is one of the best places to look for life beyond Earth."],
+ quiz:[["What is hidden under Europa's ice?",["An ocean","Lava","Gold"],0],["Europa is a moon of which planet?",["Saturn","Jupiter","Mars"],1]]},
+saturn:{n:"Saturn",e:"🪐",kind:"gas",land:"float",g:.92,sun:"886 million miles",ls:"80 minutes",moon2:"titan",
+ fact:"Saturn has the most amazing rings in the solar system!",size:"About 9 Earths wide",day:"About 10½ hours",year:"About 29 Earth years",temp:"About −220°F",moons:"More than 270 (274 known in 2025)",
+ why:"Its rings are made of billions of chunks of ice and rock, from tiny grains to pieces as big as houses.",
+ cool:["Saturn is so light for its size that it would float in water, if you had a bathtub big enough!","Saturn has the most known moons of any planet.","Its biggest moon, Titan, has a thick, hazy atmosphere."],
+ quiz:[["What are Saturn's rings made of?",["Ice and rock","Gold","Smoke"],0],["Which planet has the most known moons?",["Earth","Saturn","Mars"],1]]},
+titan:{n:"Titan (moon of Saturn)",e:"🟡",kind:"moon",land:"land",g:.14,sun:"886 million miles (with Saturn)",ls:"80 minutes",par:"saturn",
+ fact:"Titan is Saturn's biggest moon, with thick orange haze and lakes of liquid methane!",size:"Bigger than Mercury (0.40× Earth)",day:"About 16 Earth days",year:"Goes around Saturn every 16 days",temp:"About −290°F",moons:"It IS a moon!",
+ why:"Its thick, orange, smoggy air hides the ground below.",
+ cool:["Titan is the only moon with a thick atmosphere.","It has rivers, lakes and seas, but they're made of liquid methane, not water.","NASA plans to send a flying drone called Dragonfly to explore Titan."],
+ quiz:[["What are Titan's lakes made of?",["Water","Liquid methane","Lava"],1],["What makes Titan special?",["It has a thick atmosphere","It's made of gold","It's hot"],0]]},
+uranus:{n:"Uranus",e:"🔵",kind:"gas",land:"float",g:.89,sun:"1.8 billion miles",ls:"2 hours 40 minutes",
+ fact:"Uranus spins on its side, like a ball rolling around the Sun!",size:"About 4 Earths wide",day:"About 17 hours",year:"84 Earth years",temp:"About −320°F",moons:"29 known (2025)",
+ why:"A gas called methane in its air makes it look blue-green.",
+ cool:["Uranus is called an ice giant.","It has faint rings too.","Its moons are named after characters from stories by Shakespeare and Alexander Pope."],
+ quiz:[["What is weird about how Uranus spins?",["It spins on its side","It doesn't spin","It spins backward and forward"],0],["What makes Uranus look blue-green?",["Methane gas","Oceans","Blue paint"],0]]},
+neptune:{n:"Neptune",e:"🌀",kind:"gas",land:"float",g:1.1,sun:"2.8 billion miles",ls:"4 hours",
+ fact:"Neptune is the farthest planet from the Sun and super windy!",size:"About 4 Earths wide",day:"About 16 hours",year:"165 Earth years",temp:"About −330°F",moons:"16",
+ why:"Methane in its air makes it look deep blue.",
+ cool:["Its winds can blow more than 1,200 miles per hour!","Neptune was found in 1846 using math before anyone saw it in a telescope.","Its big moon Triton goes around backwards."],
+ quiz:[["Which planet is farthest from the Sun?",["Neptune","Uranus","Pluto"],0],["How was Neptune first found?",["Using math","By a rover","By accident at the beach"],0]]},
+pluto:{n:"Pluto",e:"🤍",kind:"rock",land:"land",g:.07,sun:"3.7 billion miles",ls:"5½ hours",
+ fact:"Pluto is a dwarf planet with a giant heart shape on it!",size:"Smaller than our Moon (0.19× Earth)",day:"About 6½ Earth days",year:"248 Earth years",temp:"About −375°F",moons:"5 (the biggest is Charon)",
+ why:"The bright heart is a huge plain of frozen nitrogen ice.",
+ cool:["In 2006 scientists started calling Pluto a dwarf planet.","NASA's New Horizons spacecraft flew past Pluto in 2015 and took the first close-up pictures.","Pluto is smaller than Earth's Moon."],
+ quiz:[["What kind of planet is Pluto?",["A gas giant","A dwarf planet","A star"],1],["What shape is on Pluto?",["A star","A heart","A square"],1]]},
+bh:{n:"Black Hole Exhibit",e:"🕳️",kind:"bh",land:"none",g:0,earth:"The nearest known one is about 1,560 light-years away",le:"about 1,560 years",
+ fact:"A black hole is a place where gravity pulls so hard that not even light can get out!",size:"Some are tiny, some are millions of times heavier than the Sun",day:"Many spin very fast",year:"—",temp:"The glowing disk around some can be millions of degrees",moons:"—",
+ why:"It looks black because no light can escape. The glowing ring is hot gas swirling around it.",
+ cool:["Black holes are not cosmic vacuum cleaners. Things only fall in if they get very close.","There's a giant black hole called Sagittarius A* at the center of our galaxy, about 4 million times heavier than the Sun. It is about 27,000 light-years away.","No black hole is anywhere close enough to hurt Earth. (This exhibit is a pretend one, so you're safe!)"],
+ quiz:[["Why is a black hole black?",["Light can't escape","It's painted","It's in shadow"],0],["Is any black hole close enough to hurt Earth?",["Yes","No"],1]]},
+};
+const ORDER=["sun","mercury","venus","earth","moon","iss","mars","belt","jupiter","europa","saturn","titan","uranus","neptune","pluto","bh"];
+const LABS=[["lab_feather","🪶","Feather & Hammer"],["lab_orbit","🌍","Orbit Lab"],["lab_well","🕳️","Gravity Wells"],["lab_tides","🌊","Tides"],["launch","🚀","First Launch"]];
+import * as THREE from "three";
+import {loadAvatar,buildAvatar} from "./avatar.js";
+localStorage.setItem("realcraft_space_visited","1");
+const $=id=>document.getElementById(id);
+const ren=new THREE.WebGLRenderer({antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,1.5));ren.setSize(innerWidth,innerHeight);$("view").appendChild(ren.domElement);
+const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,3000);
+addEventListener("resize",()=>{ren.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()});
+let actx=null;const AC=window.AudioContext||window.webkitAudioContext;
+function beep(f=520,d=.1){try{actx=actx||new AC();const o=actx.createOscillator(),g=actx.createGain();o.type="triangle";o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d)}catch(e){}}
+let toastT=0;function toast(t,ms=3200){const e=$("toast");e.textContent=t;e.classList.remove("hidden");clearTimeout(toastT);toastT=setTimeout(()=>e.classList.add("hidden"),ms)}
+function info(t){const e=$("info");if(!t)e.classList.add("hidden");else{e.innerHTML=t;e.classList.remove("hidden")}}
+// ---------- passport & stars (stars shared with Build World) ----------
+const KEYSP="realcraft_space_pp_v1",KEYST="realcraft_bw_stars";
+function loadPP(){try{const p=JSON.parse(localStorage.getItem(KEYSP));if(p&&p.stamps)return Object.assign({quiz:{}},p)}catch(e){}return{stamps:{},quiz:{}}}
+function savePP(p){localStorage.setItem(KEYSP,JSON.stringify(p))}
+function stars(){return +localStorage.getItem(KEYST)||0}
+function addStars(n){localStorage.setItem(KEYST,stars()+n);showStars()}
+function showStars(){$("stars").textContent="⭐ "+stars()}
+function stamp(k){const p=loadPP();if(p.stamps[k])return false;p.stamps[k]=Date.now();savePP(p);addStars(1);const nm=B[k]?B[k].n:(LABS.find(l=>l[0]===k)||[])[2];toast("🛂 New passport stamp: "+nm+"! ⭐+1");beep(880,.1);setTimeout(()=>beep(1175,.15),120);return true}
+showStars();
+// ---------- procedural textures ----------
+function rnd(s){return()=>{s=(s*16807)%2147483647;return s/2147483647}}
+function cvTex(w,h,draw){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t}
+function rockTex(base,spot,seed,extra){return cvTex(256,128,(g,w,h)=>{const r=rnd(seed);g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=0;i<260;i++){g.globalAlpha=.15+r()*.25;g.fillStyle=r()<.5?spot:"#ffffff";const x=r()*w,y=r()*h,s=1+r()*9;g.beginPath();g.arc(x,y,s,0,7);g.fill()}g.globalAlpha=1;if(extra)extra(g,w,h,r)})}
+function bandTex(cols,seed,extra){return cvTex(256,128,(g,w,h)=>{const r=rnd(seed);let y=0;while(y<h){const bh=3+r()*12;g.fillStyle=cols[Math.floor(r()*cols.length)];g.fillRect(0,y,w,bh+1);y+=bh}for(let i=0;i<40;i++){g.globalAlpha=.25;g.fillStyle=cols[Math.floor(r()*cols.length)];g.beginPath();g.ellipse(r()*w,r()*h,8+r()*20,2+r()*3,0,0,7);g.fill()}g.globalAlpha=1;if(extra)extra(g,w,h)})}
+const earthTex=()=>cvTex(256,128,(g,w,h)=>{const r=rnd(7);g.fillStyle="#1e5fb4";g.fillRect(0,0,w,h);g.fillStyle="#3f9b3a";for(let i=0;i<26;i++){const x=r()*w,y=20+r()*(h-40);for(let j=0;j<8;j++){g.beginPath();g.arc(x+(r()-.5)*30,y+(r()-.5)*20,4+r()*9,0,7);g.fill()}}g.fillStyle="#fff";g.fillRect(0,0,w,7);g.fillRect(0,h-7,w,7);g.globalAlpha=.55;for(let i=0;i<40;i++){g.beginPath();g.ellipse(r()*w,r()*h,6+r()*18,2+r()*4,0,0,7);g.fill()}});
+const TEX={
+ sun:()=>cvTex(128,64,(g,w,h)=>{const r=rnd(3);g.fillStyle="#ffb300";g.fillRect(0,0,w,h);for(let i=0;i<200;i++){g.globalAlpha=.3;g.fillStyle=r()<.5?"#fff176":"#ff6f00";g.beginPath();g.arc(r()*w,r()*h,1+r()*4,0,7);g.fill()}}),
+ mercury:()=>rockTex("#9e9e9e","#5d5d5d",11),venus:()=>bandTex(["#e8c27a","#d9a95b","#f0d49a","#c9964d"],5),earth:earthTex,
+ moon:()=>rockTex("#bdbdbd","#616161",21),mars:()=>rockTex("#c1440e","#7a2a08",31,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,6);g.fillRect(0,h-6,w,6)}),
+ jupiter:()=>bandTex(["#d8b48a","#b07d4f","#efe0c8","#a0623a","#e6c9a0"],41,(g,w,h)=>{g.fillStyle="#c0392b";g.beginPath();g.ellipse(w*.65,h*.65,14,7,0,0,7);g.fill()}),
+ europa:()=>rockTex("#e8dcc8","#a0522d",51,(g,w,h,r)=>{g.strokeStyle="#8d4e2a";g.globalAlpha=.6;for(let i=0;i<22;i++){g.beginPath();g.moveTo(r()*w,r()*h);g.lineTo(r()*w,r()*h);g.stroke()}}),
+ saturn:()=>bandTex(["#e3cf9a","#d1b675","#f1e3bb","#c4a35e"],61),titan:()=>bandTex(["#d99a3a","#c98a2d","#e3aa4c"],71),
+ uranus:()=>bandTex(["#9fe3e8","#93d8de","#a8ecf0"],81),neptune:()=>bandTex(["#3d6ee0","#2f5cc9","#4a7cf0","#2a4fb0"],91,(g,w,h)=>{g.fillStyle="#1a2f7a";g.beginPath();g.ellipse(w*.3,h*.6,10,5,0,0,7);g.fill()}),
+ pluto:()=>rockTex("#c8a27e","#7b5a3e",101,(g,w,h)=>{g.fillStyle="#f5ebdc";g.beginPath();const x=w*.5,y=h*.55;g.arc(x-9,y-6,11,0,7);g.arc(x+9,y-6,11,0,7);g.fill();g.beginPath();g.moveTo(x-20,y-2);g.lineTo(x+20,y-2);g.lineTo(x,y+20);g.fill()})};
+// ---------- SPACE scene ----------
+const space=new THREE.Scene();space.background=new THREE.Color("#000008");
+space.add(new THREE.AmbientLight("#ffffff",.35));const sunLight=new THREE.PointLight("#fff4e0",3,0,0);space.add(sunLight);
+function starfield(n,R){const g=new THREE.BufferGeometry(),p=new Float32Array(n*3),r=rnd(99);for(let i=0;i<n;i++){const u=r()*2-1,t=r()*6.283,s=Math.sqrt(1-u*u);p[i*3]=R*s*Math.cos(t);p[i*3+1]=R*u;p[i*3+2]=R*s*Math.sin(t)}g.setAttribute("position",new THREE.BufferAttribute(p,3));return new THREE.Points(g,new THREE.PointsMaterial({color:"#ffffff",size:2,sizeAttenuation:false}))}
+const sky=starfield(1500,1500);space.add(sky);
+const LAY={sun:[0,10],mercury:[22,1.2],venus:[32,2],earth:[44,2.2],mars:[58,1.6],belt:[77,0],jupiter:[102,6],saturn:[136,5],uranus:[166,3.4],neptune:[192,3.3],pluto:[215,.7]};
+const OBJ={};let ai=0;
+function planet(k,r,tex,basic){const m=new THREE.Mesh(new THREE.SphereGeometry(r,28,18),basic?new THREE.MeshBasicMaterial({map:tex}):new THREE.MeshLambertMaterial({map:tex}));space.add(m);return m}
+for(const k in LAY){const[R,r]=LAY[k];const a=ai++*.85+.3;const pos=new THREE.Vector3(Math.cos(a)*R,0,Math.sin(a)*R);
+ if(R>0){const ring=new THREE.Mesh(new THREE.RingGeometry(R-.06,R+.06,128),new THREE.MeshBasicMaterial({color:"#33415e",side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;space.add(ring)}
+ if(k==="belt"){const geo=new THREE.DodecahedronGeometry(.35,0),N=500,im=new THREE.InstancedMesh(geo,new THREE.MeshLambertMaterial({color:"#8d7b68"}),N),d=new THREE.Object3D(),rr=rnd(5);for(let i=0;i<N;i++){const t=rr()*6.283,rad=72+rr()*10;d.position.set(Math.cos(t)*rad,(rr()-.5)*2,Math.sin(t)*rad);d.rotation.set(rr()*3,rr()*3,0);d.scale.setScalar(.4+rr()*1.6);d.updateMatrix();im.setMatrixAt(i,d.matrix)}space.add(im);OBJ.belt={pos:new THREE.Vector3(Math.cos(a)*R,0,Math.sin(a)*R),r:3,mesh:im};continue}
+ const m=planet(k,r,TEX[k](),k==="sun");m.position.copy(pos);OBJ[k]={pos,r,mesh:m};
+ if(k==="sun"){const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:cvTex(128,128,(g)=>{const gr=g.createRadialGradient(64,64,10,64,64,64);gr.addColorStop(0,"rgba(255,220,120,1)");gr.addColorStop(1,"rgba(255,140,0,0)");g.fillStyle=gr;g.fillRect(0,0,128,128)}),depthWrite:false,blending:THREE.AdditiveBlending}));gl.scale.set(40,40,1);space.add(gl)}
+ if(k==="saturn"||k==="uranus"){const inner=r*(k==="saturn"?1.25:1.5),outer=r*(k==="saturn"?2.3:1.8);const rg=new THREE.RingGeometry(inner,outer,64,1);const uv=rg.attributes.uv,ps=rg.attributes.position,v=new THREE.Vector3();for(let i=0;i<ps.count;i++){v.fromBufferAttribute(ps,i);uv.setXY(i,(v.length()-inner)/(outer-inner),.5)}
+  const rt=cvTex(256,4,(g,w)=>{const rr=rnd(8);for(let x=0;x<w;x++){g.fillStyle=k==="saturn"?`rgba(${210+rr()*30|0},${190+rr()*30|0},${140+rr()*30|0},${(x>150&&x<162)?.05:.5+rr()*.5})`:`rgba(180,220,230,${.15+rr()*.2})`;g.fillRect(x,0,1,4)}});
+  const ring=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({map:rt,side:THREE.DoubleSide,transparent:true,depthWrite:false}));ring.position.copy(pos);ring.rotation.x=k==="saturn"?-Math.PI/2+.45:.1;if(k==="uranus")ring.rotation.y=Math.PI/2;space.add(ring);if(k==="uranus")m.rotation.z=1.7}}
+// moons + ISS + black hole
+function moonOf(k,par,r,dist,tex){const p=OBJ[par].pos.clone().add(new THREE.Vector3(dist,1,dist*.4));const m=planet(k,r,tex);m.position.copy(p);OBJ[k]={pos:p,r,mesh:m}}
+moonOf("moon","earth",.6,5,TEX.moon());moonOf("europa","jupiter",.6,11,TEX.europa());moonOf("titan","saturn",.75,13,TEX.titan());
+function issModel(s=1){const g=new THREE.Group(),mt=new THREE.MeshLambertMaterial({color:"#cfd8dc"}),pn=new THREE.MeshLambertMaterial({color:"#1a237e",emissive:"#0d1b4a"});
+ g.add(new THREE.Mesh(new THREE.BoxGeometry(2.4*s,.35*s,.35*s),mt));const t=new THREE.Mesh(new THREE.BoxGeometry(.3*s,.3*s,3.6*s),mt);g.add(t);
+ for(const z of[-1.4,-.8,.8,1.4])for(const x of[-1,1]){const p=new THREE.Mesh(new THREE.BoxGeometry(1.4*s,.03*s,.45*s),pn);p.position.set(x*.95*s,0,z*s);g.add(p)}return g}
+{const p=OBJ.earth.pos.clone().add(new THREE.Vector3(-3,.8,-1.5));const m=issModel(.35);m.position.copy(p);space.add(m);OBJ.iss={pos:p,r:.6,mesh:m}}
+{const p=new THREE.Vector3(-230,30,-260);const g=new THREE.Group();g.position.copy(p);
+ g.add(new THREE.Mesh(new THREE.SphereGeometry(6,32,20),new THREE.MeshBasicMaterial({color:"#000"})));
+ const disk=new THREE.Mesh(new THREE.RingGeometry(7.5,20,96),new THREE.MeshBasicMaterial({map:cvTex(256,256,(c)=>{const gr=c.createRadialGradient(128,128,40,128,128,128);gr.addColorStop(0,"rgba(255,255,255,1)");gr.addColorStop(.35,"rgba(255,200,80,1)");gr.addColorStop(.7,"rgba(255,90,20,.7)");gr.addColorStop(1,"rgba(120,0,60,0)");c.fillStyle=gr;c.fillRect(0,0,256,256)}),side:THREE.DoubleSide,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));disk.rotation.x=-1.25;g.add(disk);
+ const halo=new THREE.Mesh(new THREE.TorusGeometry(6.6,.35,8,64),new THREE.MeshBasicMaterial({color:"#ffcc66"}));g.add(halo);g.userData={disk,halo};space.add(g);OBJ.bh={pos:p,r:7,mesh:g}}
+// labels
+function label(txt){const c=document.createElement("canvas");c.width=256;c.height=48;const g=c.getContext("2d");g.fillStyle="rgba(0,0,0,.6)";g.fillRect(0,0,256,48);g.fillStyle="#ffeb3b";g.font="bold 24px system-ui";g.textAlign="center";g.fillText(txt,128,32);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));s.renderOrder=5;return s}
+for(const k of ORDER){const o=OBJ[k];if(!o)continue;const s=label(B[k].e+" "+B[k].n.replace(/ \(.*\)/,""));s.position.copy(o.pos).add(new THREE.Vector3(0,o.r+1.2,0));s.userData.k=k;space.add(s);o.lab=s}
+// rocket
+function rocketModel(){const g=new THREE.Group(),w=new THREE.MeshLambertMaterial({color:"#f5f5f5"}),r=new THREE.MeshLambertMaterial({color:"#e53935"});
+ const body=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,3,12),w);g.add(body);const nose=new THREE.Mesh(new THREE.ConeGeometry(.5,1.2,12),r);nose.position.y=2.1;g.add(nose);
+ for(let i=0;i<4;i++){const f=new THREE.Mesh(new THREE.BoxGeometry(.08,1,.7),r);const a=i*Math.PI/2;f.position.set(Math.cos(a)*.55,-1.1,Math.sin(a)*.55);f.rotation.y=-a;g.add(f)}
+ const win=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.1,12),new THREE.MeshLambertMaterial({color:"#4fc3f7",emissive:"#0d47a1"}));win.rotation.x=Math.PI/2;win.position.set(0,.8,.48);g.add(win);
+ const fl=new THREE.Mesh(new THREE.ConeGeometry(.4,1.6,10),new THREE.MeshBasicMaterial({color:"#ffab00",transparent:true,opacity:.85}));fl.rotation.x=Math.PI;fl.position.y=-2.3;g.add(fl);g.userData.flame=fl;
+ const inner=new THREE.Group();inner.add(g);return{outer:inner,g,flame:fl}}
+const RK=rocketModel();RK.g.rotation.x=Math.PI/2;space.add(RK.outer);// outer points along -Z after rotation? (nose along +Y rotated to -Z)
+RK.g.rotation.x=-Math.PI/2;
+const ship={pos:new THREE.Vector3(),q:new THREE.Quaternion(),v:0};
+function shipFwd(){return new THREE.Vector3(0,0,-1).applyQuaternion(ship.q)}
+// ---------- input: joystick ----------
+const joy={x:0,y:0,id:null};{const J=$("joy"),K=$("knob");const set=(e)=>{const r=J.getBoundingClientRect();let dx=e.clientX-r.left-70,dy=e.clientY-r.top-70;const L=Math.hypot(dx,dy),M=50;if(L>M){dx*=M/L;dy*=M/L}joy.x=dx/M;joy.y=dy/M;K.style.left=45+dx+"px";K.style.top=45+dy+"px"};
+ J.addEventListener("pointerdown",e=>{joy.id=e.pointerId;J.setPointerCapture(e.pointerId);set(e)});J.addEventListener("pointermove",e=>{if(e.pointerId===joy.id)set(e)});
+ const end=e=>{if(e.pointerId!==joy.id)return;joy.id=null;joy.x=joy.y=0;K.style.left=K.style.top="45px"};J.addEventListener("pointerup",end);J.addEventListener("pointercancel",end)}
+const keys={};addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=1;if(e.key===" ")jumpPress()});addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=0;if(e.key===" ")boost=false});
+let boost=false;{const b=$("bJump");b.addEventListener("pointerdown",e=>{e.preventDefault();jumpPress()});["pointerup","pointercancel","pointerleave"].forEach(t=>b.addEventListener(t,()=>{boost=false}))}
+function jumpPress(){if(mode==="space")boost=true;else if(mode==="surface")doJump()}
+let look={yaw:0,pitch:.25,id:null,lx:0,ly:0};
+ren.domElement.addEventListener("pointerdown",e=>{look.id=e.pointerId;look.lx=e.clientX;look.ly=e.clientY});
+ren.domElement.addEventListener("pointermove",e=>{if(e.pointerId!==look.id)return;look.yaw-=(e.clientX-look.lx)*.008;look.pitch=Math.max(-.2,Math.min(1.2,look.pitch+(e.clientY-look.ly)*.006));look.lx=e.clientX;look.ly=e.clientY});
+ren.domElement.addEventListener("pointerup",()=>look.id=null);
+// ---------- modes ----------
+let mode="launch",cur="earth",travelling=null;
+function ui(m){mode=m;$("joy").classList.toggle("hidden",m==="launch");$("act").classList.toggle("hidden",m==="launch");$("bJump").textContent=m==="space"?"🔥 Boost":(surf.float?"⬆️ Swim up":"⬆️ Jump");$("bBack").classList.toggle("hidden",m!=="surface");$("meter").classList.toggle("hidden",m!=="surface");if(m!=="space")$("near").classList.add("hidden");$("top").classList.toggle("hidden",m==="launch")}
+// ---------- LAUNCH ----------
+const L={scene:new THREE.Scene(),t:-1,alt:0};
+{const s=L.scene;s.background=new THREE.Color("#87ceeb");s.add(new THREE.HemisphereLight("#fff","#4caf50",1.1));const dl=new THREE.DirectionalLight("#fff",1);dl.position.set(50,80,30);s.add(dl);
+ const R=1600;const e=new THREE.Mesh(new THREE.SphereGeometry(R,64,48),new THREE.MeshLambertMaterial({map:earthTex()}));e.position.y=-R;e.rotation.z=.3;s.add(e);L.earth=e;
+ const grass=new THREE.Mesh(new THREE.CircleGeometry(120,40),new THREE.MeshLambertMaterial({color:"#5fa83a"}));grass.rotation.x=-Math.PI/2;grass.position.y=.02;s.add(grass);
+ const rw=new THREE.Mesh(new THREE.PlaneGeometry(10,90),new THREE.MeshLambertMaterial({color:"#555"}));rw.rotation.x=-Math.PI/2;rw.position.set(-14,.05,0);s.add(rw);
+ const pad=new THREE.Mesh(new THREE.CylinderGeometry(3,3.4,.6,16),new THREE.MeshLambertMaterial({color:"#9e9e9e"}));pad.position.y=.3;s.add(pad);
+ const tw=new THREE.Mesh(new THREE.BoxGeometry(.8,9,.8),new THREE.MeshLambertMaterial({color:"#e65100"}));tw.position.set(2.6,4.5,0);s.add(tw);
+ const sign=label("🚀 Lincoln Airport Launch Pad");sign.scale.set(10,1.9,1);sign.position.set(0,9,-6);s.add(sign);
+ const st=starfield(800,1400);st.material.transparent=true;st.material.opacity=0;s.add(st);L.stars=st;
+ const cl=new THREE.MeshLambertMaterial({color:"#fff",transparent:true,opacity:.9});const r=rnd(4);L.clouds=[];for(let i=0;i<30;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(8+r()*10,1.5,5+r()*6),cl);c.position.set((r()-.5)*160,18+r()*12,(r()-.5)*160);s.add(c)}
+ L.rk=rocketModel();L.rk.outer.position.y=2.1;s.add(L.rk.outer);L.rk.flame.visible=false}
+const LAYERS=[[0,"🌦️ Troposphere (0 to about 7 miles up): this is where clouds and weather happen."],[8,"✈️ Stratosphere (to about 31 miles): jets fly near the bottom, and the ozone layer blocks harmful sunlight."],[32,"☄️ Mesosphere (to about 53 miles): shooting stars (meteors) burn up here."],[62,"🚀 About 62 miles up: many scientists say space starts here!"],[70,"🌌 Thermosphere (to about 400 miles): the Space Station orbits here, and the northern lights glow here."],[400,"🌍 Exosphere: the air fades away into space. Look, Earth's curve!"]];
+let lastLayer=-1;
+function startLaunch(){mode="launch";ui("launch");L.t=0;L.alt=0;lastLayer=-1;$("skip").classList.remove("hidden");$("alt").classList.remove("hidden");$("count").classList.remove("hidden");if(window.Music)Music.play("space")}
+function endLaunch(){$("skip").classList.add("hidden");$("alt").classList.add("hidden");$("count").classList.add("hidden");$("layer").classList.add("hidden");L.t=-1;
+ ship.pos.copy(OBJ.earth.pos).add(new THREE.Vector3(0,1.5,9));ship.q.setFromAxisAngle(new THREE.Vector3(0,1,0),0);ship.v=0;cur="earth";ui("space");stamp("launch");
+ info("🚀 You made it to space! Steer with the stick, hold 🔥 Boost to fly, or tap 🧭 Travel to.");setTimeout(()=>info(""),6000)}
+$("skip").onclick=endLaunch;
+function stepLaunch(dt){L.t+=dt;const t=L.t,c=$("count");
+ if(t<5){const n=5-Math.floor(t);c.textContent=n;if(Math.floor(t-dt)!==Math.floor(t)||t===dt)beep(440+n*40,.12);L.rk.flame.visible=t>4}
+ else{if(c.textContent!=="🔥"){c.textContent="🔥";beep(880,.3);setTimeout(()=>c.classList.add("hidden"),900)}
+  const tt=t-5;L.alt=Math.min(900,3*tt*tt);L.rk.outer.position.y=2.1+L.alt;L.rk.flame.visible=true;L.rk.flame.scale.y=1+Math.random()*.4}
+ const miles=Math.round(L.alt*.5);$("alt").innerHTML="Altitude<br><b style='color:#ffeb3b'>"+miles+" mi</b>";
+ let li=-1;for(let i=0;i<LAYERS.length;i++)if(miles>=LAYERS[i][0]&&t>=5)li=i;if(li!==lastLayer&&li>=0){lastLayer=li;const e=$("layer");e.textContent=LAYERS[li][1];e.classList.remove("hidden")}
+ const k=Math.min(1,L.alt/140);L.scene.background.setRGB(.53*(1-k),.81*(1-k),.92*(1-k)+.03*k);L.stars.material.opacity=k;
+ const y=L.rk.outer.position.y,d=10+L.alt*1.3;cam.position.set(d*.55,y+3+L.alt*.15,d);cam.lookAt(0,y-L.alt*.25,0);cam.far=6000;cam.updateProjectionMatrix();
+ if(t>5&&L.alt>=900&&t>27)endLaunch()}
+// ---------- SPACE flight ----------
+let nearK=null;
+function stepSpace(dt){if(travelling){stepTravel(dt);return}
+ const tx=joy.x+(keys.arrowright||keys.d?1:0)-(keys.arrowleft||keys.a?1:0),ty=joy.y+(keys.arrowdown||keys.s?1:0)-(keys.arrowup||keys.w?1:0);
+ const qy=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),-tx*1.6*dt),qx=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-ty*1.3*dt);
+ ship.q.premultiply(qy).multiply(qx).normalize();
+ const b=boost||keys.shift;ship.v+=(b?18:-6)*dt;ship.v=Math.max(b?0:1.5,Math.min(45,ship.v));if(!b&&ship.v<1.5)ship.v=1.5;
+ ship.pos.addScaledVector(shipFwd(),ship.v*dt);if(ship.pos.length()>420)ship.pos.setLength(420);
+ for(const k in OBJ){const o=OBJ[k];if(k==="belt")continue;const d=ship.pos.distanceTo(o.pos),m=o.r+1.2;if(d<m)ship.pos.copy(o.pos).add(ship.pos.clone().sub(o.pos).setLength(m))}
+ let best=null,bd=1e9;for(const k of ORDER){const o=OBJ[k];const d=ship.pos.distanceTo(o.pos)-o.r;if(d<Math.max(6,o.r*1.6)&&d<bd){bd=d;best=k}}
+ if(best!==nearK){nearK=best;const n=$("near");if(best){n.textContent="ℹ️ Visit "+B[best].n.replace(/ \(.*\)/,"");n.classList.remove("hidden")}else n.classList.add("hidden")}
+ RK.flame.scale.y=b?1.6+Math.random()*.5:.6;RK.flame.visible=true;chase(dt)}
+$("near").onclick=()=>{if(nearK)arrive(nearK)};
+function placeShip(){RK.outer.position.copy(ship.pos);RK.outer.quaternion.copy(ship.q)}
+let camInit=false;function chase(dt){placeShip();const f=shipFwd(),up=new THREE.Vector3(0,1,0).applyQuaternion(ship.q);const want=ship.pos.clone().addScaledVector(f,-13).addScaledVector(up,3.6);if(!camInit){cam.position.copy(want);camInit=true}else cam.position.lerp(want,Math.min(1,dt*4));cam.up.copy(up);cam.lookAt(ship.pos.clone().addScaledVector(f,6));sky.position.copy(cam.position)}
+function standoff(k){const o=OBJ[k];const dir=o.pos.clone().setY(0);if(dir.lengthSq()<1)dir.set(0,0,1);dir.normalize();if(k==="sun")return o.pos.clone().add(new THREE.Vector3(0,6,30));return o.pos.clone().addScaledVector(dir,o.r*2.6+5).add(new THREE.Vector3(0,o.r*.6+1.5,0))}
+function travelTo(k){if(!B[k])return;closeOv("travel");$("card").classList.add("hidden");if(mode==="surface")leaveSurface(true);if(mode==="launch")endLaunch();
+ const to=standoff(k),from=ship.pos.clone();travelling={k,from,to,t:0,T:Math.min(4,1.6+from.distanceTo(to)/120),q0:ship.q.clone()};beep(330,.2);setTimeout(()=>beep(660,.3),150);info("🚀 Zooming to "+B[k].n+"…")}
+function stepTravel(dt){const tv=travelling;tv.t+=dt;const u=Math.min(1,tv.t/tv.T),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+ ship.pos.lerpVectors(tv.from,tv.to,e);ship.pos.y+=Math.sin(u*Math.PI)*25;
+ const look=new THREE.Matrix4().lookAt(ship.pos,u<.7?tv.to:OBJ[tv.k].pos,new THREE.Vector3(0,1,0));const qt=new THREE.Quaternion().setFromRotationMatrix(look);ship.q.slerp(qt,Math.min(1,dt*5));
+ cam.fov=60+Math.sin(u*Math.PI)*25;cam.updateProjectionMatrix();RK.flame.scale.y=2+Math.random();sky.scale.setScalar(1);chase(dt*2);
+ if(u>=1){travelling=null;cam.fov=60;cam.updateProjectionMatrix();ship.v=0;arrive(tv.k)}}
+function distLine(b){if(b.sun)return "📏 From the Sun: "+b.sun+" · ☀️ Sunlight takes about "+b.ls+" to get here.";if(b.earth)return "📏 "+b.earth+" · 💡 Light takes "+b.le+" to get here from Earth.";return "📏 "+b.dist+" "+b.light}
+function arrive(k){cur=k;info("");const b=B[k];stamp(k);
+ const land={land:"🛬 Land & walk",float:"☁️ Float at the cloud tops",dock:"🧑‍🚀 Spacewalk at the station",home:"🏠 Land at home (Lincoln)",none:null}[b.land];
+ let h=`<h2>${b.e} ${b.n}</h2><div>${b.fact}</div><div class="d">${distLine(b)}</div><div class="d">🏋️ ${gravLine(k)}</div><div class="bt">`;
+ if(land)h+=`<button id="cLand" style="background:#76ff03">${land}</button>`;if(b.moon2)h+=`<button id="cMoon">🧊 Visit ${B[b.moon2].n.replace(/ \(.*\)/,"")}</button>`;
+ h+=`<button id="cLearn" style="background:#4fc3f7">📖 Learn more</button><button id="cX">✖ Keep flying</button></div>`;
+ const c=$("card");c.innerHTML=h;c.classList.remove("hidden");
+ if($("cLand"))$("cLand").onclick=()=>{c.classList.add("hidden");if(b.land==="home")goHome();else enterSurface(k)};
+ if($("cMoon"))$("cMoon").onclick=()=>travelTo(b.moon2);$("cLearn").onclick=()=>openLearn(k);$("cX").onclick=()=>c.classList.add("hidden")}
+function gravLine(k){const b=B[k];if(k==="sun")return "Gravity at the Sun's surface is about 28× Earth's. Way too hot to visit!";if(k==="belt")return "Asteroids are so small their gravity is super weak.";if(k==="bh")return "Its gravity is so strong that close up, nothing can escape. We're watching from a safe distance!";if(k==="iss")return "Gravity here is still about 90% as strong as on the ground, but the station is falling around Earth, so everyone floats!";
+ const w=Math.round(70*b.g);return `Gravity: ${b.g}× Earth's. A 70 lb kid would weigh about ${w} lb here.`}
+// ---------- SURFACE ----------
+const surf={scene:new THREE.Scene(),k:null,g:1,pos:new THREE.Vector3(),vy:0,on:true,float:false,maxH:0,jumpH:0,best:0,props:[]};
+{const s=surf.scene;surf.hemi=new THREE.HemisphereLight("#ffffff","#555555",.9);s.add(surf.hemi);surf.sun=new THREE.DirectionalLight("#ffffff",1.2);surf.sun.position.set(40,60,20);s.add(surf.sun);
+ const geo=new THREE.PlaneGeometry(300,300,60,60);geo.rotateX(-Math.PI/2);const col=new Float32Array(geo.attributes.position.count*3);geo.setAttribute("color",new THREE.BufferAttribute(col,3));
+ surf.ground=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true}));s.add(surf.ground);
+ surf.stars=starfield(900,600);s.add(surf.stars);
+ surf.bigBody=new THREE.Mesh(new THREE.SphereGeometry(1,32,20),new THREE.MeshBasicMaterial());s.add(surf.bigBody);
+ surf.clouds=new THREE.Group();s.add(surf.clouds);
+ // astronaut: the player's own avatar (avatar.js), always in a space suit
+ {const sp=Object.assign(loadAvatar(),{top:"astronaut",bottom:"space",shoes:"space",hat:"space",cape:false,local:null});const av=buildAvatar(s,sp);surf.astro={g:av.g,legs:av.legs||[],arms:av.arms||[]};var a=av.g}
+ surf.balloon=new THREE.Mesh(new THREE.SphereGeometry(.5,12,8),new THREE.MeshLambertMaterial({color:"#ff4081"}));surf.balloon.position.set(.4,3,0);a.add(surf.balloon);
+ surf.iss=issModel(4);s.add(surf.iss)}
+const SURF={
+ mercury:{ground:["#8a8a8a","#5a5a5a"],sky:"#000",stars:1,big:["sun",22,"#fff3c4",[60,40,-200]]},
+ venus:{ground:["#b8873e","#8a5a22"],sky:"#d9a64e",fog:["#d9a64e",15,90],note:"In real life Venus is way too hot and its air would crush you. Your pretend super-suit keeps you safe!"},
+ moon:{ground:["#9e9e9e","#6d6d6d"],sky:"#000",stars:1,big:["earth",14,null,[-50,50,-160]]},
+ mars:{ground:["#b5501f","#7d3214"],sky:"#d8a477",fog:["#d8a477",40,180]},
+ europa:{ground:["#e9e2d4","#b98d6a"],sky:"#000",stars:1,big:["jupiter",40,null,[30,60,-220]]},
+ titan:{ground:["#a8742c","#6d4a1a"],sky:"#c9852f",fog:["#c9852f",12,70],note:"Titan's thick orange haze makes it hard to see far."},
+ pluto:{ground:["#d8c4aa","#8d6a4a"],sky:"#000",stars:1,big:["sun",1.5,"#ffffff",[40,40,-200]]},
+ jupiter:{float:1,sky:"#d7b089",cl:["#f1dcc0","#b98a5e","#e8c9a0"]},saturn:{float:1,sky:"#e7d3a0",cl:["#f3e6c2","#d6bd84"],big:["rings",0]},
+ uranus:{float:1,sky:"#a6e6ea",cl:["#d4f6f8","#8fd8de"]},neptune:{float:1,sky:"#3f6fd8",cl:["#7aa0f0","#2c55c0"]},iss:{float:1,station:1,sky:"#000",stars:1,big:["earth",120,null,[0,-150,0]]}};
+const JUMP_V=3.13;// m/s: about a 0.5 m (1.6 ft) jump on Earth
+function enterSurface(k){const C=SURF[k];if(!C)return;surf.k=k;surf.g=9.8*B[k].g;surf.float=!!C.float;surf.pos.set(0,surf.float?0:0,0);surf.vy=0;surf.on=!surf.float;surf.jumpH=0;surf.best=0;look.yaw=0;look.pitch=.25;
+ const s=surf.scene;s.background=new THREE.Color(C.sky);s.fog=C.fog?new THREE.Fog(...C.fog):null;surf.stars.visible=!!C.stars;
+ surf.ground.visible=!surf.float;if(!surf.float){const r=rnd(k.length*97),geo=surf.ground.geometry,p=geo.attributes.position,c=geo.attributes.color,a=new THREE.Color(C.ground[0]),b=new THREE.Color(C.ground[1]),t=new THREE.Color();
+  const craters=[];for(let i=0;i<25;i++)craters.push([(r()-.5)*260,(r()-.5)*260,3+r()*12]);
+  for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);let h=0;if(Math.hypot(x,z)>8)h=(Math.sin(x*.07+r()*.2)*Math.cos(z*.06))*.8;let m=r()*.5;for(const[cx,cz,cr]of craters){const d=Math.hypot(x-cx,z-cz);if(d<cr){h-=(1-d/cr)*1.2;m=.9}else if(d<cr*1.3){h+=.3;m=.1}}p.setY(i,Math.hypot(x,z)<8?0:h);t.copy(a).lerp(b,m);c.setXYZ(i,t.r,t.g,t.b)}p.needsUpdate=c.needsUpdate=true;geo.computeVertexNormals()}
+ surf.clouds.clear();if(C.cl){const r=rnd(3);for(let i=0;i<70;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(3+r()*6,8,6),new THREE.MeshLambertMaterial({color:C.cl[i%C.cl.length],transparent:true,opacity:.75}));m.position.set((r()-.5)*160,-6-r()*14+(r()<.3?18:0),(r()-.5)*160);m.scale.y=.4;surf.clouds.add(m)}}
+ surf.iss.visible=!!C.station;surf.iss.position.set(0,-1,-14);surf.balloon.visible=surf.float&&!C.station;
+ const bb=surf.bigBody;bb.visible=!!(C.big&&C.big[0]!=="rings");if(bb.visible){const[n,sz,col,ps]=C.big;bb.material=new THREE.MeshBasicMaterial(col?{color:col}:{map:TEX[n]()});bb.scale.setScalar(sz);bb.position.set(...ps)}
+ if(k==="saturn"&&!surf.ringSky){const rg=new THREE.Mesh(new THREE.RingGeometry(200,330,64),new THREE.MeshBasicMaterial({color:"#f3e2b0",side:THREE.DoubleSide,transparent:true,opacity:.7,fog:false}));rg.rotation.x=-Math.PI/2+.25;rg.position.y=60;surf.scene.add(rg);surf.ringSky=rg}if(surf.ringSky)surf.ringSky.visible=k==="saturn";
+ surf.hemi.groundColor.set(surf.float?C.sky:C.ground[1]);
+ ui("surface");$("card").classList.add("hidden");updMeter();
+ const msg=surf.float?(C.station?"🧑‍🚀 Spacewalk time! You're floating because you and the station are falling around Earth together.":"☁️ No solid ground here, so you're a cloud floater! Use ⬆️ to swim up."):"🧑‍🚀 You landed on "+B[k].n.replace(/ \(.*\)/,"")+"! Tap ⬆️ Jump and see how high you go.";
+ info(msg+(C.note?"<br>"+C.note:""));setTimeout(()=>info(""),7000);camSurfInit=false}
+function leaveSurface(silent){surf.k=null;ui("space");camInit=false;if(!silent)arrive(cur)}
+$("bBack").onclick=()=>leaveSurface();
+function doJump(){if(surf.float){surf.vy=Math.min(surf.vy+1.5,3);return}if(!surf.on)return;surf.vy=JUMP_V;surf.on=false;surf.maxH=0;beep(600,.06)}
+function updMeter(){const k=surf.k;if(!k)return;const b=B[k],g=b.g,w=Math.round(70*g*10)/10;let h;
+ if(surf.float&&k==="iss")h=`<b>⚖️ Scale:</b> A 70 lb kid floats here: it reads 0 lb!<br>Gravity is still about 90% as strong, but you're falling around Earth with the station.`;
+ else if(surf.float)h=`<b>☁️ Cloud floater:</b> ${b.n} has no solid surface.<br><b>⚖️ Scale:</b> A 70 lb kid would weigh about <b>${Math.round(70*g)} lb</b> (${g}× Earth).<br>${g>1?"Gravity here pulls harder than on Earth!":"Gravity here is a little weaker than Earth's, even though the planet is huge!"}`;
+ else{const earthFt=JUMP_V*JUMP_V/(2*9.8)*3.281,ft=JUMP_V*JUMP_V/(2*surf.g)*3.281,x=1/g;
+  const last=surf.jumpH?`Last jump: <b>${(surf.jumpH*3.281).toFixed(1)} ft</b><br>`:"Tap ⬆️ Jump!<br>";
+  h=`<b>🦘 Jump meter</b> (gravity ${g}× Earth)<br>${last}A jump that goes ${earthFt.toFixed(1)} ft on Earth goes <b>${ft.toFixed(1)} ft</b> here: <b>${x>=1.5?Math.round(x)+"× higher":x.toFixed(1)+"× as high"}!</b><br><b>⚖️ Scale:</b> A 70 lb kid weighs <b>${w%1?w.toFixed(1):w} lb</b> here.`}
+ $("meter").innerHTML=h}
+let camSurfInit=false,walkT=0;
+function stepSurface(dt){const C=SURF[surf.k],A=surf.astro;
+ const jx=joy.x+(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),jz=joy.y+(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
+ const sp=surf.float?3:3.2,cy=Math.cos(look.yaw),sy=Math.sin(look.yaw);const mx=(jx*cy+jz*sy),mz=(-jx*sy+jz*cy);
+ const mv=Math.hypot(mx,mz);if(mv>.05){surf.pos.x+=mx*sp*dt;surf.pos.z+=mz*sp*dt;A.g.rotation.y=Math.atan2(mx,mz)}
+ surf.pos.x=Math.max(-140,Math.min(140,surf.pos.x));surf.pos.z=Math.max(-140,Math.min(140,surf.pos.z));
+ if(surf.float){surf.vy-=surf.vy*1.2*dt;surf.pos.y+=surf.vy*dt;surf.pos.y=Math.max(-8,Math.min(12,surf.pos.y));A.g.position.set(surf.pos.x,surf.pos.y+Math.sin(performance.now()/700)*.15,surf.pos.z);A.g.rotation.z=Math.sin(performance.now()/1100)*.15}
+ else{if(!surf.on){surf.vy-=surf.g*dt;surf.pos.y+=surf.vy*dt;surf.maxH=Math.max(surf.maxH,surf.pos.y);if(surf.pos.y<=0){surf.pos.y=0;surf.vy=0;surf.on=true;surf.jumpH=surf.maxH;surf.best=Math.max(surf.best,surf.maxH);updMeter();beep(300,.05)}}
+  A.g.position.set(surf.pos.x,surf.pos.y,surf.pos.z);A.g.rotation.z=0}
+ walkT+=dt*(mv>.05&&(surf.on||surf.float)?8:0);const sw=Math.sin(walkT)*.6*(mv>.05?1:0);if(A.legs.length>1){A.legs[0].rotation.x=sw;A.legs[1].rotation.x=-sw}if(A.arms.length>1){A.arms[0].rotation.x=-sw;A.arms[1].rotation.x=sw;const z=(surf.float||!surf.on)?.5:0;A.arms[0].rotation.z=z;A.arms[1].rotation.z=-z}
+ const d=7,tgt=new THREE.Vector3(surf.pos.x,surf.pos.y+1.4,surf.pos.z);const want=tgt.clone().add(new THREE.Vector3(Math.sin(look.yaw)*Math.cos(look.pitch)*d,Math.sin(look.pitch)*d,Math.cos(look.yaw)*Math.cos(look.pitch)*d));
+ if(!camSurfInit){cam.position.copy(want);camSurfInit=true}else cam.position.lerp(want,Math.min(1,dt*6));if(!surf.float)cam.position.y=Math.max(cam.position.y,.5);cam.up.set(0,1,0);cam.lookAt(tgt);surf.stars.position.copy(cam.position);
+ if(C.station)surf.iss.rotation.y+=dt*.05}
+// ---------- overlays ----------
+function openOv(id){$(id).classList.remove("hidden")}function closeOv(id){$(id).classList.add("hidden");if(id==="learn"&&window.speechSynthesis)speechSynthesis.cancel();if(id==="lab")labStop()}
+document.querySelectorAll(".x").forEach(b=>b.onclick=()=>closeOv(b.dataset.c));
+function renderTravel(){const p=loadPP();$("travelBody").innerHTML=ORDER.map(k=>`<button class="tcard" data-k="${k}"><span class="te">${B[k].e}</span>${B[k].n.replace(/ \(.*\)/,"")}<small>${B[k].sun?B[k].sun.replace(/ \(.*\)/,"")+" from Sun":(B[k].earth||"").split(" (")[0]}</small>${p.stamps[k]?"<i>✅</i>":""}</button>`).join("");
+ document.querySelectorAll("#travelBody .tcard").forEach(b=>b.onclick=()=>travelTo(b.dataset.k))}
+$("bTravel").onclick=()=>{renderTravel();openOv("travel")};
+function openLearn(k){const b=B[k],p=loadPP();const er=k==="sun"?null:({mercury:.38,venus:.95,earth:1,moon:.27,mars:.53,jupiter:11.2,europa:.25,saturn:9.4,titan:.4,uranus:4,neptune:3.9,pluto:.19})[k];
+ let size="";if(er){const E=30,px=Math.min(240,Math.max(5,E*er));size=`<div class="sizecmp"><span style="width:${E}px;height:${E}px;background:#1e88e5"></span><span style="width:${px}px;height:${px}px;background:#ffb74d"></span></div><small>Blue = Earth · Orange = ${b.n.replace(/ \(.*\)/,"")}</small>`}
+ let h=`<h2>${b.e} ${b.n}</h2><p><b>${b.fact}</b></p><p style="color:#1565c0">${distLine(b)}</p>${size}<div class="stats"><div><b>📏 SIZE</b>${b.size}</div><div><b>🌅 DAY</b>${b.day}</div><div><b>🗓️ YEAR</b>${b.year}</div><div><b>🌡️ TEMPERATURE</b>${b.temp}</div><div><b>🌙 MOONS</b>${b.moons}</div><div><b>🏋️ GRAVITY</b>${gravLine(k)}</div></div>
+ <p><b>👀 Why does it look like that?</b> ${b.why}</p><p><b>✨ 3 cool facts</b></p><ul>${b.cool.map(c=>`<li>${c}</li>`).join("")}</ul><p><b>❓ Quiz for stars!</b></p>`;
+ h+=b.quiz.map((q,i)=>`<div class="qz" data-i="${i}"><div>${q[0]}</div>${q[1].map((a,j)=>`<button data-j="${j}">${a}</button>`).join("")}</div>`).join("");
+ h+=`<p style="font-size:12px;color:#666">Facts from NASA. Moon counts change as scientists discover more, so these are 2025 counts.</p>`;
+ $("learnBody").innerHTML=h;let right=0,ans=0;
+ document.querySelectorAll("#learnBody .qz").forEach(d=>d.querySelectorAll("button").forEach(bt=>bt.onclick=()=>{if(d.dataset.done)return;d.dataset.done=1;const q=b.quiz[+d.dataset.i],ok=+bt.dataset.j===q[2];bt.classList.add(ok?"right":"wrong");if(!ok)d.querySelectorAll("button")[q[2]].classList.add("right");beep(ok?988:300,.12);if(ok)right++;ans++;
+  if(ans===b.quiz.length){const pp=loadPP();const prev=pp.quiz[k]||0;if(right>prev){addStars(right-prev);pp.quiz[k]=right;savePP(pp);toast("⭐ Quiz: "+right+"/"+b.quiz.length+"! +"+(right-prev)+" star"+(right-prev>1?"s":""))}else toast("Quiz: "+right+"/"+b.quiz.length)}}));
+ $("learnSpeak").onclick=()=>{if(!window.speechSynthesis)return toast("🔇 Read-aloud isn't available here");speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(b.n+". "+b.fact+" "+b.why+" "+b.cool.join(" "));u.rate=.95;speechSynthesis.speak(u)};
+ openOv("learn")}
+function openPassport(){const p=loadPP();const all=ORDER.map(k=>[k,B[k].e,B[k].n.replace(/ \(.*\)/,"")]).concat(LABS.map(l=>[l[0],l[1],l[2]]));const got=all.filter(a=>p.stamps[a[0]]).length;
+ $("passBody").innerHTML=`<p>Stamps: <b>${got} / ${all.length}</b> · ⭐ ${stars()}</p><div class="tgrid">`+all.map(([k,e,n])=>`<button class="tcard ${p.stamps[k]?"st":"no"}" data-k="${k}"><span class="te">${p.stamps[k]?e:"❔"}</span>${n}<small>${p.stamps[k]?(B[k]&&p.quiz[k]?"Quiz ⭐".repeat(1)+" "+p.quiz[k]+"/2":"Stamped!"):"Not yet"}</small></button>`).join("")+"</div>";
+ document.querySelectorAll("#passBody .tcard.st").forEach(b=>b.onclick=()=>{if(B[b.dataset.k]){closeOv("pass");openLearn(b.dataset.k)}});openOv("pass")}
+$("bPass").onclick=openPassport;
+function goHome(){location.href="buildworld.html#rocket"}
+$("bHome").onclick=goHome;
+// ---------- GRAVITY LAB ----------
+const cv=$("labCv"),g2=cv.getContext("2d");let lab=null,labRAF=0;
+const TABS=[["feather","🪶 Feather & Hammer"],["orbit","🌍 Orbit Lab"],["well","🕳️ Gravity Wells"],["tides","🌊 Tides"]];
+$("labTabs").innerHTML=TABS.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join("");
+document.querySelectorAll("#labTabs button").forEach(b=>b.onclick=()=>labOpen(b.dataset.t));
+$("bLab").onclick=()=>{openOv("lab");labOpen("orbit")};
+function labStop(){cancelAnimationFrame(labRAF);lab=null}
+function labOpen(t){labStop();document.querySelectorAll("#labTabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));lab={t};const ctl=$("labCtl"),txt=$("labTxt");
+ if(t==="feather"){ctl.innerHTML=`<button id="lDrop" style="background:#76ff03">🖐️ Drop them!</button>`;txt.innerHTML="In 1971, Apollo 15 astronaut David Scott dropped a hammer and a falcon feather on the Moon. With no air to slow the feather, they landed at the same time! On Earth, air slows the feather down.";
+  lab.f={t:0,on:false};$("lDrop").onclick=()=>{lab.f={t:0,on:true};stamp("lab_feather")}}
+ if(t==="orbit"){ctl.innerHTML=`Speed: <input id="lSp" type="range" min="4000" max="30000" step="250" value="17250"> <b id="lSpv"></b> <button id="lGo" style="background:#76ff03">💥 Launch!</button><button data-v="10000">Slow</button><button data-v="17250">Orbit</button><button data-v="26000">Escape</button><button id="lClr">🧹 Clear</button>`;
+  lab.o={balls:[],msg:""};const sp=$("lSp");const show=()=>$("lSpv").textContent=(+sp.value).toLocaleString()+" mph";sp.oninput=show;show();
+  ctl.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{sp.value=b.dataset.v;show();orbitLaunch(+sp.value)});$("lGo").onclick=()=>orbitLaunch(+sp.value);$("lClr").onclick=()=>{lab.o.balls=[]};
+  txt.innerHTML="Launch a ball sideways from Space Station height (250 miles up). Too slow: gravity pulls it back down. About 17,000 mph: it keeps falling but keeps missing Earth. That's an orbit! Faster than about 24,000 mph: it escapes Earth's pull!"}
+ if(t==="well"){ctl.innerHTML=["moon","earth","jupiter","sun"].map(k=>`<button data-w="${k}">${B[k].e} ${B[k].n.replace("The ","")}</button>`).join("")+`<button id="lMarble" style="background:#76ff03">🔮 Roll a marble</button>`;lab.w={k:"earth",m:null,d:0};
+  ctl.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{lab.w.k=b.dataset.w;lab.w.m=null});$("lMarble").onclick=()=>{lab.w.m={x:-1.2,y:-.9,vx:.55,vy:.25,tr:[]};stamp("lab_well")};
+  txt.innerHTML="Scientists picture gravity like a heavy ball on a stretchy sheet. Heavier things make a deeper dip, so they pull harder. That's why things roll toward them, or circle around them in an orbit!"}
+ if(t==="tides"){ctl.innerHTML="";txt.innerHTML="🌊 The Moon's gravity tugs on Earth's oceans and makes two bulges of water. As Earth spins through the bulges, the ocean rises and falls about twice a day. Those are tides!";stamp("lab_tides")}
+ lab.t0=performance.now();const loop=()=>{if(!lab)return;labDraw();labRAF=requestAnimationFrame(loop)};loop()}
+// orbit sim in real units (km, s)
+const GM=398600,RE=6371,R0=RE+400;
+function orbitLaunch(mph){const v=mph*1.609344/3600;lab.o.balls.push({x:0,y:R0,vx:v,vy:0,tr:[[0,R0]],st:"fly",ang:0,col:`hsl(${(lab.o.balls.length*67)%360},90%,60%)`,mph});if(lab.o.balls.length>6)lab.o.balls.shift();beep(200,.15)}
+function orbitStep(b,dt){const r=Math.hypot(b.x,b.y),a=-GM/(r*r*r);b.vx+=a*b.x*dt;b.vy+=a*b.y*dt;b.x+=b.vx*dt;b.y+=b.vy*dt}
+function stepBall(b,steps=50){for(let i=0;i<steps&&b.st==="fly";i++){const a0=Math.atan2(b.x,b.y);orbitStep(b,4);if(i%5===0)b.tr.push([b.x,b.y]);const a1=Math.atan2(b.x,b.y);let da=a1-a0;if(da<-Math.PI)da+=2*Math.PI;if(da>Math.PI)da-=2*Math.PI;b.ang+=da;const r=Math.hypot(b.x,b.y);
+ if(r<=RE){b.st="crash";lab&&(lab.o.msg="💥 It fell back to Earth! Try faster.")}else if(Math.abs(b.ang)>=2*Math.PI){b.st="orbit";if(lab){lab.o.msg="🛰️ It's in ORBIT! It keeps falling around Earth but never hits the ground.";stamp("lab_orbit")}}
+ else if(r>RE*7){const v=Math.hypot(b.vx,b.vy);if(v*v/2-GM/r>0){b.st="escape";lab&&(lab.o.msg="🚀 It ESCAPED Earth's gravity and flew off into space!")}}}
+ if(b.tr.length>4000)b.tr.shift()}
+function labDraw(){const W=cv.width,H=cv.height,t=(performance.now()-lab.t0)/1000;g2.clearRect(0,0,W,H);g2.fillStyle="#05051a";g2.fillRect(0,0,W,H);g2.font="bold 18px system-ui";
+ if(lab.t==="feather"){const f=lab.f;if(f.on)f.t+=1/60;const top=90,ground=380,hpx=ground-top;// both from 1.6 m
+  const panel=(x0,title,g,air)=>{g2.fillStyle=air?"#87ceeb":"#000";g2.fillRect(x0,40,W/2-20,H-60);g2.fillStyle=air?"#5fa83a":"#9e9e9e";g2.fillRect(x0,ground,W/2-20,H-20-ground);g2.fillStyle=air?"#000":"#fff";g2.fillText(title,x0+12,66);
+   const yh=Math.min(1.6,.5*g*f.t*f.t);const vf=air?.6:null;const yf=air?Math.min(1.6,vf*Math.max(0,f.t-.05)):yh;
+   const py=y=>top+y/1.6*hpx;g2.font="44px system-ui";g2.fillText("🔨",x0+W/4-90,py(yh));g2.fillText("🪶",x0+W/4+30,py(yf));g2.font="bold 16px system-ui";
+   const th=Math.sqrt(2*1.6/g);g2.fillText(f.on&&yh>=1.6?`Hammer landed: ${th.toFixed(1)} s`:"",x0+12,H-30);if(f.on&&yf>=1.6)g2.fillText(`Feather landed: ${(air?1.6/vf+.05:th).toFixed(1)} s`,x0+12,H-52)};
+  panel(10,"🌍 Earth (with air)",9.8,true);panel(W/2+10,"🌙 Moon (no air)",1.62,false);
+  if(!f.on){g2.fillStyle="#ffeb3b";g2.fillText("Tap 🖐️ Drop them!",W/2-80,24)}}
+ if(lab.t==="orbit"){const o=lab.o,cx=W/2,cy=H/2+10,sc=150/RE;
+  g2.fillStyle="#1e5fb4";g2.beginPath();g2.arc(cx,cy,RE*sc,0,7);g2.fill();g2.fillStyle="#3f9b3a";g2.beginPath();g2.arc(cx-30,cy-40,40,0,7);g2.arc(cx+50,cy+30,35,0,7);g2.fill();
+  g2.fillStyle="#fff";g2.fillRect(cx-4,cy-R0*sc-4,8,8);g2.fillText("🚀 launch",cx+8,cy-R0*sc-6);
+  for(const b of o.balls){stepBall(b);g2.strokeStyle=b.col;g2.lineWidth=2;g2.beginPath();b.tr.forEach(([x,y],i)=>{const X=cx+x*sc,Y=cy-y*sc;i?g2.lineTo(X,Y):g2.moveTo(X,Y)});g2.stroke();g2.fillStyle=b.col;g2.beginPath();g2.arc(cx+b.x*sc,cy-b.y*sc,6,0,7);g2.fill()}
+  g2.fillStyle="#ffeb3b";g2.fillText(o.msg||"Pick a speed and launch!",14,26);g2.font="13px system-ui";g2.fillStyle="#aaa";g2.fillText("Real physics, sped up. Earth and the path are to scale.",14,H-12)}
+ if(lab.t==="well"){const w=lab.w,depth={moon:.25,earth:.5,jupiter:1,sun:1.6}[w.k];const P=(x,y)=>{const r=Math.hypot(x,y),z=-depth/Math.sqrt(r*r+.08)*.25;return[W/2+(x-y)*190,H/2-40+(x+y)*90-z*120]};
+  g2.strokeStyle="#4fc3f7";g2.lineWidth=1;for(let i=-10;i<=10;i++){g2.beginPath();for(let j=-10;j<=10;j++){const[a,b]=P(i/5,j/5);j>-10?g2.lineTo(a,b):g2.moveTo(a,b)}g2.stroke();g2.beginPath();for(let j=-10;j<=10;j++){const[a,b]=P(j/5,i/5);j>-10?g2.lineTo(a,b):g2.moveTo(a,b)}g2.stroke()}
+  const[c0,c1]=P(0,0);g2.font=`${30+depth*30}px system-ui`;g2.fillText(B[w.k].e,c0-20-depth*12,c1+10);
+  if(w.m){const m=w.m;for(let i=0;i<4;i++){const r=Math.hypot(m.x,m.y),a=-depth*.06/(r*r+.05);m.vx+=a*m.x/r*.016;m.vy+=a*m.y/r*.016;m.x+=m.vx*.016;m.y+=m.vy*.016;if(r<.12){m.x=m.y=0;m.vx=m.vy=0}}m.tr.push(P(m.x,m.y));if(m.tr.length>400)m.tr.shift();g2.strokeStyle="#ff4081";g2.beginPath();m.tr.forEach(([a,b],i)=>i?g2.lineTo(a,b):g2.moveTo(a,b));g2.stroke();const[a,b]=P(m.x,m.y);g2.fillStyle="#ff4081";g2.beginPath();g2.arc(a,b,8,0,7);g2.fill()}
+  g2.font="bold 18px system-ui";g2.fillStyle="#ffeb3b";g2.fillText(`${B[w.k].n}: ${w.k==="sun"?"deepest dip: the Sun is the heaviest!":w.k==="moon"?"small dip: the Moon is light":"bigger mass = deeper dip"}`,14,26);g2.font="13px system-ui";g2.fillStyle="#aaa";g2.fillText("Picture model (not to scale)",14,H-12)}
+ if(lab.t==="tides"){const cx=W/2-60,cy=H/2,a=t*.4;g2.save();g2.translate(cx,cy);g2.rotate(-a);g2.fillStyle="rgba(79,195,247,.7)";g2.beginPath();g2.ellipse(0,0,120,92,0,0,7);g2.fill();g2.restore();
+  g2.fillStyle="#1e5fb4";g2.beginPath();g2.arc(cx,cy,85,0,7);g2.fill();g2.fillStyle="#3f9b3a";g2.save();g2.translate(cx,cy);g2.rotate(t*1.2);g2.beginPath();g2.arc(30,10,25,0,7);g2.arc(-40,-30,20,0,7);g2.fill();g2.restore();
+  const mx=cx+Math.cos(-a)*300,my=cy+Math.sin(-a)*170;g2.fillStyle="#ccc";g2.beginPath();g2.arc(mx,my,22,0,7);g2.fill();g2.fillStyle="#ffeb3b";g2.fillText("🌙 Moon",mx-30,my-30);g2.fillText("Water bulges toward (and away from) the Moon",14,26);g2.font="13px system-ui";g2.fillStyle="#aaa";g2.fillText("Picture model (not to scale)",14,H-12)}}
+// ---------- main loop ----------
+const clock=new THREE.Clock();
+function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDelta());
+ if(mode==="launch"&&L.t>=0){stepLaunch(dt);ren.render(L.scene,cam);return}
+ for(const k in OBJ){const m=OBJ[k].mesh;if(m&&k!=="bh"&&k!=="belt"&&k!=="iss")m.rotation.y+=dt*.1}OBJ.bh.mesh.userData.disk.rotation.z+=dt*.6;OBJ.belt.mesh.rotation.y+=dt*.004;
+ if(mode==="surface"){stepSurface(dt);ren.render(surf.scene,cam)}else{stepSpace(dt);ren.render(space,cam)}}
+cam.far=3000;
+// test/debug hooks
+window.SP={B,OBJ,ORDER,travelTo,arrive,enterSurface,leaveSurface,doJump,loadPP,openLearn,openPassport,labOpen:t=>{openOv("lab");labOpen(t)},orbitLaunch,lab:()=>lab,mode:()=>mode,surf,ship,endLaunch,startLaunch,L,travelling:()=>travelling,stars,stepBall,mkBall:mph=>{const v=mph*1.609344/3600;return{x:0,y:R0,vx:v,vy:0,tr:[],st:"fly",ang:0}}};
+if(location.hash==="#nolaunch")endLaunch();else startLaunch();
+frame();
+</script>
+<script>
+/* Real Craft Adventures: tiny in-browser chiptune music (original tunes, no files) */
+(function(){
+const KEY="realcraft_music_v1";let on=localStorage.getItem(KEY)!=="off";
+let ctx=null,master=null,cur=null,want="home",timer=null,rate=1;const voices={};
+// note: semitones from A4 (0=A4); null=rest. Each step is an 8th note.
+const T={
+ build:{bpm:120,w:"square",m:[0,4,7,12,null,7,9,7, 5,9,12,null,9,7,5,4, 2,5,9,14,null,12,9,7, 4,7,12,11,12,null,null,null],b:[-24,null,-12,null,-17,null,-12,null, -19,null,-7,null,-17,null,-5,null, -22,null,-10,null,-17,null,-5,null, -20,null,-8,null,-24,null,null,null]},
+ home:{bpm:132,w:"square",m:[3,7,10,15,14,10,7,null, 5,8,12,17,15,12,8,null, 3,7,10,15,17,15,14,10, 12,10,8,7,5,null,3,null],b:[-21,-21,-14,-14,-16,-16,-9,-9, -19,-19,-12,-12,-14,-14,-7,-7, -21,-21,-14,-14,-16,-16,-9,-9, -16,-16,-14,-14,-21,-21,-21,null]},
+ workshop:{bpm:92,w:"triangle",m:[0,null,4,null,7,null,4,null, 2,null,5,null,9,null,5,null, 0,null,4,null,7,null,11,9, 7,null,5,null,4,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -24,null,null,null,-17,null,null,null, -19,null,null,null,-24,null,null,null]},
+ race:{bpm:160,w:"square",m:[7,7,12,7,14,12,7,5, 7,7,12,7,16,14,12,null, 5,5,9,5,12,9,5,4, 5,7,9,12,14,null,12,null],b:[-17,-5,-17,-5,-17,-5,-17,-5, -17,-5,-17,-5,-17,-5,-17,-5, -19,-7,-19,-7,-19,-7,-19,-7, -15,-3,-15,-3,-14,-2,-14,-2]},
+ mansion:{bpm:116,w:"square",m:[10,null,14,17,null,14,10,null, 12,null,15,19,null,15,12,null, 10,12,14,15,17,null,19,17, 15,14,12,null,10,null,null,null],b:[-14,null,-7,null,-14,null,-7,null, -12,null,-5,null,-12,null,-5,null, -14,null,-7,null,-11,null,-4,null, -16,null,-9,null,-14,null,null,null]},
+ spooky:{bpm:126,w:"triangle",m:[0,3,7,3,8,7,3,null, 0,3,7,3,6,5,3,null, 0,null,12,11,10,null,7,null, 8,7,5,3,2,null,0,null],b:[-24,null,-17,null,-24,null,-17,null, -20,null,-13,null,-22,null,-17,null, -24,null,-17,null,-21,null,-14,null, -19,null,-17,null,-24,null,null,null]},
+ sky:{bpm:104,w:"triangle",m:[7,null,12,14,16,null,14,12, 9,null,12,null,14,null,null,null, 5,null,9,12,14,null,12,9, 7,null,4,null,7,null,null,null],b:[-17,null,-10,null,-12,null,-5,null, -15,null,-8,null,-10,null,-3,null, -19,null,-12,null,-14,null,-7,null, -17,null,-10,null,-17,null,null,null]},
+ space:{bpm:84,w:"triangle",m:[0,7,12,16,19,16,12,7, 2,9,14,17,21,17,14,9, -3,4,9,12,16,12,9,4, -1,7,11,14,19,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -27,null,null,null,-20,null,null,null, -25,null,null,null,-17,null,null,null],bell:true},
+ xmas:{bpm:138,w:"square",m:[7,11,14,11,7,null,9,null, 7,11,14,16,14,null,null,null, 12,11,9,7,9,null,11,null, 7,9,11,9,7,null,null,null],b:[-17,-10,-17,-10,-15,-8,-15,-8, -17,-10,-17,-10,-12,-5,-12,-5, -12,-5,-12,-5,-15,-8,-15,-8, -17,-10,-17,-10,-17,null,null,null],bell:true}
+};
+const hz=n=>440*Math.pow(2,n/12);
+function init(){if(ctx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ctx=new AC();master=ctx.createGain();master.gain.value=.25*.35;master.connect(ctx.destination);timer=setInterval(tick,100)}
+function voice(name){if(!voices[name]){const g=ctx.createGain();g.gain.value=0;g.connect(master);voices[name]={g,step:0,next:ctx.currentTime+.05}}return voices[name]}
+function note(v,f,t,d,w,vol){const o=ctx.createOscillator(),e=ctx.createGain();o.type=w;o.frequency.value=f;e.gain.setValueAtTime(vol,t);e.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(e);e.connect(v.g);o.start(t);o.stop(t+d+.02)}
+function tick(){if(!ctx||ctx.state!=="running")return;const now=ctx.currentTime;
+ for(const name in voices){const v=voices[name];if(name!==cur&&v.g.gain.value<.01)continue;const tr=T[name],sp=60/tr.bpm/2/(name==="race"?rate:1);if(v.next<now-.5)v.next=now+.05;
+  while(v.next<now+.3){const i=v.step%tr.m.length,m=tr.m[i],b=tr.b[i];if(m!=null)note(v,hz(m),v.next,sp*.9,tr.w,.5);if(b!=null)note(v,hz(b),v.next,sp*.95,"triangle",.7);if(tr.bell&&i%4===0)note(v,hz(m!=null?m+24:31),v.next,.25,"sine",.18);if(i%2===0&&tr.bpm>120)note(v,hz(40+(i%4?0:4)),v.next,.03,"square",.08);v.next+=sp;v.step++}}}
+function apply(){if(!ctx)return;const t=ctx.currentTime;for(const name in voices){const g=voices[name].g.gain;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(on&&name===cur?1:0,t+1.2)}}
+function play(name){want=name;if(!ctx)return;if(name===cur)return;cur=name;const v=voice(name);if(v.g.gain.value<.01){v.step=0;v.next=ctx.currentTime+.05}apply()}
+function unlock(){init();if(!ctx)return;if(on&&!document.hidden)ctx.resume();play(want)}
+["pointerdown","touchend","keydown"].forEach(e=>addEventListener(e,unlock,{passive:true}));
+document.addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else if(on)ctx.resume()});
+function setOn(v){on=v;localStorage.setItem(KEY,on?"on":"off");btn.textContent=on?"🎵":"🔇";btn.title=btn.ariaLabel=on?"Music on (tap to turn off)":"Music off (tap to turn on)";btn.classList.toggle("off",!on);if(ctx){apply();if(on)ctx.resume();else setTimeout(()=>{if(!on)ctx.suspend()},1300)}}
+const st=document.createElement("style");st.textContent="#musicBtn{position:fixed;right:8px;top:8px;z-index:9999;width:54px;height:54px;border-radius:50%;border:3px solid #000;background:#ffca28;font-size:28px;line-height:1;padding:0;box-shadow:0 3px 0 #000;cursor:pointer}#musicBtn.off{background:#9e9e9e}";document.head.appendChild(st);
+const btn=document.createElement("button");btn.id="musicBtn";btn.addEventListener("click",e=>{e.stopPropagation();unlock();setOn(!on)});
+(document.body?Promise.resolve():new Promise(r=>addEventListener("DOMContentLoaded",r))).then(()=>{document.body.appendChild(btn);setOn(on)});
+window.Music={play,setRate:r=>{rate=r},isOn:()=>on,setOn,get ctx(){return ctx},get cur(){return cur},tracks:Object.keys(T)};
+})();
+Music.play("space");
+</script>
+</body></html>
