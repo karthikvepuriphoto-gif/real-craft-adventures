@@ -29,8 +29,8 @@ export const OPT={
  hair:{short:"Short",spiky:"Spiky",curly:"Curly",long:"Long",ponytail:"Ponytail",bun:"Bun",buzz:"Buzz",none:"None"},
  face:{smile:"😊 Smile",grin:"😁 Grin",wink:"😉 Wink",wow:"😮 Wow",cool:"😎 Cool",sleepy:"😴 Sleepy"},
  glasses:{none:"None",round:"👓 Round",square:"Square",sun:"🕶️ Sun",goggles:"🥽 Goggles"},
- hat:{none:"None",cap:"🧢 Cap",beret:"Beret",cowboy:"🤠 Cowboy",sunhat:"Explorer",chef:"👨‍🍳 Chef",helmet:"⛑️ Fire helmet",sailor:"⚓ Sailor",beanie:"Beanie",turban:"Turban",headband:"Headband",party:"🥳 Party",space:"🧑‍🚀 Space helmet"},
- top:{tee:"T-shirt",hoodie:"Hoodie",striped:"Striped",plaid:"Plaid",jersey:"🏈 Jersey",kurta:"Kurta",sherwani:"Sherwani",happi:"Happi coat",fiesta:"Fiesta shirt",carnival:"Carnival",explorer:"Explorer",astronaut:"🚀 Space suit",wetsuit:"🤿 Wetsuit",chef:"Chef coat",firefighter:"🚒 Firefighter",doctor:"🩺 Doctor",sailor:"⚓ Sailor",hero:"🦸 Hero"},
+ hat:{none:"None",cap:"🧢 Cap",beret:"Beret",cowboy:"🤠 Cowboy",sunhat:"Explorer",chef:"👨‍🍳 Chef",helmet:"⛑️ Fire helmet",sailor:"⚓ Sailor",beanie:"Beanie",turban:"Turban",headband:"Headband",party:"🥳 Party",space:"🧑‍🚀 Space helmet",tophat:"🎩 Top hat",bonnet:"Bonnet",aviator:"Aviator cap"},
+ top:{tee:"T-shirt",hoodie:"Hoodie",striped:"Striped",plaid:"Plaid",jersey:"🏈 Jersey",kurta:"Kurta",sherwani:"Sherwani",happi:"Happi coat",fiesta:"Fiesta shirt",carnival:"Carnival",explorer:"Explorer",astronaut:"🚀 Space suit",wetsuit:"🤿 Wetsuit",suit:"1860s suit",chef:"Chef coat",firefighter:"🚒 Firefighter",doctor:"🩺 Doctor",sailor:"⚓ Sailor",hero:"🦸 Hero"},
  bottom:{jeans:"Pants",shorts:"Shorts",pajama:"Pajama",dhoti:"Dhoti",skirt:"Skirt",cargo:"Cargo",space:"Space pants"},
  shoes:{sneakers:"Sneakers",boots:"Boots",sandals:"Sandals",mojari:"Mojari",space:"Space boots"}};
 
@@ -47,12 +47,17 @@ export const SETS={
  japan:{n:"Japan happi coat",e:"🇯🇵",p:{top:"happi",topColor:"#283593",bottom:"shorts",bottomColor:"#212121",hat:"headband",shoes:"sandals",cape:false,backpack:false}},
  rio:{n:"Rio carnival",e:"🎉",p:{top:"carnival",topColor:"#00c853",bottom:"shorts",bottomColor:"#fdd835",hat:"party",shoes:"sneakers",shoeColor:"#fdd835",cape:false}},
  fiesta:{n:"Fiesta",e:"🪅",p:{top:"fiesta",topColor:"#fafafa",bottom:"jeans",bottomColor:"#795548",hat:"none",shoes:"boots",cape:false}},
- astronaut:{n:"Astronaut",e:"🧑‍🚀",p:{top:"astronaut",bottom:"space",shoes:"space",hat:"space",backpack:true,accColor:"#eeeeee",glasses:"none",cape:false,scarf:false},lock:{stamps:["kennedy"],hint:"Visit Kennedy Space Center on World Trip (or launch to space!)",space:true}},
+ astronaut:{n:"Astronaut",e:"🧑‍🚀",p:{top:"astronaut",bottom:"space",shoes:"space",hat:"space",backpack:true,accColor:"#eeeeee",glasses:"none",cape:false,scarf:false},lock:{stamps:["kennedy"],hint:"Visit Kennedy Space Center, launch to space, or time-travel to 1969!",space:true,time:true}},
  diver:{n:"Scuba diver",e:"🤿",p:{top:"wetsuit",bottom:"jeans",bottomColor:"#212121",shoes:"boots",shoeColor:"#212121",glasses:"goggles",hat:"none",backpack:true,accColor:"#fdd835",cape:false,scarf:false},lock:{sea:true,hint:"Dive in 🌊 Sea Mode"}},
  hero:{n:"Superhero",e:"🦸",p:{top:"hero",topColor:"#1e88e5",bottom:"jeans",bottomColor:"#1565c0",shoes:"boots",cape:true,accColor:"#e53935",hat:"none",backpack:false},lock:{stars:5,hint:"Collect 5 ⭐ (fly through rings or ace quizzes)"}},
  chef:{n:"Chef",e:"👩‍🍳",p:{top:"chef",bottom:"jeans",bottomColor:"#212121",hat:"chef",shoes:"sneakers",shoeColor:"#212121",cape:false,backpack:false}},
  firefighter:{n:"Firefighter",e:"🚒",p:{top:"firefighter",bottom:"cargo",hat:"helmet",shoes:"boots",cape:false,backpack:false,scarf:false}},
  doctor:{n:"Doctor",e:"🩺",p:{top:"doctor",bottom:"jeans",bottomColor:"#00897b",hat:"none",shoes:"sneakers",shoeColor:"#fafafa",cape:false,backpack:false}},
+ fossil:{n:"Fossil hunter",e:"🦕",p:{top:"explorer",bottom:"cargo",hat:"sunhat",shoes:"boots",glasses:"goggles",backpack:true,accColor:"#6d4c41",cape:false,scarf:false},lock:{time:true,hint:"Travel in ⏳ Time Machine"}},
+ pioneer:{n:"Pioneer (1840s)",e:"🐂",p:{top:"plaid",topColor:"#6d4c41",bottom:"jeans",bottomColor:"#5d4037",hat:"cowboy",shoes:"boots",scarf:true,accColor:"#c62828",cape:false,backpack:false},lock:{time:true,hint:"Travel in ⏳ Time Machine"}},
+ prairie:{n:"Prairie bonnet",e:"🌾",p:{top:"kurta",topColor:"#5c6bc0",bottom:"skirt",bottomColor:"#5c6bc0",hat:"bonnet",shoes:"boots",cape:false,backpack:false,scarf:false},lock:{time:true,hint:"Travel in ⏳ Time Machine"}},
+ suit1860:{n:"1860s top hat",e:"🎩",p:{top:"suit",bottom:"jeans",bottomColor:"#212121",hat:"tophat",shoes:"boots",shoeColor:"#212121",cape:false,backpack:false,scarf:false,glasses:"none"},lock:{time:true,hint:"Travel in ⏳ Time Machine"}},
+ aviator:{n:"Early aviator",e:"✈️",p:{top:"hoodie",topColor:"#6d4c41",bottom:"jeans",bottomColor:"#3e2723",hat:"aviator",shoes:"boots",scarf:true,accColor:"#fafafa",cape:false,backpack:false},lock:{time:true,hint:"Travel in ⏳ Time Machine"}},
  sailor:{n:"Sailor",e:"⚓",p:{top:"sailor",bottom:"jeans",bottomColor:"#1a237e",hat:"sailor",shoes:"sneakers",shoeColor:"#fafafa",cape:false},lock:{stamps:["liberty","sydney","goldengate"],hint:"Visit a harbor: Statue of Liberty, Sydney or Golden Gate"}}};
 // World Trip place -> local outfit offered on arrival
 export const PLACE_SET={eiffel:"paris",taj:"india",charminar:"india",indiagate:"india",gateway:"india",mysore:"sherwani",grand:"india",
@@ -60,7 +65,7 @@ export const PLACE_SET={eiffel:"paris",taj:"india",charminar:"india",indiagate:"
  kennedy:"astronaut",liberty:"sailor",sydney:"sailor"};
 function stampsNow(){try{return JSON.parse(localStorage.getItem("realcraft_passport_v1")||"{}").stamps||{}}catch(e){return {}}}
 function starsNow(){let r=0;try{r=JSON.parse(localStorage.getItem("realcraft_bw_rings")||"[]").length}catch(e){}return (+localStorage.getItem("realcraft_bw_stars")||0)+r}
-export function isUnlocked(k){const L=SETS[k].lock;if(!L)return true;if(L.space&&localStorage.getItem("realcraft_space_visited"))return true;if(L.sea)return !!localStorage.getItem("realcraft_sea_visited");
+export function isUnlocked(k){const L=SETS[k].lock;if(!L)return true;if(L.space&&localStorage.getItem("realcraft_space_visited"))return true;if(L.time&&localStorage.getItem("realcraft_time_visited"))return true;if(L.sea)return !!localStorage.getItem("realcraft_sea_visited");
  if(L.stamps){const s=stampsNow();return L.stamps.some(x=>s[x])}if(L.stars)return starsNow()>=L.stars;return true}
 
 // ---------- 3D build ----------
@@ -89,6 +94,7 @@ const TOPS={
  firefighter:{sl:"long",base:"#6d5a2f",fixed:true,tex:(g)=>{g.fillStyle="#ffeb3b";g.fillRect(0,26,32,3);g.fillRect(0,32,32,3);g.fillStyle="#9e9e9e";g.fillRect(0,27,32,1);g.fillRect(0,33,32,1);g.fillStyle="#212121";g.fillRect(15,0,2,40)},arm:(g)=>{g.fillStyle="#ffeb3b";g.fillRect(0,22,8,3)}},
  doctor:{sl:"long",long:true,base:"#fafafa",fixed:true,tex:(g)=>{g.fillStyle="#26a69a";g.fillRect(10,0,12,40);g.fillStyle="#455a64";g.fillRect(9,4,1,14);g.fillRect(22,4,1,14);g.fillRect(9,18,14,1);g.fillStyle="#b0bec5";g.fillRect(14,18,4,4);g.fillStyle="#1e88e5";g.fillRect(24,10,4,1)},skirtTex:(g)=>{g.fillStyle="#bdbdbd";g.fillRect(15,0,2,16)}},
  sailor:{sl:"short",base:"#fafafa",fixed:true,tex:(g)=>{g.fillStyle="#1a237e";g.fillRect(0,0,32,6);g.beginPath();g.moveTo(6,0);g.lineTo(16,14);g.lineTo(26,0);g.fill();g.fillStyle="#e53935";g.fillRect(13,12,6,4)}},
+ suit:{sl:"long",long:true,base:"#212121",fixed:true,tex:(g)=>{g.fillStyle="#fafafa";g.fillRect(12,0,8,14);g.fillStyle="#111";g.fillRect(13,2,6,3);g.fillStyle="#424242";for(let y=16;y<40;y+=7)g.fillRect(15,y,2,2)},skirtTex:(g)=>{g.fillStyle="#111";g.fillRect(15,0,2,16)}},
  wetsuit:{sl:"long",tex:(g,c)=>{g.fillStyle="#212121";g.fillRect(0,0,6,40);g.fillRect(26,0,6,40);g.fillRect(0,30,32,10);g.fillStyle="#fdd835";g.fillRect(15,0,2,26)},arm:(g)=>{g.fillStyle="#212121";g.fillRect(0,20,8,20)}},
  hero:{sl:"long",tex:(g)=>{g.fillStyle="#fdd835";g.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?4:10;g.lineTo(16+Math.cos(a)*r,16+Math.sin(a)*r)}g.fill();g.fillStyle="#fdd835";g.fillRect(0,34,32,3)}}};
 export function topBase(s){const T=TOPS[s.top]||TOPS.tee;return T.fixed?T.base:(T.base&&s.top==="striped"?T.base:s.topColor)}
@@ -116,6 +122,9 @@ export function buildAvatarInto(av,s){const g=av.g;while(g.children.length){cons
  // hats
  const h=s.hat;
  if(h==="cap"){box(g,.56,.16,.56,s.topColor==="#fafafa"?"#e53935":s.top==="jersey"?s.topColor:"#1e88e5",0,2.08,0);box(g,.5,.04,.25,"#212121",0,2.01,.35)}
+ if(h==="tophat"){box(g,.8,.05,.8,"#212121",0,2.02,0);box(g,.5,.6,.5,"#212121",0,2.33,0);box(g,.52,.08,.52,"#5d4037",0,2.1,0)}
+ if(h==="bonnet"){box(g,.6,.5,.62,s.topColor||"#5c6bc0",0,1.82,-.04);box(g,.66,.12,.12,s.topColor||"#5c6bc0",0,1.95,.3)}
+ if(h==="aviator"){box(g,.56,.2,.56,"#6d4c41",0,2.04,0);box(g,.58,.36,.1,"#6d4c41",0,1.78,-.28);box(g,.5,.12,.06,"#90caf9",0,1.97,.29)}
  if(h==="beret"){box(g,.6,.1,.58,"#212121",-.03,2.07,0);box(g,.05,.08,.05,"#212121",0,2.14,0)}
  if(h==="cowboy"){box(g,.95,.05,.9,"#8d6e63",0,2.02,0);box(g,.5,.3,.5,"#8d6e63",0,2.18,0);box(g,.52,.06,.52,"#3e2723",0,2.07,0)}
  if(h==="sunhat"){box(g,.85,.05,.85,"#c8b27d",0,2.03,0);box(g,.52,.22,.52,"#c8b27d",0,2.15,0);box(g,.54,.05,.54,"#6d4c41",0,2.08,0)}
@@ -189,7 +198,7 @@ export function openDressUp(opts={}){ensureCss();if(ui)return;let s=loadAvatar()
  const sw=(k,list)=>`<div class="dzG">${list.map(c=>`<button class="sw ${s[k]===c?"on":""}" data-k="${k}" data-v="${c}" style="background:${c}" aria-label="colour ${c}"></button>`).join("")}</div>`;
  const tog=(k,n)=>`<label class="dzTog"><input type="checkbox" data-tg="${k}" ${s[k]?"checked":""}>${n}</label>`;
  function render(){ov.querySelectorAll("#dzTabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===tab));let h="";
-  if(tab==="outfits"){const grp=[["🌍 Around the world",["india","dhoti","sherwani","paris","cowboy","explorer","egypt","japan","rio","fiesta","lincoln"]],["🦸 Fun jobs & heroes",["astronaut","hero","chef","firefighter","doctor","sailor"]]];
+  if(tab==="outfits"){const grp=[["🌍 Around the world",["india","dhoti","sherwani","paris","cowboy","explorer","egypt","japan","rio","fiesta","lincoln"]],["⏳ Time travel",["fossil","pioneer","prairie","suit1860","aviator","astronaut"]],["🦸 Fun jobs & heroes",["astronaut","hero","chef","firefighter","doctor","sailor"]]];
    for(const[t,ks]of grp)h+=`<h4>${t}</h4><div class="dzSet">${ks.map(k=>{const S=SETS[k],u=isUnlocked(k);return`<button data-set="${k}" class="${u?"":"lk"} ${s.outfit===k?"on":""}"><b>${u?S.e:"🔒"}</b>${S.n}${u?"":`<small>${S.lock.hint}</small>`}</button>`}).join("")}</div>`;
    h+=tog("autoRevert","🏠 When I fly home, change back from a local outfit")}
   if(tab==="skin")h=`<h4>Skin tone</h4>`+sw("skin",SKINS);

@@ -1,0 +1,608 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:,">
+<title>Time Machine · Real Craft Adventures</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+<style>
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;font-family:system-ui,-apple-system,sans-serif;background:#111;color:#fff;-webkit-text-size-adjust:100%}
+#view{position:fixed;inset:0;touch-action:none}#view canvas{display:block;width:100%!important;height:100%!important;touch-action:none}
+button{font-family:'Press Start 2P',monospace;font-size:10px;border:3px solid #000;border-radius:8px;background:#ffca28;color:#000;padding:9px 10px;box-shadow:0 3px 0 #000;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}
+#top{position:fixed;top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));right:74px;display:flex;flex-wrap:wrap;gap:6px;z-index:10}
+#era{position:fixed;top:calc(max(8px,env(safe-area-inset-top)) + 46px);left:max(8px,env(safe-area-inset-left));z-index:9;background:rgba(0,0,0,.6);border-radius:8px;padding:6px 10px;font-family:'Press Start 2P',monospace;font-size:10px;line-height:1.7}
+#stars{position:fixed;top:max(14px,env(safe-area-inset-top));right:72px;z-index:10;font-family:'Press Start 2P',monospace;font-size:12px;text-shadow:2px 2px 0 #000}
+#joy{position:fixed;left:max(24px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.6);z-index:8;touch-action:none}
+#knob{position:absolute;left:45px;top:45px;width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #555}
+#btns{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;z-index:8}
+#btns button{font-size:12px;padding:12px 14px}
+#talk{position:fixed;left:0;right:0;margin:auto;bottom:max(180px,calc(env(safe-area-inset-bottom) + 170px));width:fit-content;max-width:90vw;z-index:9;background:#4fc3f7;font-size:12px;padding:12px 16px}
+#bubble{position:fixed;left:50%;transform:translateX(-50%);bottom:max(24px,env(safe-area-inset-bottom));width:min(620px,60vw);z-index:12;background:#fff;color:#000;border:4px solid #000;border-radius:12px;padding:12px 14px;font-size:16px;line-height:1.45;box-shadow:0 5px 0 #000}
+#bubble b{font-family:'Press Start 2P',monospace;font-size:11px;display:block;margin-bottom:6px}
+#bubble .row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+#toast{position:fixed;top:100px;left:50%;transform:translateX(-50%);z-index:30;background:#ffeb3b;color:#000;border:3px solid #000;border-radius:8px;padding:8px 12px;font-family:'Press Start 2P',monospace;font-size:10px;line-height:1.6;max-width:90vw;text-align:center;pointer-events:none;transition:opacity .4s}
+.hidden{display:none!important}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+.pan{position:relative;background:#fff;color:#000;border:4px solid #000;border-radius:12px;width:min(900px,100%);max-height:calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:16px;font-size:16px;line-height:1.5}
+.pan,.pan *{touch-action:pan-x pan-y}
+.pan h2{font-family:'Press Start 2P',monospace;font-size:15px;margin:4px 60px 10px 0;line-height:1.5}.pan h3{font-family:'Press Start 2P',monospace;font-size:11px;margin:14px 0 6px;color:#4527a0}
+.pan .x{position:absolute;top:10px;right:10px;background:#ef5350;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.era{display:flex;flex-direction:column;align-items:center;gap:6px;background:#ede7f6;font-family:system-ui,sans-serif;font-size:14px;font-weight:700;padding:12px;position:relative}
+.era .e{font-size:38px}.era small{font-weight:400;color:#555}.era i{position:absolute;top:6px;right:8px;font-style:normal}
+.q{background:#f3e5f5;border:3px solid #000;border-radius:10px;padding:10px;margin:8px 0}.q button{font-family:system-ui,sans-serif;font-size:15px;margin:4px 4px 0 0;background:#fff}.q button.ok{background:#66bb6a}.q button.no{background:#ef9a9a}
+.stamp{border:3px dashed #6a1b9a;border-radius:12px;padding:10px;text-align:center;font-weight:700;background:#fff8e1}.stamp.off{opacity:.35;filter:grayscale(1)}.stamp .e{font-size:34px;display:block}
+#swirl{position:fixed;inset:0;z-index:60;pointer-events:none;background:radial-gradient(circle,#fff 0,#b388ff 25%,#311b92 60%,#000 100%);opacity:0;transition:opacity .4s;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:28px;color:#fff;text-shadow:3px 3px 0 #000}
+#swirl.on{opacity:1}
+/* lab */
+#lab .pan{width:min(1000px,100%)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;position:sticky;top:-16px;background:#fff;padding:8px 0;z-index:3}.tabs button{font-size:9px;background:#e0e0e0}.tabs button.on{background:#ffd54f}
+.tl{list-style:none;padding:0;margin:8px 0}.tl li{display:flex;align-items:center;gap:8px;background:#e3f2fd;border:3px solid #000;border-radius:10px;padding:8px 10px;margin:6px 0;touch-action:none!important;cursor:grab;position:relative}
+.tl li *{touch-action:none!important}.tl li.drag{opacity:.85;z-index:5;box-shadow:0 8px 16px rgba(0,0,0,.4);background:#fff59d}.tl li.ok{background:#c8e6c9}.tl li.no{background:#ffccbc}
+.tl .em{font-size:28px}.tl .tx{flex:1}.tl .tx small{display:block;color:#444}.tl .yr{font-family:'Press Start 2P',monospace;font-size:11px;color:#1b5e20}.tl .mv{display:flex;flex-direction:column;gap:3px}.tl .mv button{padding:4px 7px;font-size:10px;touch-action:manipulation!important}
+.exp{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}.exp svg,.exp canvas{background:#fafafa;border:3px solid #000;border-radius:10px;max-width:100%}.exp .side{flex:1;min-width:240px}
+.exp .side button{font-family:system-ui,sans-serif;font-size:15px;margin:3px 3px 3px 0}
+.why{background:#fff8e1;border-left:6px solid #ffb300;padding:8px 10px;border-radius:6px;margin-top:8px;font-size:15px}
+.meter{height:18px;background:#eee;border:2px solid #000;border-radius:9px;overflow:hidden}.meter div{height:100%;background:linear-gradient(90deg,#ffeb3b,#ff9800);width:0}
+input[type=range]{width:100%;touch-action:pan-x!important}
+</style></head><body>
+<div id="view"></div>
+<div id="top"><button id="bHome">🏠 Home</button><button id="bTM">⏳ Time Machine</button><button id="bLab">🔬 Inventors Lab</button><button id="bLearn">📖 Learn more</button><button id="bPP">🛂 Time Passport</button><button id="bOutfit">👕 Era outfit</button></div>
+<div id="era"></div><div id="stars">⭐ 0</div>
+<div id="joy"><div id="knob"></div></div>
+<div id="btns"><button id="bJump">⬆️ Jump</button><button id="bAct" class="hidden">▶️ Watch!</button></div>
+<button id="talk" class="hidden"></button>
+<div id="bubble" class="hidden"></div>
+<div id="toast" style="opacity:0"></div>
+<div id="swirl">⏳</div>
+<div id="tmOv" class="ov hidden"><div class="pan"><button class="x" data-c="tmOv">✖</button><h2>⏳ Where (and when!) should we go?</h2><div id="tmBody" class="grid"></div></div></div>
+<div id="factOv" class="ov hidden"><div class="pan" style="width:min(620px,100%)"><div id="factBody"></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button id="factLearn" style="background:#4fc3f7">📖 Learn more</button><button class="x2" data-c="factOv">🚶 Explore!</button></div></div></div>
+<div id="learnOv" class="ov hidden"><div class="pan"><button class="x" data-c="learnOv">✖</button><button id="speak" style="background:#b39ddb">🔊 Read to me</button><div id="learnBody"></div></div></div>
+<div id="ppOv" class="ov hidden"><div class="pan"><button class="x" data-c="ppOv">✖</button><h2>🛂 My Time Passport</h2><div id="ppBody"></div></div></div>
+<div id="lab" class="ov hidden"><div class="pan"><button class="x" data-c="lab">✖</button><h2>🔬 Inventors Lab</h2><div class="tabs" id="labTabs"></div><div id="labBody"></div></div></div>
+<script type="module">
+import * as THREE from "three";
+import {buildAvatar,loadAvatar,SETS} from "./avatar.js";
+// ---------- ERA DATA (facts checked with Smithsonian, NPS, NASA, Library of Congress, Nebraska State Historical Society, NatGeo) ----------
+const ERAS={
+dino:{n:"Dinosaurs",e:"🦖",when:"About 68 million years ago",set:"fossil",sky:"#9ad0ec",ground:"#6b8e23",
+ fact:"Birds are living dinosaurs! The sparrow at your window is a cousin of T. rex.",
+ learn:{when:"Dinosaurs lived on Earth for about 165 million years. T. rex and Triceratops lived near the very end, about 68 to 66 million years ago.",
+  who:"Nobody! There were no people yet. Scientists called paleontologists learn about dinosaurs by studying fossils: bones, teeth, eggs and footprints turned to stone.",
+  what:"About 66 million years ago a giant asteroid hit Earth near Mexico. The big dinosaurs disappeared, but one group survived and became today's birds.",
+  cool:["Stegosaurus lived so long before T. rex that T. rex lived closer in time to us than to Stegosaurus!","T. rex was about 40 feet long, about as long as a school bus.","Long-necked sauropods were the biggest land animals ever.","Our time machine brought dinosaurs from different times together for a visit. In real life Stegosaurus and Brachiosaurus lived millions of years before T. rex."],
+  tip:"Nebraska is famous for fossils too! Morrill Hall at the University of Nebraska in Lincoln has giant mammoth fossils."},
+ quiz:[["Which animals are living dinosaurs?",["Birds","Frogs","Sharks"],0],["What do we call a scientist who studies fossils?",["Paleontologist","Astronaut","Chef"],0],["About when did the big dinosaurs disappear?",["66 million years ago","100 years ago","Last week"],0]]},
+egypt:{n:"Ancient Egypt",e:"🏺",when:"About 4,500 years ago",set:"egypt",sky:"#ffe0a3",ground:"#e6c88a",
+ fact:"The Great Pyramid was the tallest human-made building in the world for about 3,800 years!",
+ learn:{when:"The Great Pyramid of Giza was built about 4,500 years ago, for a king (pharaoh) named Khufu.",
+  who:"Thousands of skilled workers built it. Archaeologists found their villages, bakeries and tombs nearby. They were paid workers, not slaves.",
+  what:"Workers cut more than 2 million stone blocks and moved them with ramps, sleds and ropes. The pyramid was first about 481 feet tall.",
+  cool:["Egyptians wrote with hieroglyphs: little pictures that stand for sounds and ideas.","The Rosetta Stone, found in 1799, had the same message in three scripts. It helped Jean-François Champollion read hieroglyphs in 1822.","Egyptians made a kind of paper from the papyrus plant that grew along the Nile.","The Nile River flooded every year and left rich soil for farming."],
+  tip:"Try writing your name with picture symbols, like a scribe!"},
+ quiz:[["What is Egyptian picture-writing called?",["Hieroglyphs","Emojis","Comics"],0],["Which river was the heart of Ancient Egypt?",["The Nile","The Missouri","The Amazon"],0],["What helped people learn to read hieroglyphs again?",["The Rosetta Stone","A telescope","A compass"],0]]},
+trail:{n:"Oregon Trail in Nebraska",e:"🐂",when:"1840s to 1860s",set:"pioneer",sky:"#a7d8f0",ground:"#a8b85c",
+ fact:"Chimney Rock in western Nebraska was mentioned in more pioneer diaries than any other landmark on the trail!",
+ learn:{when:"From the 1840s to the 1860s, more than 400,000 people went west on the Oregon, California and Mormon trails.",
+  who:"Pioneer families with covered wagons pulled by oxen. Native nations like the Pawnee and Lakota had lived on these lands for a very long time before the pioneers came.",
+  what:"The trip from Missouri to Oregon was about 2,000 miles and took 4 to 6 months. Wagons went about 15 miles a day, and most people walked beside them!",
+  cool:["Chimney Rock is about 325 feet from base to tip. Its spire alone is about 120 feet.","Pioneers followed the Platte River across Nebraska. People said it was 'a mile wide and an inch deep.'","Scotts Bluff, another Nebraska landmark, was a welcome sight on the trail too.","Wagons were packed with flour, bacon, tools and a water barrel."],
+  tip:"You can visit Chimney Rock near Bayard, Nebraska, and still see the old trail landscape."},
+ quiz:[["Which Nebraska landmark was mentioned in the most pioneer diaries?",["Chimney Rock","Mount Rushmore","The Arch"],0],["What animals usually pulled covered wagons?",["Oxen","Camels","Kangaroos"],0],["About how long was the trip to Oregon?",["2,000 miles","20 miles","20,000 miles"],0]]},
+lincoln:{n:"Abraham Lincoln's America",e:"🎩",when:"1861 to 1865",set:"suit1860",sky:"#b3d4f5",ground:"#7cb342",
+ fact:"Abraham Lincoln, our 16th President, gave the Gettysburg Address in about 2 minutes. It's only about 270 words!",
+ learn:{when:"Abraham Lincoln was President from 1861 to 1865, during the Civil War between the North (the Union) and the South (the Confederacy).",
+  who:"Abraham Lincoln, the tallest President at 6 feet 4 inches. Harriet Tubman, who escaped slavery and came back about 13 times to lead about 70 family and friends to freedom. Frederick Douglass, a famous writer and speaker who had escaped slavery too.",
+  what:"The biggest cause of the war was slavery: whether it would continue and spread to new western lands. On January 1, 1863, Lincoln's Emancipation Proclamation declared enslaved people in the Confederate states free. In November 1863 he gave the Gettysburg Address, about a 'government of the people, by the people, for the people.' The war ended in 1865, and the 13th Amendment ended slavery in the whole country that same year.",
+  cool:["The Underground Railroad wasn't a real railroad. It was a secret network of people and safe houses helping freedom seekers travel north.","Freedom seekers followed the North Star to find north at night.","Harriet Tubman said she 'never lost a passenger.'","Lincoln, Nebraska was named after Abraham Lincoln in 1867."],
+  tip:"Lincoln worked hard to learn: he mostly taught himself by reading borrowed books."},
+ quiz:[["What did the Emancipation Proclamation do in 1863?",["Declared enslaved people in Confederate states free","Started a railroad","Made a new state"],0],["What was the Underground Railroad?",["A secret network helping people escape slavery","A subway train","A toy train set"],0],["Which famous speech did Lincoln give in 1863?",["The Gettysburg Address","The Moon speech","The Pledge"],0]]},
+wright:{n:"Wright Brothers' First Flight",e:"🛩️",when:"December 17, 1903",set:"aviator",sky:"#cfe3f3",ground:"#e8d9a8",
+ fact:"The very first airplane flight lasted 12 seconds and went 120 feet. That's shorter than a jumbo jet's wings!",
+ learn:{when:"December 17, 1903, at 10:35 in the morning, at Kill Devil Hills near Kitty Hawk, North Carolina.",
+  who:"Wilbur and Orville Wright, two brothers who ran a bicycle shop in Dayton, Ohio. John T. Daniels took the famous photo.",
+  what:"Orville flew first: 12 seconds and 120 feet. The brothers took turns and made four flights that day. Wilbur's last flight went 852 feet in 59 seconds.",
+  cool:["Wilbur won a coin toss to try first, on December 14, but that try didn't work. Orville flew on December 17.","They spent four years testing kites, gliders and a home-made wind tunnel.","Their big idea was 'three-axis control': a way to steer up and down, left and right, and to bank (tilt).","The real 1903 Wright Flyer is at the Smithsonian in Washington, D.C."],
+  tip:"Make a paper airplane and test small changes, just like the Wrights did!"},
+ quiz:[["Where did the first flight happen?",["Near Kitty Hawk, North Carolina","Paris","Lincoln, Nebraska"],0],["How long was the very first flight?",["12 seconds","12 hours","12 days"],0],["What business did the Wright brothers run?",["A bicycle shop","A bakery","A zoo"],0]]},
+moon:{n:"Moon Landing",e:"🌕",when:"July 20, 1969",set:"astronaut",sky:"#000000",ground:"#9e9e9e",low:true,
+ fact:"Neil Armstrong was the first person to walk on the Moon. Buzz Aldrin joined him about 20 minutes later!",
+ learn:{when:"July 20, 1969, during NASA's Apollo 11 mission.",
+  who:"Neil Armstrong and Buzz Aldrin landed in the lunar module Eagle. Michael Collins circled the Moon in the command module Columbia.",
+  what:"Armstrong stepped out and said, 'That's one small step for man, one giant leap for mankind.' The astronauts explored for about 2½ hours and collected about 47 pounds of Moon rocks.",
+  cool:["The trip to the Moon took about 3 days. The Moon is about 239,000 miles away.","Moon gravity is about one-sixth of Earth's, so you can jump much higher!","There's no wind on the Moon, so footprints can last a very, very long time.","12 astronauts walked on the Moon between 1969 and 1972."],
+  tip:"Look up at the Moon tonight and find the dark 'seas.' Apollo 11 landed on the Sea of Tranquility."},
+ quiz:[["Who was the first person to walk on the Moon?",["Neil Armstrong","Buzz Lightyear","Orville Wright"],0],["What year was the first Moon landing?",["1969","1903","2020"],0],["Why can you jump higher on the Moon?",["Its gravity is weaker","It's made of cheese","It's windy"],0]]},
+lab:{n:"Inventors Lab",e:"🔬",when:"Any time!",set:null,sky:"#d7ccc8",ground:"#8d6e63",
+ fact:"Inventors build on each other's ideas. Almost every invention has many helpers!",
+ learn:{when:"From Gutenberg's printing press around 1440 to the World Wide Web in 1989, and still today!",
+  who:"Inventors like Alessandro Volta, Margaret Knight, Lewis Latimer, Garrett Morgan, the Wright brothers and Tim Berners-Lee.",
+  what:"Inventions usually come from many people. Thomas Edison made a long-lasting light bulb in 1879, Joseph Swan made bulbs in England, and Lewis Latimer improved the carbon filament (patent 1882).",
+  cool:["Margaret Knight's paper-bag machine (patent 1871) did the work of about 30 people.","Garrett Morgan's 1923 traffic signal had a 'stop everyone' position, like today's yellow light.","Alessandro Volta made the first battery in 1800. The word 'volt' comes from his name!","William Sturgeon made the first electromagnet in 1825."],
+  tip:"Try the experiments at each lab table, then put inventions in order on the timeline!"},
+ quiz:[["Who made the first battery in 1800?",["Alessandro Volta","Neil Armstrong","Harriet Tubman"],0],["Which inventor improved light bulb filaments?",["Lewis Latimer","Abraham Lincoln","Khufu"],0],["Which invention did Margaret Knight make?",["A paper-bag machine","An airplane","A rocket"],0]]}};
+const ERA_ORDER=["dino","egypt","trail","lincoln","wright","moon","lab"];
+// Invention timeline (dates = first working version or patent; credits shared fairly)
+const INV=[
+ {k:"press",e:"📰",n:"Printing press with metal type",who:"Johannes Gutenberg, Germany (movable type was invented earlier in China and Korea!)",y:1440,ys:"about 1440"},
+ {k:"scope",e:"🔭",n:"Telescope",who:"Hans Lipperhey asked for a patent in 1608; Galileo improved it in 1609",y:1608,ys:"1608"},
+ {k:"battery",e:"🔋",n:"Battery",who:"Alessandro Volta, Italy",y:1800,ys:"1800"},
+ {k:"telegraph",e:"📟",n:"Telegraph message line",who:"Samuel Morse and Alfred Vail sent a long-distance message",y:1844,ys:"1844"},
+ {k:"bag",e:"🛍️",n:"Flat-bottom paper-bag machine",who:"Margaret Knight",y:1871,ys:"1871"},
+ {k:"phone",e:"☎️",n:"Telephone",who:"Alexander Graham Bell got the patent (others like Elisha Gray and Antonio Meucci worked on it too)",y:1876,ys:"1876"},
+ {k:"bulb",e:"💡",n:"Long-lasting light bulb",who:"Thomas Edison and Joseph Swan; Lewis Latimer improved the filament",y:1879,ys:"1879"},
+ {k:"plane",e:"🛩️",n:"Airplane",who:"Wilbur and Orville Wright",y:1903,ys:"1903"},
+ {k:"signal",e:"🚦",n:"Three-position traffic signal",who:"Garrett Morgan",y:1923,ys:"1923"},
+ {k:"web",e:"🌐",n:"World Wide Web",who:"Tim Berners-Lee",y:1989,ys:"1989"}];
+// ---------- engine ----------
+const $=id=>document.getElementById(id);
+const SKEY="realcraft_bw_stars",PKEY="realcraft_time_pp_v1";
+const loadPP=()=>{try{return Object.assign({stamps:{},quiz:{},lab:{}},JSON.parse(localStorage.getItem(PKEY)||"{}"))}catch(e){return{stamps:{},quiz:{},lab:{}}}};
+const savePP=p=>localStorage.setItem(PKEY,JSON.stringify(p));
+const getStars=()=>+localStorage.getItem(SKEY)||0;
+function addStars(n){localStorage.setItem(SKEY,getStars()+n);showStars();window.dispatchEvent(new Event("starschange"))}
+function showStars(){$("stars").textContent="⭐ "+getStars()}
+let toastT=0;function toast(t,ms=2600){const el=$("toast");el.textContent=t;el.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>el.style.opacity=0,ms)}
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
+function beep(f=660,d=.08){try{const c=window.Music&&Music.ctx;if(!c)return;const o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.stop(c.currentTime+d+.02)}catch(e){}}
+
+const ren=new THREE.WebGLRenderer({antialias:true});ren.setPixelRatio(Math.min(2,devicePixelRatio));$("view").appendChild(ren.domElement);
+const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(60,1,.1,700);
+const hemi=new THREE.HemisphereLight(0xffffff,0x6d6d55,1.05);scene.add(hemi);const sun=new THREE.DirectionalLight(0xffffff,.85);sun.position.set(40,80,30);scene.add(sun);
+let world=new THREE.Group();scene.add(world);
+const MC={};const mat=(c,o)=>{const k=c+(o?JSON.stringify(o):"");return MC[k]||(MC[k]=new THREE.MeshLambertMaterial(Object.assign({color:c},o||{})))};
+const GB=new THREE.BoxGeometry(1,1,1);
+let solids=[],CH=[],UPD=[],BOUND=58;
+function B(w,h,d,c,x,y,z,p=world,solid=false){const m=new THREE.Mesh(GB,mat(c));m.scale.set(w,h,d);m.position.set(x,y+h/2,z);p.add(m);if(solid&&p===world)solids.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2,top:y+h});return m}
+function CY(r0,r1,h,c,x,y,z,p=world,seg=12,solid=false){const m=new THREE.Mesh(new THREE.CylinderGeometry(r0,r1,h,seg),mat(c));m.position.set(x,y+h/2,z);p.add(m);if(solid&&p===world)solids.push({x0:x-r1,x1:x+r1,z0:z-r1,z1:z+r1,top:y+h});return m}
+function SP(r,c,x,y,z,p=world,o){const m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),o?new THREE.MeshBasicMaterial(Object.assign({color:c},o)):mat(c));m.position.set(x,y,z);p.add(m);return m}
+function label(t,x,y,z,s=1,p=world){const c=document.createElement("canvas");c.width=512;c.height=96;const g=c.getContext("2d");g.fillStyle="rgba(0,0,0,.6)";g.fillRect(0,0,512,96);g.fillStyle="#ffeb3b";g.font="bold 40px sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(t,256,50,500);const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthWrite:false}));sp.scale.set(6*s,1.1*s,1);sp.position.set(x,y,z);p.add(sp);return sp}
+function groundY(x,z){let y=0;for(const s of solids)if(x>s.x0-.3&&x<s.x1+.3&&z>s.z0-.3&&z<s.z1+.3&&s.walk)y=Math.max(y,s.top);return y}
+// blocky person
+function person(o){const g=new THREE.Group(),sk=o.skin||"#c68642";const add=(w,h,d,c,x,y,z)=>B(w,h,d,c,x,y,z,g);
+ const H=o.tall||1;add(.26,.75*H,.26,o.pants||"#37474f",-.15,0,0);add(.26,.75*H,.26,o.pants||"#37474f",.15,0,0);
+ const by=.75*H;if(o.dress){add(.8,.8,.5,o.dress,0,by-.5,0)}add(.62,.8,.36,o.shirt||"#1565c0",0,by,0);
+ const aL=new THREE.Group(),aR=new THREE.Group();aL.position.set(-.42,by+.75,0);aR.position.set(.42,by+.75,0);B(.2,.72,.2,o.shirt||"#1565c0",0,-.72,0,aL);B(.2,.72,.2,o.shirt||"#1565c0",0,-.72,0,aR);B(.18,.16,.18,sk,0,-.86,0,aL);B(.18,.16,.18,sk,0,-.86,0,aR);g.add(aL,aR);
+ const hy=by+.8;add(.52,.52,.52,sk,0,hy,0);B(.08,.08,.02,"#212121",-.12,hy+.3,.27,g);B(.08,.08,.02,"#212121",.12,hy+.3,.27,g);B(.16,.04,.02,"#8d2a1e",0,hy+.13,.27,g);
+ if(o.hair)add(.56,.16,.56,o.hair,0,hy+.42,0);if(o.hair&&o.hairBack)add(.56,.4,.12,o.hair,0,hy+.1,-.24);
+ if(o.beard)add(.54,.22,.1,o.beard,0,hy,.25);if(o.stache)add(.24,.06,.04,o.stache,0,hy+.19,.28);
+ if(o.hat==="top"){add(.8,.05,.8,"#212121",0,hy+.52,0);add(.46,.62,.46,"#212121",0,hy+.55,0)}
+ if(o.hat==="scarf"){add(.58,.2,.58,o.scarf||"#c62828",0,hy+.42,0);add(.5,.3,.1,o.scarf||"#c62828",0,hy+.15,-.25)}
+ if(o.hat==="bonnet"){add(.6,.5,.62,o.bonnet||"#ffe0b2",0,hy+.08,-.04)}
+ if(o.hat==="brim"){add(.9,.05,.9,o.hatc||"#8d6e63",0,hy+.52,0);add(.5,.26,.5,o.hatc||"#8d6e63",0,hy+.54,0)}
+ if(o.hat==="cap"){add(.56,.14,.56,o.hatc||"#5d4037",0,hy+.5,0);add(.5,.04,.24,o.hatc||"#5d4037",0,hy+.5,.35)}
+ if(o.hat==="nemes"){add(.6,.26,.6,"#fdd835",0,hy+.4,0);add(.16,.5,.12,"#1565c0",-.3,hy-.05,.1);add(.16,.5,.12,"#1565c0",.3,hy-.05,.1)}
+ if(o.helmet){const h=SP(.42,"#fafafa",0,hy+.27,0,g);const v=SP(.3,"#ffb300",0,hy+.27,.16,g);v.scale.set(1,.8,.6);add(.7,.8,.3,"#e0e0e0",0,by+.05,-.3)}
+ if(o.lantern){const l=B(.18,.24,.18,"#ffb300",0,-1.05,0,aR);l.material=new THREE.MeshBasicMaterial({color:"#ffd54f"})}
+ g.position.set(o.x,o.y||0,o.z);g.rotation.y=o.ry||0;world.add(g);label(o.name,o.x,(o.y||0)+hy+(o.hat==="top"?1.9:1.45),o.z,.75);
+ const c={g,arms:[aL,aR],name:o.name,lines:o.lines,li:-1,x:o.x,z:o.z,r:o.r||3.2,face:o.face!==false,anim:o.anim};CH.push(c);return c}
+// ---------- player ----------
+let av=null,avSpec=null,eraOutfit=true;
+const P={x:0,y:0,z:0,vy:0,yaw:Math.PI,cy:Math.PI,cp:.32,on:true},hold={};
+function buildPlayer(){if(av){scene.remove(av.g)}let s=loadAvatar();const E=ERAS[cur];if(eraOutfit&&E&&E.set&&SETS[E.set])s=Object.assign({},s,SETS[E.set].p);avSpec=s;av=buildAvatar(scene,s);av.g.scale.setScalar(.9)}
+// joystick
+const joy=$("joy"),knob=$("knob");let jv={x:0,y:0},jid=null;
+function mvJoy(e){const r=joy.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const m=Math.hypot(dx,dy),R=r.width/2-20;if(m>R){dx*=R/m;dy*=R/m}jv={x:dx/R,y:dy/R};knob.style.left=(45+dx)+"px";knob.style.top=(45+dy)+"px"}
+joy.addEventListener("pointerdown",e=>{jid=e.pointerId;joy.setPointerCapture(jid);mvJoy(e)});joy.addEventListener("pointermove",e=>{if(e.pointerId===jid)mvJoy(e)});
+const jend=e=>{if(e.pointerId===jid){jid=null;jv={x:0,y:0};knob.style.left="45px";knob.style.top="45px"}};joy.addEventListener("pointerup",jend);joy.addEventListener("pointercancel",jend);
+addEventListener("keydown",e=>{hold[e.key.toLowerCase()]=1;if(e.key===" ")jump()});addEventListener("keyup",e=>hold[e.key.toLowerCase()]=0);
+// look + tap
+const cv=ren.domElement;let look=null;const ray=new THREE.Raycaster();
+cv.addEventListener("pointerdown",e=>{look={id:e.pointerId,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,moved:false};cv.setPointerCapture(e.pointerId)});
+cv.addEventListener("pointermove",e=>{if(!look||e.pointerId!==look.id)return;if(Math.hypot(e.clientX-look.sx,e.clientY-look.sy)>10)look.moved=true;if(look.moved){P.cy-=(e.clientX-look.x)*.005;P.cp=Math.max(.05,Math.min(1.2,P.cp+(e.clientY-look.y)*.004))}look.x=e.clientX;look.y=e.clientY});
+cv.addEventListener("pointerup",e=>{if(look&&!look.moved)tapAt(e.clientX,e.clientY);look=null});
+function tapAt(x,y){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1),cam);const hits=ray.intersectObjects(CH.map(c=>c.g),true);if(hits[0]){let o=hits[0].object;const c=CH.find(c=>{let q=o;while(q){if(q===c.g)return true;q=q.parent}return false});if(c){talkTo(c);return}}
+ const th=ray.intersectObjects(TAPS.map(t=>t.o),true)[0];if(th){let o=th.object;const t=TAPS.find(t=>{let q=o;while(q){if(q===t.o)return true;q=q.parent}return false});if(t)t.f()}}
+let TAPS=[];
+function jump(){if(P.y<=groundY(P.x,P.z)+.05){P.vy=ERAS[cur].low?6.5:7.5;beep(500,.06)}}
+document.querySelectorAll("#btns button,#top button,#talk").forEach(b=>b.addEventListener("pointerdown",e=>e.stopPropagation()));
+$("bJump").onclick=jump;
+// talk
+let nearC=null;
+function talkTo(c){const p=loadPP();c.li=(c.li+1)%c.lines.length;const line=c.lines[c.li];const bb=$("bubble");bb.innerHTML=`<b>💬 ${c.name}</b>${line}<div class="row"><button id="bbNext">▶️ More</button><button id="bbSay" style="background:#b39ddb">🔊</button><button id="bbX" style="background:#e0e0e0">✖</button></div>`;bb.classList.remove("hidden");
+ $("bbNext").onclick=()=>talkTo(c);$("bbSay").onclick=()=>say(c.name+" says: "+line);$("bbX").onclick=()=>bb.classList.add("hidden");beep(720,.05);
+ const k=cur+":"+c.name;if(!p.lab["met_"+k]){p.lab["met_"+k]=1;savePP(p);addStars(1);toast("⭐ +1 for meeting "+c.name+"!")}}
+$("talk").onclick=()=>{if(nearC)talkTo(nearC)};
+// ---------- era switching ----------
+let cur=null,eraT=0;
+function clearWorld(){scene.remove(world);world.traverse(o=>{if(o.geometry&&o.geometry!==GB)o.geometry.dispose();if(o.material&&o.material.map)o.material.map.dispose()});world=new THREE.Group();scene.add(world);solids=[];CH=[];UPD=[];TAPS=[];$("bubble").classList.add("hidden");$("bAct").classList.add("hidden")}
+function goEra(k,anim=true){const run=()=>{clearWorld();cur=k;const E=ERAS[k];scene.background=new THREE.Color(E.sky);scene.fog=new THREE.Fog(E.sky,k==="moon"?400:90,k==="moon"?700:220);
+ const gr=new THREE.Mesh(new THREE.PlaneGeometry(400,400),mat(E.ground));gr.rotation.x=-Math.PI/2;world.add(gr);
+ hemi.intensity=k==="moon"?.7:1.05;sun.intensity=k==="moon"?1.2:.85;
+ const sp=BUILD[k]();P.x=sp[0];P.z=sp[1];P.yaw=sp[2]??Math.PI;P.cy=P.yaw;P.y=groundY(P.x,P.z);P.vy=0;buildPlayer();
+ $("era").innerHTML=`${E.e} ${E.n}<br><span style="color:#ffd54f">${E.when}</span>`;
+ localStorage.setItem("realcraft_time_visited","1");const p=loadPP();const first=!p.stamps[k];if(first){p.stamps[k]=Date.now();savePP(p);addStars(1)}
+ history.replaceState(null,"","#"+k);
+ $("factBody").innerHTML=`<h2>${E.e} ${E.n}</h2><p style="font-family:'Press Start 2P',monospace;font-size:11px;color:#6a1b9a">${E.when}</p><p style="font-size:19px">💡 ${E.fact}</p>${first?'<p style="color:#2e7d32;font-weight:700">🛂 New Time Passport stamp! ⭐+1</p>':""}${E.set&&SETS[E.set]?`<p>👕 You're wearing the <b>${SETS[E.set].n}</b> outfit. It's unlocked in dress-up too!</p>`:""}`;
+ openOv("factOv")};
+ if(!anim){run();return}const sw=$("swirl");sw.textContent="⏳ "+ERAS[k].when;sw.classList.add("on");beep(300,.3);setTimeout(()=>beep(600,.3),250);setTimeout(()=>beep(900,.3),500);setTimeout(()=>{run();setTimeout(()=>sw.classList.remove("on"),300)},900)}
+function openOv(id){document.querySelectorAll(".ov").forEach(o=>{if(o.id!==id)o.classList.add("hidden")});$(id).classList.remove("hidden")}
+function closeOv(id){$(id).classList.add("hidden")}
+document.addEventListener("click",e=>{const c=e.target.closest("[data-c]");if(c)closeOv(c.dataset.c)});
+document.addEventListener("touchmove",e=>{if(!e.target.closest(".pan"))e.preventDefault()},{passive:false});
+// picker
+function openTM(){const p=loadPP();$("tmBody").innerHTML=ERA_ORDER.map(k=>{const E=ERAS[k];return`<button class="era" data-k="${k}"><span class="e">${E.e}</span>${E.n}<small>${E.when}</small>${p.stamps[k]?"<i>✅</i>":""}</button>`}).join("");$("tmBody").querySelectorAll(".era").forEach(b=>b.onclick=()=>{closeOv("tmOv");goEra(b.dataset.k)});openOv("tmOv")}
+$("bTM").onclick=openTM;
+// learn + quiz
+function openLearn(k=cur){const E=ERAS[k],L=E.learn,p=loadPP();const got=p.quiz[k]||{};
+ $("learnBody").innerHTML=`<h2>${E.e} ${E.n}</h2><p style="font-family:'Press Start 2P',monospace;font-size:11px;color:#6a1b9a">${E.when}</p>
+ <h3>📅 When?</h3><p>${L.when}</p><h3>👥 Who?</h3><p>${L.who}</p><h3>📜 What happened?</h3><p>${L.what}</p><h3>🤩 Cool facts</h3><ul>${L.cool.map(c=>`<li>${c}</li>`).join("")}</ul><h3>💡 Try this</h3><p>${L.tip}</p>
+ <h3>❓ Quiz (⭐ for each first right answer)</h3>${E.quiz.map((q,i)=>`<div class="q" data-i="${i}"><b>${q[0]}</b><br>${q[1].map((a,j)=>`<button data-j="${j}" class="${got[i]&&j===q[2]?"ok":""}">${a}</button>`).join("")}</div>`).join("")}`;
+ $("learnBody").querySelectorAll(".q").forEach(d=>d.querySelectorAll("button").forEach(b=>b.onclick=()=>{const i=+d.dataset.i,j=+b.dataset.j,q=E.quiz[i];if(j===q[2]){b.className="ok";const p=loadPP();p.quiz[k]=p.quiz[k]||{};if(!p.quiz[k][i]){p.quiz[k][i]=1;savePP(p);addStars(1);toast("✅ Correct! ⭐+1")}else toast("✅ Correct!");beep(880)}else{b.className="no";toast("Not quite. Try again! 🙂");beep(200)}}));
+ $("speak").onclick=()=>say(`${E.n}. ${L.when} ${L.who} ${L.what} ${L.cool.join(" ")}`);openOv("learnOv")}
+$("bLearn").onclick=()=>openLearn();$("factLearn").onclick=()=>openLearn();
+// passport
+function openPP(){const p=loadPP();const labDone=LABS.filter(l=>p.lab[l.k]).length;
+ $("ppBody").innerHTML=`<div class="grid">${ERA_ORDER.map(k=>{const E=ERAS[k],s=p.stamps[k],q=Object.keys(p.quiz[k]||{}).length;return`<div class="stamp ${s?"":"off"}"><span class="e">${E.e}</span>${E.n}<br><small>${E.when}</small><br><small>${s?"✅ Visited":"Not yet"} · Quiz ${q}/${E.quiz.length}</small></div>`}).join("")}</div>
+ <h3>🔬 Lab badges</h3><div class="grid">${LABS.map(l=>`<div class="stamp ${p.lab[l.k]?"":"off"}"><span class="e">${l.e}</span>${l.n}</div>`).join("")}</div><p>${labDone}/${LABS.length} experiments done</p>`;openOv("ppOv")}
+$("bPP").onclick=openPP;
+$("bOutfit").onclick=()=>{eraOutfit=!eraOutfit;buildPlayer();toast(eraOutfit?"👕 Era outfit on!":"👕 Your own outfit")};
+$("bHome").onclick=()=>{location.href="buildworld.html#time"};
+$("bLab").onclick=()=>openLab();
+// ---------- loop ----------
+let last=performance.now(),vw=0,vh=0;
+function resize(){vw=innerWidth;vh=innerHeight;ren.setSize(vw,vh,false);cam.aspect=vw/vh;cam.updateProjectionMatrix()}
+function blocked(x,z,y){for(const s of solids){if(s.walk&&y>=s.top-.6)continue;if(x>s.x0-.35&&x<s.x1+.35&&z>s.z0-.35&&z<s.z1+.35&&y<s.top-.05)return true}return false}
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;if(innerWidth!==vw||innerHeight!==vh)resize();
+ if(av&&cur){let fx=jv.x+(hold.d||hold.arrowright?1:0)-(hold.a||hold.arrowleft?1:0),fz=jv.y+(hold.s||hold.arrowdown?1:0)-(hold.w||hold.arrowup?1:0);const m=Math.min(1,Math.hypot(fx,fz));
+  if(m>.08){const a=Math.atan2(fx,fz)+P.cy;const sp=(ERAS[cur].low?4:5.5)*m;const nx=P.x+Math.sin(a)*sp*dt,nz=P.z+Math.cos(a)*sp*dt;if(!blocked(nx,P.z,P.y))P.x=nx;if(!blocked(P.x,nz,P.y))P.z=nz;P.yaw=a}
+  const R=Math.hypot(P.x,P.z);if(R>BOUND){P.x*=BOUND/R;P.z*=BOUND/R}
+  const gy=groundY(P.x,P.z);P.vy-=(ERAS[cur].low?1.62*2:20)*dt;P.y+=P.vy*dt;if(P.y<gy){P.y=gy;P.vy=0}
+  av.g.position.set(P.x,P.y,P.z);av.g.rotation.y=P.yaw;const sw=m>.08&&P.y<=gy+.01?Math.sin(t*10)*.6*m:0;av.legs.forEach((l,i)=>l.rotation.x=i?-sw:sw);av.arms.forEach((a,i)=>a.rotation.x=i?sw:-sw);
+  const d=7.5,tx=P.x+Math.sin(P.cy)*d*Math.cos(P.cp),ty=P.y+1.6+Math.sin(P.cp)*d,tz=P.z+Math.cos(P.cy)*d*Math.cos(P.cp);cam.position.lerp(new THREE.Vector3(tx,ty,tz),Math.min(1,dt*6));cam.lookAt(P.x,P.y+1.5,P.z);
+  let best=null,bd=99;for(const c of CH){const dd=Math.hypot(c.x-P.x,c.z-P.z);if(dd<c.r&&dd<bd){bd=dd;best=c}if(c.face&&dd<8)c.g.rotation.y=Math.atan2(P.x-c.x,P.z-c.z);c.arms[1].rotation.x=dd<5?-1.2+Math.sin(t*5)*.4:Math.sin(t*1.5+c.x)*.1;if(c.anim)c.anim(t)}
+  if(best!==nearC){nearC=best;$("talk").classList.toggle("hidden",!best);if(best)$("talk").textContent="💬 Talk to "+best.name}
+  for(const u of UPD)u(t,dt)}
+ ren.render(scene,cam);requestAnimationFrame(frame)}
+// ---------- era scenes ----------
+const R=(s=>()=>(s=(s*16807)%2147483647)/2147483647);
+function tree(x,z,h=4,leaf="#2e7d32"){B(.5,h,.5,"#6d4c41",x,0,z,world,true);B(2.6,2.2,2.6,leaf,x,h-.4,z)}
+function palm(x,z){for(let i=0;i<6;i++)B(.45,1,.45,"#8d6e63",x+i*.06,i,z);for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]])B(a?2.2:.6,.25,b?2.2:.6,"#43a047",x+a*1+.36,6,z+b*1);solids.push({x0:x-.3,x1:x+.3,z0:z-.3,z1:z+.3,top:6})}
+function dinoBody(o){const g=new THREE.Group(),c=o.c,add=(w,h,d,cc,x,y,z)=>B(w,h,d,cc||c,x,y,z,g);return{g,add}}
+function dino(type,x,z,ry,lines,name){const {g,add}=dinoBody({c:"#000"});let head=null,tail=null;
+ if(type==="trex"){add(2.2,2.2,4,"#6d8b3a",0,2.6,0);head=new THREE.Group();head.position.set(0,5,2.2);B(1.6,1.4,2.4,"#6d8b3a",0,-.4,.6,head);B(1.5,.4,2,"#f5f5f5",0,-.75,.8,head);B(.25,.25,.1,"#212121",-.5,.55,.8,head);B(.25,.25,.1,"#212121",.5,.55,.8,head);B(.25,.25,.1,"#212121",-.5,.55,.8,head).position.x=-.81;g.add(head);
+  add(1.4,1.6,1.4,"#6d8b3a",0,3.8,1.7);add(.7,2.8,1,"#55702c",-.8,0,0);add(.7,2.8,1,"#55702c",.8,0,0);add(.3,.9,.3,"#6d8b3a",-.6,3.2,2.2);add(.3,.9,.3,"#6d8b3a",.6,3.2,2.2);tail=new THREE.Group();tail.position.set(0,3.2,-2);B(1.2,1.1,3.5,"#6d8b3a",0,0,-1.7,tail);B(.6,.6,2,"#6d8b3a",0,.2,-4.2,tail);g.add(tail)}
+ if(type==="tri"){add(2.4,2,4,"#a1887f",0,1.4,0);for(const[a,b]of[[-.9,1.3],[.9,1.3],[-.9,-1.3],[.9,-1.3]])add(.6,1.5,.6,"#8d6e63",a,0,b);head=new THREE.Group();head.position.set(0,2.4,2.4);B(1.5,1.3,1.6,"#a1887f",0,-.6,.6,head);B(2.6,2.2,.3,"#ff8a65",0,-.4,-.2,head);B(.2,.2,1.2,"#fff8e1",-.45,.2,1.2,head).rotation.x=-.4;B(.2,.2,1.2,"#fff8e1",.45,.2,1.2,head).rotation.x=-.4;B(.15,.15,.6,"#fff8e1",0,-.6,1.5,head);B(.2,.2,.1,"#212121",-.6,.1,1,head);B(.2,.2,.1,"#212121",.6,.1,1,head);g.add(head);tail=new THREE.Group();tail.position.set(0,2,-2);B(.9,.8,2.6,"#a1887f",0,0,-1.2,tail);g.add(tail)}
+ if(type==="stego"){add(2,2,4.4,"#8bc34a",0,1.5,0);for(const[a,b]of[[-.8,1.4],[.8,1.4],[-.8,-1.4],[.8,-1.4]])add(.6,1.6,.6,"#7cb342",a,0,b);for(let i=0;i<5;i++)add(.25,1.2-Math.abs(i-2)*.2,.9,"#ff7043",0,3.5,-1.8+i*.9);head=new THREE.Group();head.position.set(0,2.2,2.4);B(.8,.7,1.2,"#8bc34a",0,-.3,.5,head);B(.15,.15,.1,"#212121",-.3,0,.9,head);B(.15,.15,.1,"#212121",.3,0,.9,head);g.add(head);tail=new THREE.Group();tail.position.set(0,2.4,-2.2);B(.7,.6,2.6,"#8bc34a",0,0,-1.2,tail);B(.15,.15,1,"#fff8e1",-.4,.3,-2.2,tail).rotation.y=.6;B(.15,.15,1,"#fff8e1",.4,.3,-2.2,tail).rotation.y=-.6;g.add(tail)}
+ if(type==="brachio"){add(3,3,6,"#78909c",0,4,0);for(const[a,b]of[[-1.1,2],[1.1,2],[-1.1,-2],[1.1,-2]])add(.9,4,.9,"#607d8b",a,0,b);for(let i=0;i<7;i++)add(1,1.4,1,"#78909c",0,6.2+i*1.3,2.8+i*.35);head=new THREE.Group();head.position.set(0,15.6,5.5);B(1.2,1,2,"#78909c",0,-.4,.4,head);B(.2,.2,.1,"#212121",-.45,0,1.2,head);B(.2,.2,.1,"#212121",.45,0,1.2,head);g.add(head);tail=new THREE.Group();tail.position.set(0,5,-3);B(1.2,1,4,"#78909c",0,0,-2,tail);B(.6,.6,3,"#78909c",0,-.4,-5,tail);g.add(tail)}
+ g.position.set(x,0,z);g.rotation.y=ry;world.add(g);const s={trex:3.4,tri:2.4,stego:2.6,brachio:4.2}[type];solids.push({x0:x-s,x1:x+s,z0:z-s,z1:z+s,top:9});
+ const c={g,arms:[{rotation:{}},{rotation:{}}],name,lines,li:-1,x,z,r:s+3.5,face:false,anim:t=>{if(head)head.rotation.x=Math.sin(t*1.3+x)*.15;if(tail)tail.rotation.y=Math.sin(t*2+z)*.3}};CH.push(c);label(name,x,{trex:8,tri:4.6,stego:5.6,brachio:18}[type],z,.9);return c}
+const BUILD={
+dino(){BOUND=58;const r=R(7);
+ // volcano (sleepy) + lake + ferns
+ CY(4,22,26,"#5d4037",-40,0,-42,world,16,true);CY(3,4.2,1.2,"#ff7043",-40,26,-42);for(let i=0;i<6;i++){const p=SP(1.6+i*.3,"#bdbdbd",-40,29+i*2.4,-42,world,{transparent:true,opacity:.55});UPD.push((t)=>{p.position.y=29+((t*1.5+i*2.4)%14);p.material.opacity=.55-(p.position.y-29)/30})}
+ const lake=new THREE.Mesh(new THREE.CircleGeometry(12,24),mat("#4fc3f7"));lake.rotation.x=-Math.PI/2;lake.position.set(30,.03,-25);world.add(lake);
+ for(let i=0;i<40;i++){const x=(r()-.5)*110,z=(r()-.5)*110;if(Math.hypot(x,z)<10||Math.hypot(x-30,z+25)<14||Math.hypot(x+40,z+42)<24)continue;if(i%3)tree(x,z,3+r()*4,["#2e7d32","#388e3c","#1b5e20"][i%3]);else for(let k=0;k<4;k++)B(.3,1.2,1.4,"#558b2f",x+k*.4-.6,0,z).rotation.y=k}
+ // nest with eggs
+ CY(2,2.4,.5,"#8d6e63",8,0,10);for(let i=0;i<4;i++){const e=SP(.45,"#fff8e1",7.2+i*.55,.8,10+(i%2)*.5);e.scale.y=1.3}label("Dinosaur nest 🥚",8,2.6,10,.8);
+ dino("trex",-14,14,Math.PI*.8,["ROAR! (A friendly roar.) I'm a T. rex: about 40 feet long, as long as a school bus!","My teeth were as big as bananas. I lived about 68 million years ago.","I had tiny arms, but they were strong! Scientists still wonder what I used them for."],"T. rex");
+ dino("tri",14,-6,-.6,["I'm Triceratops: 'three-horned face.' I ate plants.","My big frill and horns helped show off and protect me.","I lived at the same time as T. rex, near the end of the dinosaur age."],"Triceratops");
+ dino("stego",-20,-14,.5,["I'm Stegosaurus! My back plates may have helped show off to friends.","My spiky tail is called a 'thagomizer' (a funny name that started in a cartoon!).","I lived about 150 million years ago, way before T. rex."],"Stegosaurus");
+ dino("brachio",22,22,-2.4,["I'm Brachiosaurus, a long-necked plant-eater!","My neck helped me reach leaves high in the trees, like a giraffe.","Long-necked sauropods were the biggest land animals ever."],"Brachiosaurus");
+ // pterosaurs gliding
+ for(let i=0;i<3;i++){const g=new THREE.Group();B(.6,.5,2,"#8d6e63",0,0,0,g);B(5,.15,1.2,"#a1887f",0,.2,0,g);B(.4,.4,1.2,"#8d6e63",0,.1,1.4,g);world.add(g);UPD.push(t=>{const a=t*.25+i*2.1;g.position.set(Math.cos(a)*(30+i*6),22+i*3+Math.sin(t+i)*1.5,Math.sin(a)*(30+i*6));g.rotation.y=-a;g.rotation.z=Math.sin(t*2+i)*.2})}
+ label("Pteranodon: a flying reptile, not a dinosaur!",0,30,0,1.2);
+ person({name:"Dr. Rosa (paleontologist)",x:3,z:4,shirt:"#c8b27d",pants:"#6d4c41",hair:"#3e2723",hat:"brim",hatc:"#c8b27d",skin:"#a0663d",lines:["Welcome to the age of dinosaurs! I'm Dr. Rosa, a fossil scientist.","Fossils are like nature's photos. Bones, teeth, eggs and even footprints can turn to stone!","Fun fact: birds are living dinosaurs. Next time you see a pigeon, say hi to a dino cousin!","Tap the dinosaurs to hear their facts. They're friendly today!"]});
+ return[0,10,0]},
+egypt(){BOUND=58;const r=R(3);
+ const nile=new THREE.Mesh(new THREE.PlaneGeometry(14,400),mat("#29b6f6"));nile.rotation.x=-Math.PI/2;nile.position.set(44,.03,0);world.add(nile);solids.push({x0:37,x1:51,z0:-200,z1:200,top:3});
+ // felucca boat
+ const boat=new THREE.Group();B(2,.7,5,"#8d6e63",0,0,0,boat);B(.15,5,.15,"#5d4037",0,.7,0,boat);const sail=B(.05,4,2.6,"#fff8e1",0,1.2,.8,boat);boat.position.set(44,.1,0);world.add(boat);UPD.push(t=>{boat.position.z=((t*2)%120)-60});
+ // pyramids
+ const pyr=(cx,cz,n,c="#e0c58a")=>{for(let i=0;i<n;i++){const w=(n-i)*2;B(w,2,w,c,cx,i*2,cz)}solids.push({x0:cx-n,x1:cx+n,z0:cz-n,z1:cz+n,top:n*2})};
+ pyr(-20,-30,14);pyr(8,-40,11);pyr(-38,-6,8);B(1,1,1,"#ffd54f",-20,28,-30);label("Great Pyramid of Giza (for pharaoh Khufu)",-20,32,-30,1.4);
+ // sphinx
+ B(4,3,10,"#d7b77a",-2,0,-14,world,true);B(3.2,3.2,3,"#d7b77a",-2,3,-9.5);B(3.6,2,1.2,"#c9a865",-2,4.5,-10.6);B(1,1.2,3,"#d7b77a",-3.5,0,-7.6);B(1,1.2,3,"#d7b77a",-.5,0,-7.6);label("Great Sphinx",-2,8,-10,1);
+ // obelisk + hieroglyph wall
+ B(1.4,10,1.4,"#cfae6d",14,0,-4,world,true);B(.9,1,.9,"#ffd54f",14,10,-4);
+ const wall=B(10,4,.6,"#e8d3a0",16,0,8,world,true);const glyph=["𓀀","𓁐","𓃀","𓅓","𓆣","𓂀","𓇳","𓈖"];const c=document.createElement("canvas");c.width=512;c.height=200;const g2=c.getContext("2d");g2.fillStyle="#e8d3a0";g2.fillRect(0,0,512,200);g2.fillStyle="#5d4037";g2.font="56px serif";for(let i=0;i<8;i++)g2.fillText(["🦅","👁️","🐍","☀️","🌊","🪲","🦆","🌿"][i],12+(i%4)*125,70+Math.floor(i/4)*90);const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;const pl=new THREE.Mesh(new THREE.PlaneGeometry(9.6,3.8),new THREE.MeshBasicMaterial({map:tx}));pl.position.set(16,2,8.32);world.add(pl);label("Picture-writing wall",16,5,8,.9);
+ // workers moving a block on a sled
+ const sled=new THREE.Group();B(2,.3,2.6,"#8d6e63",0,0,0,sled);B(1.8,1.8,1.8,"#e0c58a",0,.3,0,sled);world.add(sled);UPD.push(t=>{const k=(t*1.2)%30;sled.position.set(-10+k*.3,0,-5-k*.5)});
+ for(let i=0;i<16;i++){const x=30+r()*6,z=(r()-.5)*100;palm(x,z)}for(let i=0;i<8;i++)palm(-50+r()*20,20+r()*30);
+ person({name:"Meri the scribe",x:12,z:4,shirt:"#fafafa",pants:"#fafafa",skin:"#8d5524",hair:"#111111",hairBack:true,lines:["Hello, traveler! I'm Meri, a scribe. I write with hieroglyphs: little pictures for sounds and ideas.","I write on papyrus, a paper made from a plant that grows by the Nile.","Being a scribe means years of practice. There are hundreds of signs to learn!"]});
+ person({name:"Builder Ahmose",x:-6,z:-2,shirt:"#f5e6c8",pants:"#f5e6c8",skin:"#8d5524",hair:"#111111",lines:["Welcome to Giza! I help build the pyramids. We are skilled workers and we get paid in bread and other food.","We move giant stone blocks on wooden sleds, and pour water on the sand so they slide better!","The Great Pyramid has more than 2 million blocks. Teamwork!"]});
+ person({name:"Farmer Nefer",x:30,z:10,shirt:"#a5d6a7",pants:"#fafafa",skin:"#a0663d",hair:"#212121",hairBack:true,dress:"#fafafa",lines:["Every year the Nile floods and leaves rich black mud. That's perfect for growing wheat and barley!","We call our land Kemet, the 'black land,' because of that rich soil."]});
+ return[0,14,0]},
+trail(){BOUND=58;const r=R(11);
+ // North Platte River
+ const riv=new THREE.Mesh(new THREE.PlaneGeometry(400,10),mat("#4fc3f7"));riv.rotation.x=-Math.PI/2;riv.position.set(0,.03,34);world.add(riv);solids.push({x0:-200,x1:200,z0:29,z1:39,top:3});label("North Platte River",0,2,30,1);
+ // trail ruts
+ for(const dz of[-1,1]){const rut=new THREE.Mesh(new THREE.PlaneGeometry(400,.6),mat("#8d6e63"));rut.rotation.x=-Math.PI/2;rut.position.set(0,.04,8+dz);world.add(rut)}
+ // Chimney Rock: cone + spire
+ CY(5,16,14,"#c9a27e",-26,0,-30,world,20,true);CY(2.2,3,12,"#d4b08c",-26,14,-30);CY(1.6,2.2,6,"#c9a27e",-26,26,-30);label("Chimney Rock (about 325 feet tall)",-26,36,-30,1.4);
+ // Scotts Bluff far
+ B(40,16,10,"#b7926b",40,0,-60);B(30,4,8,"#c9a27e",36,16,-60);label("Scotts Bluff (farther west)",40,24,-58,1.2);
+ // grass tufts + sunflowers
+ for(let i=0;i<70;i++){const x=(r()-.5)*110,z=(r()-.5)*50-5;if(Math.abs(z-8)<3)continue;B(.4,.6,.4,i%5?"#9e9d24":"#fdd835",x,0,z)}
+ // covered wagons
+ const wagon=(x)=>{const g=new THREE.Group();B(2,1,4,"#8d6e63",0,.8,0,g);const top=new THREE.Mesh(new THREE.CylinderGeometry(1.25,1.25,4,12,1,true,0,Math.PI),mat("#fafafa",{side:THREE.DoubleSide}));top.rotation.z=Math.PI/2;top.rotation.y=Math.PI/2;top.position.y=1.8;g.add(top);for(const[a,b]of[[-1.05,1.3],[1.05,1.3],[-1.05,-1.3],[1.05,-1.3]]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,.15,12),mat("#5d4037"));w.rotation.z=Math.PI/2;w.position.set(a,.7,b);g.add(w)}
+  for(const s of[-.5,.5]){B(.8,1,1.8,"#6d4c41",s*1.2,.6,4,g);B(.6,.6,.6,"#6d4c41",s*1.2,1.2,5,g);B(.08,.4,.08,"#fff8e1",s*1.2-.25,1.8,5,g);B(.08,.4,.08,"#fff8e1",s*1.2+.25,1.8,5,g)}
+  g.rotation.y=Math.PI/2;g.position.set(x,0,8);world.add(g);return g};
+ const W=[-30,-18,-6].map(wagon);UPD.push((t)=>W.forEach((w,i)=>{w.position.x=((t*1.2+i*12)%80)-40}));
+ // camp: tent + safe campfire + water barrel
+ const tent=new THREE.Mesh(new THREE.ConeGeometry(2.4,3,4),mat("#fff8e1"));tent.position.set(14,1.5,-10);tent.rotation.y=Math.PI/4;world.add(tent);solids.push({x0:12,x1:16,z0:-12,z1:-8,top:3});
+ for(let i=0;i<5;i++)B(.25,.25,1.2,"#5d4037",6,0,-8).rotation.y=i*.6;const fire=new THREE.Mesh(new THREE.ConeGeometry(.5,1.1,6),new THREE.MeshBasicMaterial({color:"#ff9800"}));fire.position.set(6,.6,-8);world.add(fire);UPD.push(t=>fire.scale.y=1+Math.sin(t*12)*.15);
+ CY(.6,.6,1.2,"#8d6e63",9,0,-6,world,10,true);
+ person({name:"Hannah (pioneer)",x:4,z:-5,shirt:"#5c6bc0",pants:"#5c6bc0",dress:"#5c6bc0",hat:"bonnet",skin:"#f5cba7",lines:["Howdy, traveler! We're heading west to Oregon, about 2,000 miles!","We walk beside the wagon most of the day. The oxen go about 15 miles a day.","Look, Chimney Rock! Almost every family writes about it in their diary."]});
+ person({name:"Sam (age 9)",x:8,z:-4,shirt:"#c62828",pants:"#5d4037",hat:"brim",hatc:"#a1887f",skin:"#f5cba7",tall:.8,lines:["My job is gathering buffalo chips. They're dried poop that we burn for the campfire. Really!","I carved my initials in my diary drawing of Chimney Rock.","Some days we cross rivers. The Platte is wide but shallow."]});
+ person({name:"Trail guide Joseph",x:-8,z:-2,shirt:"#8d6e63",pants:"#4e342e",hat:"brim",hatc:"#4e342e",skin:"#c68642",beard:"#4e342e",lines:["Pioneers follow the Platte River across Nebraska. People say it's 'a mile wide and an inch deep.'","The Pawnee and Lakota and other Native nations lived on these lands long before the wagons came.","Next big landmark: Scotts Bluff. Then the mountains!"]});
+ return[0,-1,0]},
+lincoln(){BOUND=58;const r=R(5);
+ // Gettysburg dedication: platform, flags, crowd (peaceful ceremony, November 1863)
+ B(10,1.2,6,"#8d6e63",0,0,-14,world,true);solids[solids.length-1].walk=true;B(10,.2,6,"#a1887f",0,1.2,-14);for(const x of[-5,5]){B(.2,6,.2,"#5d4037",x,1.2,-16.5);B(1.6,1,.05,"#1565c0",x+.8,6,-16.5);B(1.6,.12,.06,"#e53935",x+.8,5.6,-16.48)}
+ label("Gettysburg, Pennsylvania · November 19, 1863",0,9,-16,1.3);
+ for(let i=0;i<22;i++){const x=-12+(i%11)*2.4,z=-4+Math.floor(i/11)*2.2;const g=new THREE.Group();const cc=["#5d4037","#212121","#37474f","#6d4c41","#1a237e"][i%5];B(.6,1.6,.4,cc,0,0,0,g);B(.45,.45,.45,["#f5cba7","#c68642","#8d5524","#e0ac69"][i%4],0,1.6,0,g);if(i%3===0)B(.5,.35,.5,"#212121",0,2.05,0,g);g.position.set(x+r()*.5,0,z);g.rotation.y=Math.PI;world.add(g)}
+ // Lincoln on the platform
+ person({name:"Abraham Lincoln",x:0,y:1.4,z:-14,shirt:"#212121",pants:"#212121",hat:"top",beard:"#2b1b14",hair:"#2b1b14",skin:"#e0ac69",tall:1.25,face:true,r:6,lines:["Hello! I'm Abraham Lincoln, the 16th President of the United States.","'Four score and seven years ago...' That's how my Gettysburg Address begins. 'Four score and seven' means 87 years!","I said our nation should have 'a new birth of freedom' and a 'government of the people, by the people, for the people.'","On January 1, 1863, I signed the Emancipation Proclamation, declaring enslaved people in the Confederate states free.","I didn't go to school much. I taught myself by reading every book I could borrow!"]});
+ person({name:"Frederick Douglass",x:-7,z:-10,shirt:"#37474f",pants:"#212121",hair:"#e0e0e0",beard:"#e0e0e0",skin:"#6b3e26",lines:["I'm Frederick Douglass. I escaped slavery in 1838 and became a writer and speaker for freedom.","I met President Lincoln at the White House to talk about fairness for Black soldiers.","Reading opened the door to freedom for me. Keep reading!"]});
+ // Underground Railroad: farmhouse safe house with a lantern, quilt, North Star
+ B(8,4,6,"#a1887f",26,0,16,world,true);const roof=new THREE.Mesh(new THREE.ConeGeometry(6,3,4),mat("#6d4c41"));roof.position.set(26,5.5,16);roof.rotation.y=Math.PI/4;roof.scale.z=.8;world.add(roof);
+ B(1.4,1.4,.1,"#4fc3f7",23.5,1.6,12.96);const lamp=new THREE.Mesh(new THREE.BoxGeometry(.5,.6,.2),new THREE.MeshBasicMaterial({color:"#ffd54f"}));lamp.position.set(23.5,2.2,12.9);world.add(lamp);UPD.push(t=>lamp.material.color.setHSL(.13,1,.55+Math.sin(t*3)*.08));
+ B(2,2,.1,"#e91e63",28,1,12.9);B(1,1,.12,"#ffeb3b",28,1.5,12.9);label("A safe house on the Underground Railroad",26,9,16,1.2);
+ const star=new THREE.Mesh(new THREE.OctahedronGeometry(1.4),new THREE.MeshBasicMaterial({color:"#fff59d"}));star.position.set(26,30,60);world.add(star);UPD.push(t=>star.rotation.y=t);label("⭐ North Star: freedom seekers followed it north",26,26,58,1.3);
+ person({name:"Harriet Tubman",x:20,z:10,shirt:"#6d4c41",pants:"#4e342e",dress:"#5d4037",hat:"scarf",scarf:"#c62828",skin:"#6b3e26",lantern:true,lines:["I'm Harriet Tubman. I escaped slavery in 1849 and found freedom in Philadelphia.","Then I came back about 13 times to guide about 70 family members and friends to freedom.","The Underground Railroad wasn't a real train. It was secret routes and kind people who hid freedom seekers in safe houses.","We followed the North Star to find our way north at night. I never lost a passenger!"]});
+ // town buildings + trees
+ for(let i=0;i<5;i++){B(6,5+i%3,6,["#c62828","#8d6e63","#bcaaa4","#a1887f","#795548"][i],-40+i*8,0,30,world,true)}for(let i=0;i<20;i++){const x=(r()-.5)*110,z=(r()-.5)*110;if(Math.hypot(x,z+6)>22&&Math.hypot(x-26,z-16)>10&&z<26)tree(x,z,4,"#558b2f")}
+ return[0,8,0]},
+wright(){BOUND=58;const r=R(19);
+ const sea=new THREE.Mesh(new THREE.PlaneGeometry(60,400),mat("#4fc3f7"));sea.rotation.x=-Math.PI/2;sea.position.set(70,.03,0);world.add(sea);
+ for(let i=0;i<12;i++){const d=new THREE.Mesh(new THREE.SphereGeometry(6+r()*6,10,8,0,Math.PI*2,0,Math.PI/2),mat("#e2cf98"));d.position.set(-30-r()*25,0,(r()-.5)*100);d.scale.y=.4;world.add(d)}
+ label("Kill Devil Hills, near Kitty Hawk, North Carolina",-35,10,0,1.4);
+ // camp sheds
+ B(8,4,5,"#a1887f",-14,0,18,world,true);B(8.6,.4,5.6,"#6d4c41",-14,4,18);B(6,3.4,4,"#bcaaa4",-4,0,22,world,true);label("The Wrights' camp",-10,7,18,1);
+ // bicycle
+ const bike=new THREE.Group();for(const z of[-.6,.6]){const w=new THREE.Mesh(new THREE.TorusGeometry(.45,.06,6,16),mat("#212121"));w.position.set(0,.5,z);w.rotation.y=Math.PI/2;bike.add(w)}B(.08,.08,1.2,"#c62828",0,.8,0,bike);B(.08,.5,.08,"#c62828",0,.6,.4,bike);bike.position.set(-9,0,14);world.add(bike);label("Their bicycle shop paid for the airplane!",-9,2.4,14,.8);
+ // launching rail
+ B(.3,.2,18,"#8d6e63",0,0,-2);
+ // Wright Flyer
+ const F=new THREE.Group();for(const y of[0,1.4]){B(12,.1,1.8,"#f5f0e1",0,y+.8,0,F)}for(const x of[-5.6,-3,-1,1,3,5.6]){B(.08,1.4,.08,"#8d6e63",x,.8,-.8,F);B(.08,1.4,.08,"#8d6e63",x,.8,.8,F)}B(2.4,.08,.6,"#f5f0e1",0,1.4,3.4,F);B(2.4,.08,.6,"#f5f0e1",0,1.8,3.4,F);B(.08,.08,3,"#8d6e63",.6,1.2,1.9,F);B(.08,.08,3,"#8d6e63",-.6,1.2,1.9,F);B(1,1.4,.08,"#f5f0e1",.0,1,-3.2,F);B(1,1.4,.08,"#f5f0e1",.0,1,-3.6,F);
+ const props=[];for(const x of[-1.6,1.6]){const p=B(.1,2,.12,"#a1887f",x,.6,-1.2,F);props.push(p)}B(.6,.5,.7,"#757575",.6,.9,-.2,F);
+ const pilot=new THREE.Group();B(.4,.3,1.4,"#3e2723",0,0,0,pilot);B(.36,.36,.36,"#f5cba7",0,.05,.85,pilot);B(.4,.15,.4,"#3e2723",0,.25,.85,pilot);pilot.position.set(-.3,1.05,.1);F.add(pilot);
+ F.position.set(0,0,-6);world.add(F);label("1903 Wright Flyer",0,5,-6,1);
+ let fly=null;TAPS.push({o:F,f:()=>startFly()});$("bAct").textContent="▶️ Watch the first flight!";$("bAct").classList.remove("hidden");$("bAct").onclick=()=>startFly();
+ function startFly(){if(fly)return;fly={t0:performance.now()/1000};toast("🛫 10:35 a.m., December 17, 1903. Orville is the pilot!",4000);beep(400,.3)}
+ UPD.push((t,dt)=>{props.forEach(p=>p.rotation.z+=dt*(fly?30:0));if(!fly)return;const e=t-fly.t0;if(e<12){const k=e/12;F.position.z=-6+k*36.6;F.position.y=Math.min(1,e/1.5)*(2.4+Math.sin(e*2.2)*.9);$("era").innerHTML=`🛩️ First flight!<br><span style="color:#ffd54f">⏱️ ${e.toFixed(1)} s · ${Math.round(k*120)} ft</span>`}else{F.position.y=0;if(!fly.done){fly.done=1;toast("🎉 12 seconds, 120 feet. Humans can fly! ⭐+1",4000);const p=loadPP();if(!p.lab.watchFlight){p.lab.watchFlight=1;savePP(p);addStars(1)}setTimeout(()=>{F.position.set(0,0,-6);fly=null;$("era").innerHTML=`${ERAS.wright.e} ${ERAS.wright.n}<br><span style="color:#ffd54f">${ERAS.wright.when}</span>`},3500)}}});
+ person({name:"Orville Wright",x:4,z:-10,shirt:"#37474f",pants:"#263238",hair:"#3e2723",stache:"#3e2723",hat:"cap",hatc:"#5d4037",skin:"#f5cba7",lines:["Hi! I'm Orville. Today I'll pilot our Flyer. I lie on my tummy on the bottom wing to steer!","My brother and I tested ideas with kites, gliders and our own wind tunnel.","Tap 'Watch the first flight!' and count the seconds with me!"]});
+ person({name:"Wilbur Wright",x:-4,z:-10,shirt:"#455a64",pants:"#263238",hair:"#9e9e9e",hat:"cap",hatc:"#424242",skin:"#f5cba7",lines:["I'm Wilbur. I won the coin toss to try first on December 14, but the Flyer stalled.","We figured out 'three-axis control': steering up and down, left and right, and tilting the wings.","Our last flight today will go 852 feet in 59 seconds!"]});
+ person({name:"John T. Daniels",x:7,z:-2,shirt:"#1a237e",pants:"#263238",hat:"cap",hatc:"#1a237e",skin:"#e0ac69",lines:["Orville set up his camera and asked me to squeeze the bulb when the Flyer took off. I'd never taken a photo before!","My photo of the first flight became one of the most famous pictures ever."]});
+ B(.15,1.4,.15,"#5d4037",6,0,0);B(.6,.5,.7,"#212121",6,1.4,0);
+ return[3,-16,Math.PI]},
+moon(){BOUND=70;const r=R(23);
+ // stars, Earth
+ const sg=new THREE.BufferGeometry(),pts=[];for(let i=0;i<900;i++){const a=r()*Math.PI*2,b=r()*.9+.05,R2=500;pts.push(Math.cos(a)*Math.cos(b)*R2,Math.sin(b)*R2,Math.sin(a)*Math.cos(b)*R2)}sg.setAttribute("position",new THREE.Float32BufferAttribute(pts,3));world.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:1.6,sizeAttenuation:false})));
+ const earth=SP(14,"#1e88e5",-120,90,-260,world,{});for(let i=0;i<7;i++){const c=SP(4+r()*3,"#43a047",0,0,0,earth,{});c.position.set((r()-.5)*18,(r()-.5)*18,10);c.scale.z=.3}const cl=SP(14.4,"#ffffff",0,0,0,earth,{transparent:true,opacity:.25});label("Earth (about 239,000 miles away)",-120,70,-260,6);
+ // craters
+ for(let i=0;i<40;i++){const x=(r()-.5)*140,z=(r()-.5)*140;if(Math.hypot(x,z)<14)continue;const s=1+r()*4;const c=new THREE.Mesh(new THREE.CylinderGeometry(s,s*1.2,.2,16),mat("#757575"));c.position.set(x,.02,z);world.add(c);const rim=new THREE.Mesh(new THREE.TorusGeometry(s*1.1,.25,4,16),mat("#bdbdbd"));rim.rotation.x=Math.PI/2;rim.position.set(x,.1,z);world.add(rim)}
+ for(let i=0;i<25;i++)B(.6+r(),.4+r()*.6,.6+r(),"#8d8d8d",(r()-.5)*120,0,(r()-.5)*120);
+ // Eagle lunar module
+ const E=new THREE.Group();const gold=mat("#ffb300");const base=new THREE.Mesh(new THREE.BoxGeometry(3.6,2,3.6),gold);base.position.y=2.4;E.add(base);for(const[a,b]of[[1,1],[-1,1],[1,-1],[-1,-1]]){B(.15,2.6,.15,"#bdbdbd",a*2.4,0,b*2.4,E).rotation.set(b*.3,0,-a*.3);CY(.5,.5,.12,"#bdbdbd",a*2.9,0,b*2.9,E)}
+ const top=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2.2,2.6,8),mat("#cfd8dc"));top.position.y=4.7;E.add(top);B(.8,.8,.05,"#263238",0,4.8,2.05,E);B(1,2.4,.6,"#bdbdbd",0,0,2.4,E);E.position.set(-8,0,-10);world.add(E);solids.push({x0:-11,x1:-5,z0:-13,z1:-7,top:6});label("Lunar Module 'Eagle'",-8,8,-10,1);
+ // flag
+ B(.1,4,.1,"#e0e0e0",4,0,-12);const fc=document.createElement("canvas");fc.width=190;fc.height=100;const g=fc.getContext("2d");for(let i=0;i<13;i++){g.fillStyle=i%2?"#fff":"#b22234";g.fillRect(0,i*100/13,190,100/13+.5)}g.fillStyle="#3c3b6e";g.fillRect(0,0,76,54);g.fillStyle="#fff";for(let i=0;i<30;i++)g.fillRect(5+(i%6)*12,4+Math.floor(i/6)*10,3,3);const ft=new THREE.CanvasTexture(fc);ft.colorSpace=THREE.SRGBColorSpace;const fl=new THREE.Mesh(new THREE.PlaneGeometry(2.6,1.4),new THREE.MeshBasicMaterial({map:ft,side:THREE.DoubleSide}));fl.position.set(5.3,3.2,-12);world.add(fl);B(2.6,.06,.06,"#e0e0e0",5.3,3.9,-12);
+ // footprints trail
+ for(let i=0;i<14;i++)B(.3,.03,.5,"#616161",-5+i*.7+(i%2)*.25,0,-6+i*.5);
+ // plaque
+ B(1.6,1,.1,"#bdbdbd",-6,1.2,-7.2);label("'We came in peace for all mankind'",-6,3.2,-7,.8);
+ // Columbia orbiting overhead
+ const col=new THREE.Group();CY(.6,1.2,1.6,"#e0e0e0",0,0,0,col);CY(1.2,1.2,2.2,"#bdbdbd",0,-2.2,0,col);col.rotation.x=Math.PI/2;world.add(col);UPD.push(t=>{const a=t*.08;col.position.set(Math.cos(a)*90,70,Math.sin(a)*90-40)});label("Michael Collins in 'Columbia' (orbiting)",0,64,-40,3);
+ person({name:"Neil Armstrong",x:0,z:-6,helmet:true,shirt:"#eeeeee",pants:"#eeeeee",skin:"#f5cba7",lines:["That's one small step for man, one giant leap for mankind!","I was the first person to walk on the Moon, on July 20, 1969.","Try jumping! Moon gravity is about one-sixth of Earth's."]});
+ person({name:"Buzz Aldrin",x:6,z:-8,helmet:true,shirt:"#eeeeee",pants:"#eeeeee",skin:"#f5cba7",lines:["I'm Buzz Aldrin! I stepped onto the Moon about 20 minutes after Neil. 'Magnificent desolation!'","We set up science experiments and collected about 47 pounds of Moon rocks.","With no wind here, our footprints can last a very, very long time."]});
+ return[0,6,0]},
+lab(){BOUND=26;
+ // workshop room
+ B(56,.2,56,"#bcaaa4",0,0,0);for(const[x,z,w,d]of[[0,-28,56,1],[0,28,56,1],[-28,0,1,56],[28,0,1,56]])B(w,8,d,"#efebe9",x,0,z,world,true);
+ B(14,4,.2,"#37474f",0,2,-27.3);label("🔬 Inventors Lab",0,10,-26,1.6);
+ const st=(x,z,e,n,k)=>{const g=new THREE.Group();B(4,1.2,2.4,"#8d6e63",0,0,0,g);B(4.2,.2,2.6,"#a1887f",0,1.2,0,g);const ic=SP(.5,"#ffeb3b",0,1.9,0,g,{});g.position.set(x,0,z);world.add(g);solids.push({x0:x-2,x1:x+2,z0:z-1.2,z1:z+1.2,top:1.4});label(e+" "+n,x,3.6,z,.9);TAPS.push({o:g,f:()=>openLab(k)});UPD.push(t=>ic.position.y=1.9+Math.sin(t*2+x)*.15)};
+ LABS.forEach((l,i)=>st(-15+(i%4)*10,i<4?-12:4,l.e,l.n,l.k));
+ // giant bulb sculpture + timeline wall
+ SP(2,"#fff59d",18,6,18,world,{});CY(.8,.8,1.4,"#9e9e9e",18,3.6,18);label("💡",18,9,18,.6);
+ const tw=B(18,3,.2,"#ffe082",-14,2,27.3);label("🕰️ Invention Timeline (tap!)",-14,6,26.5,1.2);TAPS.push({o:tw,f:()=>openLab("timeline")});
+ person({name:"Professor Spark",x:0,z:-4,shirt:"#fafafa",pants:"#5e35b1",hair:"#9e9e9e",stache:"#9e9e9e",skin:"#c68642",lines:["Welcome to the Inventors Lab! Every table has a hands-on experiment.","Inventions are teamwork. Even famous inventors built on other people's ideas!","Try the timeline on the back wall: can you put inventions in order?","Tip: tap any glowing table to start an experiment."]});
+ person({name:"Ada (junior inventor)",x:8,z:14,shirt:"#ec407a",pants:"#283593",hair:"#3e2723",hairBack:true,skin:"#8d5524",tall:.85,lines:["I love making circuits! A circuit is a loop that electricity travels around.","My favorite experiment is the electromagnet. More wire wraps make it stronger!","Did you know a US penny isn't magnetic? Try it at the magnet table!"]});
+ return[0,12,0]}};
+ERAS.bigbang={n:"The Big Bang",e:"💥",when:"About 13.8 billion years ago",set:"astronaut",sky:"#05030f",ground:"#120a2a",low:true,
+ fact:"Everything in the universe (every star, planet and atom) started out squeezed together, then began expanding about 13.8 billion years ago!",
+ learn:{when:"Scientists say the universe began about 13.8 billion years ago. That's 13,800 million years!",
+  who:"No people yet: just energy and tiny particles. Scientists figured this out by studying light from far-away galaxies and a faint glow left over from the early universe.",
+  what:"The universe started very hot and tiny and began to expand. After about 380,000 years it cooled enough for the first atoms to form, mostly hydrogen and helium. Gravity pulled gas into clouds, and the first stars lit up. Much later, about 4.6 billion years ago, our Sun formed, and Earth formed soon after.",
+  cool:["The Big Bang wasn't an explosion in space. Space itself started stretching, and it's still expanding today!","Hydrogen and helium are still the most common elements in the universe.","Many atoms in your body, like the carbon and oxygen, were made inside stars long ago. You're made of star stuff!","The faint leftover glow from the early universe is called the cosmic microwave background."],
+  tip:"Blow up a balloon with dots drawn on it: as it grows, every dot moves away from every other dot, just like galaxies!"},
+ quiz:[["About how long ago did the universe begin?",["13.8 billion years ago","1,000 years ago","Yesterday"],0],["What were the first atoms mostly?",["Hydrogen and helium","Gold and silver","Iron"],0],["About when did our Sun form?",["4.6 billion years ago","In 1969","13.8 billion years ago"],0]]};
+ERAS.evolution={n:"Life Begins!",e:"🦠",when:"About 3.5 billion years ago to today",set:"explorer",sky:"#a5d6e8",ground:"#8bc34a",
+ fact:"The first living things were tiny single cells in the ocean, more than 3.5 billion years ago. Walk the path to see life change over time!",
+ learn:{when:"Life started in the ocean more than 3.5 billion years ago and has been changing ever since.",
+  who:"Tiny microbes first, then sea creatures, fish, plants and animals on land, dinosaurs, mammals and finally people.",
+  what:"Over very long times, living things slowly change from generation to generation. This is called evolution. Fish appeared about 500 million years ago. About 375 million years ago some fish with leg-like fins started crawling onto land. Dinosaurs appeared about 230 million years ago, the first small mammals about 200 million years ago, and modern humans about 300,000 years ago.",
+  cool:["For about 3 billion years, almost all life was too small to see without a microscope!","Tiktaalik was a fish with a neck and leg-like fins. It lived about 375 million years ago.","The first mammals were small, about the size of a mouse.","If Earth's whole history were one day, humans would show up in the last few seconds before midnight!"],
+  tip:"Look at your hand: it has the same kinds of bones as a whale's flipper and a bat's wing. That's a clue we're all related!"},
+ quiz:[["Where did life begin?",["In the ocean","On the Moon","In a city"],0],["What do we call the slow change of living things over many generations?",["Evolution","Erosion","Electricity"],0],["Which came first?",["Fish","Dinosaurs","People"],0]]};
+ERA_ORDER.unshift("bigbang","evolution");
+BUILD.bigbang=function(){BOUND=50;const r=R(41);
+ const sg=new THREE.BufferGeometry(),pts=[];for(let i=0;i<800;i++){const a=r()*Math.PI*2,b=(r()-.3)*1.4,R2=400;pts.push(Math.cos(a)*Math.cos(b)*R2,Math.sin(b)*R2,Math.sin(a)*Math.cos(b)*R2)}sg.setAttribute("position",new THREE.Float32BufferAttribute(pts,3));world.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:1.4,sizeAttenuation:false})));
+ // expanding fireball loop with particles flying outward
+ const core=SP(2,"#fff59d",0,14,-30,world,{transparent:true,opacity:.9});const parts=[];for(let i=0;i<120;i++){const p=SP(.25,["#ff8a65","#fff176","#81d4fa","#ce93d8"][i%4],0,14,-30,world,{});const d=new THREE.Vector3(r()-.5,r()-.5,r()-.5).normalize();parts.push({p,d,s:4+r()*8})}
+ UPD.push(t=>{const k=(t%10)/10;core.scale.setScalar(1+k*5);core.material.opacity=.95-k*.85;parts.forEach(q=>q.p.position.set(q.d.x*q.s*k*6,14+q.d.y*q.s*k*6,-30+q.d.z*q.s*k*6))});
+ label("💥 The universe begins: about 13.8 billion years ago",0,26,-30,1.6);
+ // first atoms: hydrogen (1p + 1e) and helium (2p2n + 2e)
+ const atom=(x,z,n,name,txt)=>{const g=new THREE.Group();for(let i=0;i<n;i++)SP(.45,i%2?"#90a4ae":"#ef5350",(i%2-.5)*.5,(i>1?.4:0),0,g,{});const es=[];for(let i=0;i<(n>1?2:1);i++){const e=SP(.25,"#4fc3f7",0,0,0,g,{});es.push(e)}const ring=new THREE.Mesh(new THREE.TorusGeometry(2,.04,6,40),new THREE.MeshBasicMaterial({color:"#80deea"}));g.add(ring);g.position.set(x,3,z);world.add(g);label(name,x,6,z,.9);UPD.push(t=>es.forEach((e,i)=>{const a=t*3+i*Math.PI;e.position.set(Math.cos(a)*2,Math.sin(a)*2,0)}));TAPS.push({o:g,f:()=>toast(txt,4000)})};
+ atom(-12,-6,1,"Hydrogen atom (H)","Hydrogen: 1 proton and 1 electron. It formed about 380,000 years after the Big Bang!");atom(-4,-10,4,"Helium atom (He)","Helium: 2 protons, 2 neutrons and 2 electrons. Balloons float with helium!");
+ // star nursery + first stars
+ for(let i=0;i<5;i++){const c=SP(4+r()*3,"#7e57c2",22+r()*10,8+r()*8,-14+r()*10,world,{transparent:true,opacity:.18})}const st=SP(1.6,"#ffffff",26,12,-10,world,{});UPD.push(t=>st.scale.setScalar(1+Math.sin(t*3)*.1));label("✨ First stars: gas pulled together by gravity",26,18,-10,1.2);
+ // Sun and baby Earth
+ const sunM=SP(5,"#ffb300",-26,10,10,world,{});const earth=SP(1.2,"#1e88e5",0,0,0,world,{});UPD.push(t=>{earth.position.set(-26+Math.cos(t*.4)*12,10,10+Math.sin(t*.4)*12)});label("☀️ Sun + 🌍 Earth form: about 4.6 billion years ago",-26,18,10,1.3);
+ person({name:"Cosmo (space guide)",x:2,z:2,helmet:true,shirt:"#7e57c2",pants:"#4527a0",skin:"#c68642",lines:["Welcome to the very beginning, about 13.8 billion years ago! I'm Cosmo.","Space itself started stretching, and it's still expanding today.","After about 380,000 years, the first atoms formed: mostly hydrogen and helium. Tap the atoms!","You're made of star stuff! Atoms like carbon and oxygen were made inside stars."]});
+ return[0,14,0]};
+BUILD.evolution=function(){BOUND=58;const r=R(51);
+ // a walking path through time (start: ocean, end: people)
+ for(let i=0;i<12;i++)B(4,.08,5,"#d7ccc8",0,0,40-i*7);
+ const sign=(z,t,x=4)=>{B(.2,2.4,.2,"#6d4c41",x,0,z);label(t,x,3.2,z,1)};
+ // ocean with cells
+ const sea=new THREE.Mesh(new THREE.CircleGeometry(12,24),mat("#26a69a"));sea.rotation.x=-Math.PI/2;sea.position.set(-14,.03,38);world.add(sea);for(let i=0;i<20;i++){const c=SP(.35+r()*.3,"#c6ff00",-14+(r()-.5)*16,.4,38+(r()-.5)*16,world,{transparent:true,opacity:.8});const p0=c.position.clone();UPD.push(t=>{c.position.x=p0.x+Math.sin(t+i)*.4;c.position.y=.4+Math.abs(Math.sin(t*1.5+i))*.3})}
+ sign(38,"🦠 First life: tiny cells, 3.5+ billion years ago");
+ // fish pond
+ const pond=new THREE.Mesh(new THREE.CircleGeometry(7,20),mat("#29b6f6"));pond.rotation.x=-Math.PI/2;pond.position.set(-12,.03,20);world.add(pond);for(let i=0;i<5;i++){const f=new THREE.Group();B(.5,.6,1.2,"#ff7043",0,0,0,f);B(.1,.5,.4,"#ff7043",0,0,-.7,f);world.add(f);UPD.push(t=>{const a=t*.8+i*1.3;f.position.set(-12+Math.cos(a)*4,.3,20+Math.sin(a)*4);f.rotation.y=-a})}
+ sign(22,"🐟 Fish: about 500 million years ago");
+ // Tiktaalik crawling out
+ const tk=new THREE.Group();B(1,.6,3,"#8d6e63",0,.3,0,tk);B(.9,.5,1,"#8d6e63",0,.4,1.8,tk);B(.8,.15,.4,"#6d4c41",-.6,.1,.8,tk);B(.8,.15,.4,"#6d4c41",.6,.1,.8,tk);tk.position.set(-6,0,12);tk.rotation.y=1.2;world.add(tk);UPD.push(t=>tk.position.x=-6+Math.sin(t*.5)*1);
+ sign(10,"🦎 Onto land (Tiktaalik): about 375 million years ago");
+ // ferns & early land plants
+ for(let i=0;i<10;i++)B(.3,1.4,1.4,"#558b2f",-16+r()*8,0,6+r()*6).rotation.y=r()*3;
+ // small early dinosaur
+ const dn=new THREE.Group();B(.9,1,2,"#7cb342",0,1,0,dn);B(.6,.6,.9,"#7cb342",0,1.8,1.2,dn);B(.3,1,.3,"#689f38",-.3,0,0,dn);B(.3,1,.3,"#689f38",.3,0,0,dn);B(.4,.4,1.8,"#7cb342",0,1.1,-1.6,dn);dn.position.set(-8,0,-4);world.add(dn);UPD.push(t=>{dn.position.z=-4+Math.sin(t)*2;dn.rotation.y=Math.cos(t)>0?0:Math.PI});
+ sign(-4,"🦖 Dinosaurs: about 230 million years ago");
+ // first mammal (mouse-sized) in a burrow
+ const mm=new THREE.Group();B(.5,.35,.7,"#8d6e63",0,.2,0,mm);B(.3,.3,.3,"#8d6e63",0,.35,.45,mm);B(.1,.1,.5,"#8d6e63",0,.25,-.55,mm);mm.position.set(-6,0,-16);world.add(mm);UPD.push(t=>mm.position.x=-6+Math.sin(t*3)*.6);CY(.8,1,.3,"#5d4037",-7.5,0,-16);
+ sign(-16,"🐭 First mammals (tiny!): about 200 million years ago");
+ // mammoth (ice age mammals)
+ const mo=new THREE.Group();B(2.4,2.2,3.6,"#795548",0,1.6,0,mo);B(1.6,1.6,1.4,"#795548",0,2.6,2.2,mo);B(.4,1.8,.4,"#6d4c41",0,1.2,3,mo);for(const[a,b]of[[-.8,1.2],[.8,1.2],[-.8,-1.2],[.8,-1.2]])B(.6,1.6,.6,"#6d4c41",a,0,b,mo);B(.2,.2,1.6,"#fff8e1",-.6,2,3,mo).rotation.x=.6;B(.2,.2,1.6,"#fff8e1",.6,2,3,mo).rotation.x=.6;mo.position.set(-14,0,-26);mo.rotation.y=.8;world.add(mo);
+ sign(-26,"🦣 Ice Age mammals like mammoths (mammoth fossils are found in Nebraska!)");
+ // early humans camp
+ for(let i=0;i<5;i++)B(.25,.25,1.2,"#5d4037",-8,0,-38).rotation.y=i*.6;const fire=new THREE.Mesh(new THREE.ConeGeometry(.5,1.1,6),new THREE.MeshBasicMaterial({color:"#ff9800"}));fire.position.set(-8,.6,-38);world.add(fire);UPD.push(t=>fire.scale.y=1+Math.sin(t*12)*.15);
+ const cave=B(10,6,6,"#757575",-16,0,-44,world,true);B(3,3.4,.2,"#212121",-14,0,-40.9);
+ sign(-38,"🧑 Modern humans: about 300,000 years ago");
+ person({name:"Early human artist",x:-11,z:-36,shirt:"#8d6e63",pants:"#6d4c41",hair:"#3e2723",hairBack:true,skin:"#8d5524",lines:["Hello! We make tools from stone and paint animals on cave walls.","We use fire to stay warm and cook food.","People like us (Homo sapiens) appeared about 300,000 years ago."]});
+ person({name:"Guide Gaia",x:3,z:34,shirt:"#43a047",pants:"#2e7d32",hair:"#5d4037",hairBack:true,skin:"#e0ac69",hat:"brim",hatc:"#a5d6a7",lines:["Hi! I'm Gaia. Walk down this path and travel through billions of years of life!","Living things change slowly over many, many generations. That's called evolution.","For about 3 billion years, nearly all life was too tiny to see!","At the end of the path you'll meet early humans. Then hop to the dinosaurs in the Time Machine!"]});
+ return[0,46,0]};
+// ---------- Inventors Lab ----------
+const LABS=[{k:"circuit",e:"💡",n:"Light a bulb"},{k:"series",e:"🔀",n:"Series vs parallel"},{k:"emag",e:"🧲",n:"Electromagnet"},{k:"static",e:"🎈",n:"Static electricity"},{k:"lever",e:"🏗️",n:"Levers & pulleys"},{k:"magnet",e:"🧭",n:"Magnets"}];
+const TABS=[{k:"timeline",e:"🕰️",n:"Timeline"},...LABS];
+let labTab="timeline";
+function labDone(k,msg){const p=loadPP();if(!p.lab[k]){p.lab[k]=1;savePP(p);addStars(1);toast("🏅 "+(msg||"Experiment complete!")+" ⭐+1",3200);beep(880,.15)}}
+function openLab(k){if(k)labTab=k;openOv("lab");renderLab()}
+function renderLab(){const p=loadPP();$("labTabs").innerHTML=TABS.map(t=>`<button data-k="${t.k}" class="${t.k===labTab?"on":""}">${t.e} ${t.n}${p.lab[t.k]?" ✅":""}</button>`).join("");$("labTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{labTab=b.dataset.k;renderLab()});
+ const L=$("labBody");L.innerHTML="";({timeline:labTimeline,circuit:labCircuit,series:labSeries,emag:labEmag,static:labStatic,lever:labLever,magnet:labMagnet})[labTab](L)}
+// --- timeline: drag (or ▲▼) to put inventions in order
+let tlSet=null;
+function labTimeline(L){if(!tlSet){const s=[...INV].sort(()=>Math.random()-.5).slice(0,6);tlSet=s}
+ L.innerHTML=`<p>Drag the cards (or use ▲▼) to put these inventions in order, <b>oldest at the top</b>. Then tap <b>Check</b>!</p><ul class="tl" id="tl">${tlSet.map(c=>`<li data-k="${c.k}"><span class="em">${c.e}</span><span class="tx"><b>${c.n}</b><small>${c.who}</small></span><span class="yr"></span><span class="mv"><button data-m="-1">▲</button><button data-m="1">▼</button></span></li>`).join("")}</ul>
+ <button id="tlCheck" style="background:#66bb6a">✅ Check</button> <button id="tlNew">🔀 New set</button><div id="tlMsg" class="why hidden"></div>`;
+ const ul=$("tl");const order=()=>[...ul.children].map(li=>li.dataset.k);
+ ul.querySelectorAll(".mv button").forEach(b=>b.addEventListener("click",e=>{const li=b.closest("li"),m=+b.dataset.m;if(m<0&&li.previousElementSibling)ul.insertBefore(li,li.previousElementSibling);if(m>0&&li.nextElementSibling)ul.insertBefore(li.nextElementSibling,li);clearMarks()}));
+ const clearMarks=()=>ul.querySelectorAll("li").forEach(li=>{li.classList.remove("ok","no");li.querySelector(".yr").textContent=""});
+ let drag=null;
+ ul.querySelectorAll("li").forEach(li=>{li.addEventListener("pointerdown",e=>{if(e.target.closest(".mv"))return;e.preventDefault();drag={li,y0:e.clientY,id:e.pointerId};li.setPointerCapture(e.pointerId);li.classList.add("drag");clearMarks()});
+  li.addEventListener("pointermove",e=>{if(!drag||drag.li!==li)return;const dy=e.clientY-drag.y0;li.style.transform=`translateY(${dy}px)`;const h=li.offsetHeight+12;
+   if(dy>h*.6&&li.nextElementSibling){ul.insertBefore(li.nextElementSibling,li);drag.y0+=h;li.style.transform=`translateY(${e.clientY-drag.y0}px)`}
+   else if(dy<-h*.6&&li.previousElementSibling){ul.insertBefore(li,li.previousElementSibling);drag.y0-=h;li.style.transform=`translateY(${e.clientY-drag.y0}px)`}});
+  const up=()=>{if(drag&&drag.li===li){li.style.transform="";li.classList.remove("drag");drag=null}};li.addEventListener("pointerup",up);li.addEventListener("pointercancel",up)});
+ $("tlCheck").onclick=()=>{const sorted=[...tlSet].sort((a,b)=>a.y-b.y).map(c=>c.k);let ok=0;[...ul.children].forEach((li,i)=>{const good=li.dataset.k===sorted[i];li.classList.toggle("ok",good);li.classList.toggle("no",!good);if(good){ok++;li.querySelector(".yr").textContent=INV.find(c=>c.k===li.dataset.k).ys}});
+  const m=$("tlMsg");m.classList.remove("hidden");if(ok===sorted.length){m.innerHTML="🎉 Perfect order! Every invention helped the next ones. For example, batteries made the telegraph possible, and light bulbs needed reliable electricity.";labDone("timeline","Timeline master!")}else m.innerHTML=`${ok} of ${sorted.length} in the right spot. Green cards are correct; move the orange ones and check again!`};
+ $("tlNew").onclick=()=>{tlSet=null;renderLab()}}
+// --- circuit: close the gaps + switch
+function labCircuit(L){const st={g1:false,g2:false,sw:false};
+ L.innerHTML=`<div class="exp"><svg id="cSvg" viewBox="0 0 420 300" width="420" height="300"></svg><div class="side"><p><b>Make the bulb light up!</b> Tap the two gaps (⚡) to connect the wires, then flip the switch.</p><button id="cSw">🔘 Switch: OFF</button><div id="cWhy" class="why">Electricity only flows when there's a complete loop, called a <b>circuit</b>. The battery pushes tiny particles called <b>electrons</b> through the wire and the bulb's thin filament, which glows!<br><br>🧑‍🔬 <b>Real inventors:</b> Alessandro Volta made the first battery in 1800. Thomas Edison, Joseph Swan and Lewis Latimer helped make long-lasting bulbs (1879 to 1882). <br><br>⚛️ Want to see electrons up close? Try <a href="atom.html">Atom Explorer</a>!</div></div></div>`;
+ const draw=()=>{const on=st.g1&&st.g2&&st.sw;const w=(c)=>c?"#ff9800":"#555";
+  $("cSvg").innerHTML=`<rect x="30" y="110" width="70" height="120" rx="10" fill="#424242"/><rect x="50" y="98" width="30" height="14" fill="#bdbdbd"/><text x="65" y="180" fill="#fdd835" font-size="28" text-anchor="middle">+</text><text x="65" y="215" fill="#fff" font-size="12" text-anchor="middle">BATTERY</text>
+  <path d="M65 98 V40 H170" stroke="${w(on)}" stroke-width="6" fill="none"/><path d="M230 40 H330 V110" stroke="${w(on)}" stroke-width="6" fill="none"/><path d="M330 190 V270 H260" stroke="${w(on)}" stroke-width="6" fill="none"/><path d="M200 270 H65 V230" stroke="${w(on)}" stroke-width="6" fill="none"/>
+  <g id="g1" style="cursor:pointer">${st.g1?`<path d="M170 40 H230" stroke="${w(on)}" stroke-width="6"/>`:`<rect x="172" y="20" width="56" height="40" rx="8" fill="#fff59d" stroke="#000" stroke-width="2"/><text x="200" y="47" font-size="20" text-anchor="middle">⚡</text>`}</g>
+  <g id="g2" style="cursor:pointer">${st.g2?`<path d="M200 270 H260" stroke="${w(on)}" stroke-width="6"/>`:`<rect x="202" y="250" width="56" height="40" rx="8" fill="#fff59d" stroke="#000" stroke-width="2"/><text x="230" y="277" font-size="20" text-anchor="middle">⚡</text>`}</g>
+  <circle cx="330" cy="150" r="${on?60:0}" fill="url(#gl)" opacity=".8"/><defs><radialGradient id="gl"><stop offset="0" stop-color="#fff59d"/><stop offset="1" stop-color="#fff59d" stop-opacity="0"/></radialGradient></defs>
+  <circle cx="330" cy="140" r="30" fill="${on?"#ffeb3b":"#eceff1"}" stroke="#000" stroke-width="3"/><rect x="315" y="168" width="30" height="22" fill="#9e9e9e" stroke="#000" stroke-width="2"/><path d="M320 150 q10 -25 20 0" stroke="${on?"#ff6f00":"#795548"}" stroke-width="3" fill="none"/>
+  ${on?[0,1,2,3,4,5].map(i=>`<circle r="5" fill="#4fc3f7"><animateMotion dur="3s" begin="${i*.5}s" repeatCount="indefinite" path="M65 98 V40 H330 V270 H65 Z"/></circle>`).join(""):""}`;
+  $("g1").onclick=()=>{st.g1=true;draw();beep(600)};$("g2").onclick=()=>{st.g2=true;draw();beep(600)};if(on)labDone("circuit","You lit the bulb!")};
+ $("cSw").onclick=()=>{st.sw=!st.sw;$("cSw").textContent="🔘 Switch: "+(st.sw?"ON":"OFF");draw();if(st.sw&&!(st.g1&&st.g2))toast("The loop has a gap! Tap the ⚡ gaps.")};draw()}
+// --- series vs parallel
+function labSeries(L){const st={mode:"series",a:true,b:true,tried:{}};
+ L.innerHTML=`<div class="exp"><svg id="sSvg" viewBox="0 0 420 280" width="420" height="280"></svg><div class="side"><p><button id="sSer">➡️ Series</button><button id="sPar">🔀 Parallel</button></p><p><button id="sA">🔧 Unscrew bulb A</button><button id="sB">🔧 Unscrew bulb B</button></p><div id="sWhy" class="why"></div></div></div>`;
+ const draw=()=>{const ser=st.mode==="series";let A,B2;if(ser){const on=st.a&&st.b;A=st.a&&on?.55:0;B2=st.b&&on?.55:0}else{A=st.a?1:0;B2=st.b?1:0}
+  const bulb=(x,y,lv,has,n)=>has?`<circle cx="${x}" cy="${y}" r="${18+lv*40}" fill="#fff59d" opacity="${lv*.6}"/><circle cx="${x}" cy="${y}" r="24" fill="${lv>.8?"#ffeb3b":lv>0?"#fff59d":"#eceff1"}" stroke="#000" stroke-width="3"/><text x="${x}" y="${y+5}" font-size="14" text-anchor="middle">${n}</text>`:`<circle cx="${x}" cy="${y}" r="24" fill="none" stroke="#bbb" stroke-dasharray="4"/><text x="${x}" y="${y+5}" font-size="12" text-anchor="middle" fill="#999">empty</text>`;
+  $("sSvg").innerHTML=ser?`<rect x="20" y="100" width="60" height="90" rx="8" fill="#424242"/><path d="M50 100 V40 H370 V240 H50 V190" stroke="#555" stroke-width="5" fill="none"/>${bulb(170,40,A,st.a,"A")}${bulb(280,40,B2,st.b,"B")}<text x="210" y="150" font-size="16" text-anchor="middle">One loop: the electricity goes through A, then B</text>`
+  :`<rect x="20" y="100" width="60" height="90" rx="8" fill="#424242"/><path d="M50 100 V30 H370 V250 H50 V190 M170 30 V250 M280 30 V250" stroke="#555" stroke-width="5" fill="none"/>${bulb(170,140,A,st.a,"A")}${bulb(280,140,B2,st.b,"B")}<text x="210" y="275" font-size="14" text-anchor="middle">Two paths: each bulb has its own loop</text>`;
+  $("sWhy").innerHTML=ser?"<b>Series:</b> one single path. The bulbs share the battery's push, so they're dimmer. Take one bulb out and the loop breaks, so <b>both</b> go dark!":"<b>Parallel:</b> each bulb gets its own path, so they're brighter, and if one goes out, the other <b>stays on</b>. That's why the lights in your house are wired in parallel!";
+  $("sA").textContent=(st.a?"🔧 Unscrew":"💡 Put back")+" bulb A";$("sB").textContent=(st.b?"🔧 Unscrew":"💡 Put back")+" bulb B";if(!(st.a&&st.b))st.tried[st.mode]=1;if(st.tried.series&&st.tried.parallel)labDone("series","Circuit detective!")};
+ $("sSer").onclick=()=>{st.mode="series";draw()};$("sPar").onclick=()=>{st.mode="parallel";draw()};$("sA").onclick=()=>{st.a=!st.a;draw()};$("sB").onclick=()=>{st.b=!st.b;draw()};draw()}
+// --- electromagnet
+function labEmag(L){const st={wraps:5,bat:1,on:false};
+ L.innerHTML=`<div class="exp"><svg id="eSvg" viewBox="0 0 420 280" width="420" height="280"></svg><div class="side"><p><b>Wire wraps:</b> <span id="eW">5</span></p><input type="range" id="eR" min="0" max="30" value="5"><p><button id="eB">🔋 Batteries: 1</button><button id="eOn">⚡ Power: OFF</button></p><p id="eC" style="font-size:20px"></p><div class="why">When electricity flows through a coil of wire, it makes a <b>magnetic field</b>, and the iron nail inside becomes a magnet! More wraps or more batteries make it stronger. Turn the power off and the paper clips drop.<br><br>🧑‍🔬 William Sturgeon made the first electromagnet in 1825, and Joseph Henry made much stronger ones. Electromagnets are inside speakers, doorbells and junkyard cranes!</div></div></div>`;
+ const draw=()=>{const n=st.on?Math.min(10,Math.floor(st.wraps*st.bat/5)):0;$("eW").textContent=st.wraps;
+  let coil="";for(let i=0;i<st.wraps;i++){const x=130+i*(160/Math.max(1,st.wraps));coil+=`<ellipse cx="${x}" cy="100" rx="4" ry="22" fill="none" stroke="${st.on?"#ff9800":"#b87333"}" stroke-width="3"/>`}
+  let clips="";for(let i=0;i<12;i++){const up=i<n;const x=140+(i%6)*28,y=up?132+Math.floor(i/6)*22:250-Math.floor(i/6)*10;clips+=`<rect x="${x}" y="${y}" width="10" height="20" rx="5" fill="none" stroke="#78909c" stroke-width="3" transform="rotate(${up?0:70} ${x+5} ${y+10})"/>`}
+  $("eSvg").innerHTML=`<rect x="110" y="90" width="210" height="20" rx="4" fill="#9e9e9e"/><polygon points="320,90 345,100 320,110" fill="#9e9e9e"/>${coil}<rect x="20" y="70" width="60" height="70" rx="8" fill="#424242"/><text x="50" y="112" fill="#fdd835" font-size="16" text-anchor="middle">${st.bat}×🔋</text><path d="M80 90 H120 M80 120 H110 V160 H300 V122" stroke="#b87333" stroke-width="3" fill="none"/>${clips}<line x1="100" y1="270" x2="400" y2="270" stroke="#795548" stroke-width="4"/>`;
+  $("eC").textContent=st.on?`🧷 Picked up ${n} paper clip${n===1?"":"s"}!`:"Power is off.";if(n>=5)labDone("emag","Super electromagnet!")};
+ $("eR").oninput=e=>{st.wraps=+e.target.value;draw()};$("eB").onclick=()=>{st.bat=st.bat===1?2:1;$("eB").textContent="🔋 Batteries: "+st.bat;draw()};$("eOn").onclick=()=>{st.on=!st.on;$("eOn").textContent="⚡ Power: "+(st.on?"ON":"OFF");draw()};draw()}
+// --- static electricity
+function labStatic(L){let charge=0,lastX=null;const tried={};
+ L.innerHTML=`<div class="exp"><canvas id="stC" width="420" height="300"></canvas><div class="side"><p><b>Rub the balloon on the sweater!</b> Drag back and forth over the sweater (or tap 🧶 Rub).</p><button id="stRub">🧶 Rub</button><div class="meter"><div id="stM"></div></div><p><button data-t="hair">💇 Hold near hair</button><button data-t="paper">📄 Near paper bits</button><button data-t="wall">🧱 Stick to wall</button></p><div id="stWhy" class="why">Rubbing moves tiny <b>electrons</b> from the sweater onto the balloon. Now the balloon has extra negative charge, and it pulls on things nearby. Opposite charges attract!<br><br>🧑‍🔬 Benjamin Franklin studied electricity and in 1752 showed lightning is electricity too. (Never fly kites in storms!)<br><br>⚛️ See electrons hop in <a href="atom.html">Atom Explorer</a>!</div></div></div>`;
+ const c=$("stC"),g=c.getContext("2d");let mode=null,mt=0;
+ const draw=()=>{g.clearRect(0,0,420,300);g.fillStyle="#e3f2fd";g.fillRect(0,0,420,300);g.fillStyle="#8e24aa";g.fillRect(20,170,170,120);g.fillStyle="#ab47bc";for(let y=180;y<290;y+=12)for(let x=26;x<186;x+=12)g.fillRect(x,y,6,6);g.fillStyle="#fff";g.font="14px sans-serif";g.fillText("sweater",70,165);
+  const k=Math.min(1,mt/30);let bx=280,by=110;if(mode==="hair"){bx=280;by=80}if(mode==="paper"){bx=300;by=170}if(mode==="wall"){bx=380;by=120}
+  if(mode==="hair"){g.fillStyle="#f5cba7";g.fillRect(250,180,60,60);g.strokeStyle="#3e2723";g.lineWidth=3;for(let i=0;i<9;i++){g.beginPath();g.moveTo(254+i*6,182);const up=charge>.3?k*charge:0;g.lineTo(254+i*6+(i-4)*4*up,182-10-40*up);g.stroke()}}
+  if(mode==="paper"){for(let i=0;i<10;i++){const up=charge>.3?k*charge:0;g.fillStyle="#fafafa";g.strokeStyle="#999";const x=270+i*8,y=280-up*(80+(i%3)*10);g.fillRect(x,y,6,6);g.strokeRect(x,y,6,6)}}
+  if(mode==="wall"){g.fillStyle="#bcaaa4";g.fillRect(400,0,20,300)}
+  g.fillStyle="#e53935";g.beginPath();g.ellipse(bx,by,34,42,0,0,7);g.fill();g.strokeStyle="#333";g.beginPath();g.moveTo(bx,by+42);g.lineTo(bx,by+(mode==="wall"&&charge<.3?150:90));g.stroke();
+  g.fillStyle="#fff";g.font="bold 16px sans-serif";for(let i=0;i<Math.round(charge*8);i++)g.fillText("−",bx-20+(i%4)*12,by-10+Math.floor(i/4)*18);
+  if(mode==="wall"&&charge<.3){g.fillStyle="#000";g.font="14px sans-serif";g.fillText("falls…",bx-60,by+60)}
+  $("stM").style.width=(charge*100)+"%"};
+ const rub=a=>{charge=Math.min(1,charge+a);mode=null;draw();if(charge>=1)toast("⚡ Fully charged! Now try hair, paper or the wall.")};
+ c.addEventListener("pointermove",e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)*420/r.width,y=(e.clientY-r.top)*300/r.height;if(e.buttons||e.pointerType==="touch"){if(x<190&&y>160){if(lastX!=null)rub(Math.abs(x-lastX)/600);lastX=x}}});c.addEventListener("pointerup",()=>lastX=null);
+ $("stRub").onclick=()=>rub(.25);
+ L.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{mode=b.dataset.t;mt=0;tried[mode]=1;if(charge<.3)toast("The balloon needs more charge. Rub it first!");if(charge>=.3&&Object.keys(tried).length>=2)labDone("static","Static scientist!");const an=()=>{mt++;draw();if(mt<30)requestAnimationFrame(an);else charge=Math.max(0,charge-.15)};an()});draw()}
+// --- levers & pulleys
+function labLever(L){const st={f:50,ropes:1,tried:{}};
+ L.innerHTML=`<div class="exp"><svg id="lSvg" viewBox="0 0 420 300" width="420" height="300"></svg><div class="side"><h3>⚖️ Lever</h3><p>Slide the <b>fulcrum</b> (the triangle). The box weighs 100 pounds.</p><input type="range" id="lR" min="10" max="90" value="50"><p id="lT"></p><h3>🪝 Pulley</h3><p>How many rope sections hold up the box? <button data-r="1">1</button><button data-r="2">2</button><button data-r="4">4</button></p><p id="pT"></p><div class="why">Simple machines trade <b>force</b> for <b>distance</b>. Put the fulcrum close to the box (or add more ropes) and you push with less force, but you have to move farther.<br><br>🧑‍🔬 The ancient Greek inventor Archimedes explained levers over 2,000 years ago. He is said to have joked, "Give me a place to stand and I will move the Earth!"</div></div></div>`;
+ const draw=()=>{const fx=40+st.f*3.4,loadArm=fx-40,effArm=380-fx,eff=Math.round(100*loadArm/effArm),pull=Math.round(100/st.ropes);
+  let pr="";const px=330;for(let i=0;i<st.ropes;i++){pr+=`<line x1="${px-30+i*16}" y1="200" x2="${px-30+i*16}" y2="250" stroke="#795548" stroke-width="3"/>`}
+  $("lSvg").innerHTML=`<line x1="30" y1="120" x2="390" y2="120" stroke="#8d6e63" stroke-width="10"/><polygon points="${fx},124 ${fx-18},160 ${fx+18},160" fill="#455a64"/><rect x="25" y="80" width="40" height="38" fill="#a1887f" stroke="#000"/><text x="45" y="104" font-size="12" text-anchor="middle">100 lb</text><text x="375" y="105" font-size="22" text-anchor="middle">👇</text>
+  <line x1="${px-30}" y1="185" x2="${px+20}" y2="185" stroke="#555" stroke-width="4"/><circle cx="${px-22}" cy="200" r="12" fill="none" stroke="#555" stroke-width="3"/>${pr}<rect x="${px-45}" y="250" width="60" height="36" fill="#a1887f" stroke="#000"/><text x="${px-15}" y="273" font-size="12" text-anchor="middle">100 lb</text><text x="120" y="230" font-size="14">Pulley: pull with ${pull} lb</text>`;
+  $("lT").innerHTML=`Push down with about <b>${eff} pounds</b> ${eff<100?"💪 Easier than lifting!":eff>100?"😓 Harder!":""}`;$("pT").innerHTML=`Pull with about <b>${pull} pounds</b>, but pull <b>${st.ropes}×</b> as much rope.`;
+  if(eff<50)st.tried.lever=1;if(st.ropes===4)st.tried.pulley=1;if(st.tried.lever&&st.tried.pulley)labDone("lever","Simple machine master!")};
+ $("lR").oninput=e=>{st.f=+e.target.value;draw()};L.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{st.ropes=+b.dataset.r;draw()});draw()}
+// --- magnets
+function labMagnet(L){const st={flip:false,res:"",tested:{}};const OBJ=[["🧷","Steel paper clip",true],["🔩","Iron nail",true],["🪙","US penny",false],["🥫","Aluminum can",false],["🪀","Rubber band",false],["🔑","Steel key",true]];
+ L.innerHTML=`<div class="exp"><svg id="mSvg" viewBox="0 0 420 200" width="420" height="200"></svg><div class="side"><p><button id="mFlip">🔄 Flip right magnet</button><button id="mPush">🤝 Push together</button></p><p id="mRes" style="font-size:18px"></p><h3>Is it magnetic?</h3><div id="mObj"></div><div class="why">Every magnet has a <b>north (N)</b> and <b>south (S)</b> pole. Opposite poles attract and the same poles push apart. Magnets pull on iron, steel, nickel and cobalt, but not on copper, aluminum, plastic or rubber. A US penny isn't magnetic!<br><br>🧭 Earth is like a giant magnet, which is why a compass needle points north. People in China used magnetic compasses for navigation over 900 years ago.</div></div></div>`;
+ const draw=(gap=60)=>{const R2=st.flip?["S","N"]:["N","S"];const lE=200-gap/2,rS=220+gap/2;const col=c=>c==="N"?"#e53935":"#1e88e5";const bar=(x,a,b)=>`<rect x="${x}" y="70" width="60" height="50" fill="${col(a)}"/><rect x="${x+60}" y="70" width="60" height="50" fill="${col(b)}"/><text x="${x+30}" y="102" fill="#fff" font-size="20" text-anchor="middle">${a}</text><text x="${x+90}" y="102" fill="#fff" font-size="20" text-anchor="middle">${b}</text>`;$("mSvg").innerHTML=bar(lE-120,"N","S")+bar(rS,R2[0],R2[1])};
+ $("mFlip").onclick=()=>{st.flip=!st.flip;draw()};
+ $("mPush").onclick=()=>{const attract=!st.flip;let g=60,t=0;const an=()=>{t++;if(attract)g=Math.max(0,60-t*4);else g=t<10?60-t*3:30+(t-10)*4;draw(Math.min(60,g));if(t<20)requestAnimationFrame(an);else{$("mRes").textContent=attract?"🧲 S meets N: they snap together! Opposites attract.":"💨 S meets S: they push apart! Same poles repel.";st.tested["p"+attract]=1;chk()}};an()};
+ $("mObj").innerHTML=OBJ.map((o,i)=>`<button data-i="${i}">${o[0]} ${o[1]}</button>`).join("");
+ const chk=()=>{if(Object.keys(st.tested).length>=OBJ.length+2)labDone("magnet","Magnet expert!")};
+ $("mObj").querySelectorAll("button").forEach(b=>b.onclick=()=>{const o=OBJ[+b.dataset.i];b.style.background=o[2]?"#66bb6a":"#ef9a9a";b.textContent=`${o[0]} ${o[1]}: ${o[2]?"YES 🧲":"no"}`;st.tested[o[1]]=1;chk()});draw()}
+// ---------- start ----------
+showStars();window.addEventListener("storage",showStars);
+const h0=location.hash.slice(1);
+if(h0==="lab"){goEra("lab",false);setTimeout(()=>openLab("timeline"),400)}else if(ERAS[h0])goEra(h0,false);else{goEra("bigbang",false);closeOv("factOv");setTimeout(openTM,300)}
+requestAnimationFrame(frame);
+window.TM={P,goEra,openLab,openLearn,openPP,openTM,loadPP,ERAS,get CH(){return CH},cur:()=>cur,talkTo,LABS};
+</script>
+<script>
+/* Real Craft Adventures: tiny in-browser chiptune music (original tunes, no files) */
+(function(){
+const KEY="realcraft_music_v1";let on=localStorage.getItem(KEY)!=="off";
+let ctx=null,master=null,cur=null,want="home",timer=null,rate=1;const voices={};
+// note: semitones from A4 (0=A4); null=rest. Each step is an 8th note.
+const T={
+ time:{bpm:96,w:"triangle",bell:true,m:[0,null,7,null,12,null,7,4, 5,null,9,null,12,null,9,5, 7,null,11,null,14,null,11,7, 12,null,7,null,0,null,null,null],b:[-24,null,-17,null,-12,null,-17,null, -19,null,-12,null,-7,null,-12,null, -17,null,-10,null,-5,null,-10,null, -12,null,-17,null,-24,null,null,null]},
+ atom:{bpm:110,w:"sine",bell:true,m:[12,7,4,7,12,16,19,16, 14,9,5,9,14,17,21,17, 12,7,4,7,12,16,19,24, 21,17,14,12,null,null,12,null],b:[-24,null,-12,null,-24,null,-12,null, -22,null,-10,null,-22,null,-10,null, -24,null,-12,null,-24,null,-12,null, -19,null,-7,null,-24,null,null,null]},
+ build:{bpm:120,w:"square",m:[0,4,7,12,null,7,9,7, 5,9,12,null,9,7,5,4, 2,5,9,14,null,12,9,7, 4,7,12,11,12,null,null,null],b:[-24,null,-12,null,-17,null,-12,null, -19,null,-7,null,-17,null,-5,null, -22,null,-10,null,-17,null,-5,null, -20,null,-8,null,-24,null,null,null]},
+ home:{bpm:132,w:"square",m:[3,7,10,15,14,10,7,null, 5,8,12,17,15,12,8,null, 3,7,10,15,17,15,14,10, 12,10,8,7,5,null,3,null],b:[-21,-21,-14,-14,-16,-16,-9,-9, -19,-19,-12,-12,-14,-14,-7,-7, -21,-21,-14,-14,-16,-16,-9,-9, -16,-16,-14,-14,-21,-21,-21,null]},
+ workshop:{bpm:92,w:"triangle",m:[0,null,4,null,7,null,4,null, 2,null,5,null,9,null,5,null, 0,null,4,null,7,null,11,9, 7,null,5,null,4,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -24,null,null,null,-17,null,null,null, -19,null,null,null,-24,null,null,null]},
+ race:{bpm:160,w:"square",m:[7,7,12,7,14,12,7,5, 7,7,12,7,16,14,12,null, 5,5,9,5,12,9,5,4, 5,7,9,12,14,null,12,null],b:[-17,-5,-17,-5,-17,-5,-17,-5, -17,-5,-17,-5,-17,-5,-17,-5, -19,-7,-19,-7,-19,-7,-19,-7, -15,-3,-15,-3,-14,-2,-14,-2]},
+ mansion:{bpm:116,w:"square",m:[10,null,14,17,null,14,10,null, 12,null,15,19,null,15,12,null, 10,12,14,15,17,null,19,17, 15,14,12,null,10,null,null,null],b:[-14,null,-7,null,-14,null,-7,null, -12,null,-5,null,-12,null,-5,null, -14,null,-7,null,-11,null,-4,null, -16,null,-9,null,-14,null,null,null]},
+ spooky:{bpm:126,w:"triangle",m:[0,3,7,3,8,7,3,null, 0,3,7,3,6,5,3,null, 0,null,12,11,10,null,7,null, 8,7,5,3,2,null,0,null],b:[-24,null,-17,null,-24,null,-17,null, -20,null,-13,null,-22,null,-17,null, -24,null,-17,null,-21,null,-14,null, -19,null,-17,null,-24,null,null,null]},
+ sky:{bpm:104,w:"triangle",m:[7,null,12,14,16,null,14,12, 9,null,12,null,14,null,null,null, 5,null,9,12,14,null,12,9, 7,null,4,null,7,null,null,null],b:[-17,null,-10,null,-12,null,-5,null, -15,null,-8,null,-10,null,-3,null, -19,null,-12,null,-14,null,-7,null, -17,null,-10,null,-17,null,null,null]},
+ ocean:{bpm:72,w:"sine",m:[7,null,12,null,16,null,14,12, 9,null,12,null,14,null,null,null, 5,null,9,null,12,null,11,9, 7,null,4,null,7,null,null,null],b:[-17,null,null,null,-10,null,null,null, -15,null,null,null,-8,null,null,null, -19,null,null,null,-12,null,null,null, -17,null,null,null,-10,null,null,null],bell:true},
+ space:{bpm:84,w:"triangle",m:[0,7,12,16,19,16,12,7, 2,9,14,17,21,17,14,9, -3,4,9,12,16,12,9,4, -1,7,11,14,19,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -27,null,null,null,-20,null,null,null, -25,null,null,null,-17,null,null,null],bell:true},
+ xmas:{bpm:138,w:"square",m:[7,11,14,11,7,null,9,null, 7,11,14,16,14,null,null,null, 12,11,9,7,9,null,11,null, 7,9,11,9,7,null,null,null],b:[-17,-10,-17,-10,-15,-8,-15,-8, -17,-10,-17,-10,-12,-5,-12,-5, -12,-5,-12,-5,-15,-8,-15,-8, -17,-10,-17,-10,-17,null,null,null],bell:true}
+};
+const hz=n=>440*Math.pow(2,n/12);
+function init(){if(ctx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ctx=new AC();master=ctx.createGain();master.gain.value=.25*.35;master.connect(ctx.destination);timer=setInterval(tick,100)}
+function voice(name){if(!voices[name]){const g=ctx.createGain();g.gain.value=0;g.connect(master);voices[name]={g,step:0,next:ctx.currentTime+.05}}return voices[name]}
+function note(v,f,t,d,w,vol){const o=ctx.createOscillator(),e=ctx.createGain();o.type=w;o.frequency.value=f;e.gain.setValueAtTime(vol,t);e.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(e);e.connect(v.g);o.start(t);o.stop(t+d+.02)}
+function tick(){if(!ctx||ctx.state!=="running")return;const now=ctx.currentTime;
+ for(const name in voices){const v=voices[name];if(name!==cur&&v.g.gain.value<.01)continue;const tr=T[name],sp=60/tr.bpm/2/(name==="race"?rate:1);if(v.next<now-.5)v.next=now+.05;
+  while(v.next<now+.3){const i=v.step%tr.m.length,m=tr.m[i],b=tr.b[i];if(m!=null)note(v,hz(m),v.next,sp*.9,tr.w,.5);if(b!=null)note(v,hz(b),v.next,sp*.95,"triangle",.7);if(tr.bell&&i%4===0)note(v,hz(m!=null?m+24:31),v.next,.25,"sine",.18);if(i%2===0&&tr.bpm>120)note(v,hz(40+(i%4?0:4)),v.next,.03,"square",.08);v.next+=sp;v.step++}}}
+function apply(){if(!ctx)return;const t=ctx.currentTime;for(const name in voices){const g=voices[name].g.gain;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(on&&name===cur?1:0,t+1.2)}}
+function play(name){want=name;if(!ctx)return;if(name===cur)return;cur=name;const v=voice(name);if(v.g.gain.value<.01){v.step=0;v.next=ctx.currentTime+.05}apply()}
+function unlock(){init();if(!ctx)return;if(on&&!document.hidden)ctx.resume();play(want)}
+["pointerdown","touchend","keydown"].forEach(e=>addEventListener(e,unlock,{passive:true}));
+document.addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else if(on)ctx.resume()});
+function setOn(v){on=v;localStorage.setItem(KEY,on?"on":"off");btn.textContent=on?"🎵":"🔇";btn.title=btn.ariaLabel=on?"Music on (tap to turn off)":"Music off (tap to turn on)";btn.classList.toggle("off",!on);if(ctx){apply();if(on)ctx.resume();else setTimeout(()=>{if(!on)ctx.suspend()},1300)}}
+const st=document.createElement("style");st.textContent="#musicBtn{position:fixed;right:8px;top:8px;z-index:9999;width:54px;height:54px;border-radius:50%;border:3px solid #000;background:#ffca28;font-size:28px;line-height:1;padding:0;box-shadow:0 3px 0 #000;cursor:pointer}#musicBtn.off{background:#9e9e9e}";document.head.appendChild(st);
+const btn=document.createElement("button");btn.id="musicBtn";btn.addEventListener("click",e=>{e.stopPropagation();unlock();setOn(!on)});
+(document.body?Promise.resolve():new Promise(r=>addEventListener("DOMContentLoaded",r))).then(()=>{document.body.appendChild(btn);setOn(on)});
+window.Music={play,setRate:r=>{rate=r},isOn:()=>on,setOn,get ctx(){return ctx},get cur(){return cur},tracks:Object.keys(T)};
+})();
+Music.play("time");
+</script>
+</body></html>

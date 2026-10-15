@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="icon" href="data:,"><title>Atom Explorer · Real Craft Adventures</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 50% 30%,#283593,#0d0b2a);color:#fff;overscroll-behavior:none}
+body{overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+button{font-family:'Press Start 2P',monospace;font-size:10px;border:3px solid #000;border-radius:8px;background:#ffca28;color:#000;padding:9px 10px;box-shadow:0 3px 0 #000;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}
+#top{display:flex;flex-wrap:wrap;gap:6px;margin-right:64px;align-items:center}
+h1{font-family:'Press Start 2P',monospace;font-size:16px;margin:12px 0 4px;line-height:1.5}
+#stars{font-family:'Press Start 2P',monospace;font-size:12px;margin-left:auto}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.tabs button{background:#b39ddb}.tabs button.on{background:#ffd54f}
+.card{background:#fff;color:#000;border:4px solid #000;border-radius:12px;padding:14px;font-size:16px;line-height:1.5}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}.row canvas,.row svg{background:#0d0b2a;border:3px solid #000;border-radius:10px;max-width:100%;touch-action:pan-y}
+.side{flex:1;min-width:250px}.side button{font-family:system-ui,sans-serif;font-size:15px;margin:3px 3px 3px 0}
+.why{background:#fff8e1;border-left:6px solid #ffb300;padding:8px 10px;border-radius:6px;margin-top:8px;font-size:15px}
+.big{font-size:22px;font-weight:800}.el{font-family:'Press Start 2P',monospace;font-size:26px;color:#4527a0}
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:30;background:#ffeb3b;color:#000;border:3px solid #000;border-radius:8px;padding:8px 12px;font-family:'Press Start 2P',monospace;font-size:10px;line-height:1.6;max-width:90vw;text-align:center;pointer-events:none;transition:opacity .4s;opacity:0}
+input[type=range]{width:100%}
+a{color:#1565c0;font-weight:700}
+</style></head><body>
+<div id="top"><button onclick="location.href='index.html'">🏠 Home</button><button onclick="location.href='timemachine.html#lab'">🔬 Inventors Lab</button><span id="stars">⭐ 0</span></div>
+<h1>⚛️ Atom Explorer</h1><div>Shrink down smaller than you can imagine and see what everything is made of!</div>
+<div class="tabs" id="tabs"></div><div class="card" id="body"></div><div id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);const AK="realcraft_atom_v1";
+const ld=()=>{try{return JSON.parse(localStorage.getItem(AK)||"{}")}catch(e){return{}}};const sv=o=>localStorage.setItem(AK,JSON.stringify(o));
+const stars=()=>+localStorage.getItem("realcraft_bw_stars")||0;const showS=()=>$("stars").textContent="⭐ "+stars();showS();
+let tt=0;function toast(t){const e=$("toast");e.textContent=t;e.style.opacity=1;clearTimeout(tt);tt=setTimeout(()=>e.style.opacity=0,2800)}
+function badge(k,msg){const o=ld();if(!o[k]){o[k]=1;sv(o);localStorage.setItem("realcraft_bw_stars",stars()+1);showS();toast("🏅 "+msg+" ⭐+1")}}
+const TABS=[["shrink","🔍 Shrink into a wire"],["build","🧪 Atom builder"],["static","🎈 Static"],["cond","🔌 Conductors"],["current","🔋 Current"]];let tab="shrink",raf=0;
+function render(){cancelAnimationFrame(raf);const o=ld();$("tabs").innerHTML=TABS.map(([k,n])=>`<button data-k="${k}" class="${k===tab?"on":""}">${n}${o[k]?" ✅":""}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;render()});({shrink,build,stat,cond,current}[tab==="static"?"stat":tab])($("body"))}
+// ---- 1. shrink into a copper wire
+function shrink(B){let lv=0;const L=[
+ ["A copper wire","Copper wire carries electricity to lights and outlets in your house. Let's shrink down and look inside!"],
+ ["Copper atoms in rows","Zoom! The copper is made of trillions of atoms packed in neat rows, like oranges stacked at a store."],
+ ["Free electrons","Each copper atom lets one outer electron wander. These free electrons drift between the atoms, and that's why copper carries electricity so well!"],
+ ["One copper atom","A copper atom has a tiny nucleus with 29 protons (+) and usually 34 neutrons, with 29 electrons (−) zooming around it in layers called shells: 2, 8, 18 and 1."],
+ ["The nucleus","Protons have a positive charge, neutrons have no charge. The nucleus is super tiny: if an atom were as big as a football stadium, the nucleus would be about the size of a marble! Atoms are mostly empty space."]];
+ B.innerHTML=`<div class="row"><canvas id="c" width="460" height="340"></canvas><div class="side"><div class="big" id="t"></div><p id="d"></p><button id="in">🔍 Shrink more</button> <button id="out">🔎 Grow back</button><div class="why">⚛️ Everything (you, the air, your iPad) is made of atoms. Atoms are so small that a single grain of sand has more atoms than there are grains of sand on all of Earth's beaches!</div></div></div>`;
+ const c=$("c"),g=c.getContext("2d");const set=()=>{$("t").textContent=(lv+1)+". "+L[lv][0];$("d").textContent=L[lv][1];if(lv===4)badge("shrink","Atom explorer!")};
+ $("in").onclick=()=>{lv=Math.min(4,lv+1);set()};$("out").onclick=()=>{lv=Math.max(0,lv-1);set()};set();
+ const draw=(t)=>{g.fillStyle="#0d0b2a";g.fillRect(0,0,460,340);
+  if(lv===0){g.fillStyle="#fafafa";g.fillRect(0,150,460,40);g.fillStyle="#d84315";g.fillRect(0,158,460,24);g.fillStyle="#ffab91";g.fillRect(0,160,460,5);g.fillStyle="#fff";g.font="16px sans-serif";g.fillText("plastic coating (insulator)",20,140);g.fillText("copper inside (conductor)",20,215)}
+  if(lv===1||lv===2){for(let y=0;y<9;y++)for(let x=0;x<12;x++){const px=25+x*38+(y%2)*19,py=25+y*36;g.fillStyle="#e07a3f";g.beginPath();g.arc(px,py,15,0,7);g.fill();g.fillStyle="#ffab91";g.beginPath();g.arc(px-4,py-4,4,0,7);g.fill()}
+   if(lv===2)for(let i=0;i<40;i++){const x=((i*53+t*.04*(1+i%3))%480)-10,y=(i*37)%330+8+Math.sin(t*.003+i)*6;g.fillStyle="#4fc3f7";g.beginPath();g.arc(x,y,4,0,7);g.fill()}}
+  if(lv===3){const cx=230,cy=170;[2,8,18,1].forEach((n,s)=>{const r=30+s*36;g.strokeStyle="rgba(128,222,234,.5)";g.beginPath();g.arc(cx,cy,r,0,7);g.stroke();for(let i=0;i<n;i++){const a=t*.001*(1.6-s*.3)+i*Math.PI*2/n;g.fillStyle="#4fc3f7";g.beginPath();g.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,5,0,7);g.fill()}});g.fillStyle="#ef5350";g.beginPath();g.arc(cx,cy,14,0,7);g.fill();g.fillStyle="#fff";g.font="12px sans-serif";g.fillText("Cu: 29 electrons",10,330)}
+  if(lv===4){const cx=230,cy=170;for(let i=0;i<63;i++){const a=i*2.4,r=Math.sqrt(i)*13;g.fillStyle=i%2?"#90a4ae":"#ef5350";g.beginPath();g.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,11,0,7);g.fill();g.strokeStyle="#000";g.stroke()}g.fillStyle="#ef5350";g.fillRect(14,300,14,14);g.fillStyle="#fff";g.font="14px sans-serif";g.fillText("proton (+) × 29",34,312);g.fillStyle="#90a4ae";g.fillRect(170,300,14,14);g.fillStyle="#fff";g.fillText("neutron × 34",190,312)}
+  raf=requestAnimationFrame(draw)};raf=requestAnimationFrame(draw)}
+// ---- 2. atom builder
+const EL=[null,["H","Hydrogen","The most common element in the universe. Stars like our Sun are mostly hydrogen!"],["He","Helium","Lighter than air: it makes party balloons float."],["Li","Lithium","Used in rechargeable batteries, like the one in an iPad!"],["Be","Beryllium","A light, strong metal used in space telescopes' mirrors."],["B","Boron","Found in borax, used to make some kinds of slime!"],["C","Carbon","In every living thing, in pencil 'lead' (graphite) and in diamonds!"],["N","Nitrogen","About 78% of the air you breathe is nitrogen."],["O","Oxygen","The gas you need to breathe. Also part of water (H₂O)!"],["F","Fluorine","Part of the fluoride in toothpaste that protects teeth."],["Ne","Neon","Glows red-orange in bright signs."]];
+function build(B){const st={p:1,n:0,e:1},made=ld().made||{};
+ B.innerHTML=`<div class="row"><canvas id="c" width="420" height="340"></canvas><div class="side"><div class="el" id="sym"></div><div class="big" id="nm"></div><p id="fx"></p><p>🔴 Protons <button data-a="p-1">−</button><button data-a="p1">+</button> <b id="pv"></b></p><p>⚪ Neutrons <button data-a="n-1">−</button><button data-a="n1">+</button> <b id="nv"></b></p><p>🔵 Electrons <button data-a="e-1">−</button><button data-a="e1">+</button> <b id="ev"></b></p><p id="ch"></p><p>🎯 Goal: build Hydrogen, Helium, Carbon and Oxygen! <span id="gl"></span></p><div class="why">The number of <b>protons</b> decides which element it is! Neutrons make it heavier. When electrons equal protons, the atom is neutral (no charge).</div></div></div>`;
+ const c=$("c"),g=c.getContext("2d");
+ const up=()=>{const E=EL[st.p];$("sym").textContent=E[0];$("nm").textContent=E[1]+" (element #"+st.p+")";$("fx").textContent=E[2];$("pv").textContent=st.p;$("nv").textContent=st.n;$("ev").textContent=st.e;const q=st.p-st.e;$("ch").innerHTML=q===0?"✅ Neutral atom: protons = electrons":q>0?`⚡ Charge +${q}: missing electrons (a positive ion)`:`⚡ Charge ${q}: extra electrons (a negative ion)`;
+  if(q===0){made[E[0]]=1;const o=ld();o.made=made;sv(o)}$("gl").textContent=["H","He","C","O"].map(s=>(made[s]?"✅":"⬜")+s).join(" ");if(["H","He","C","O"].every(s=>made[s]))badge("build","Element maker!")};
+ B.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const k=b.dataset.a[0],d=+b.dataset.a.slice(1);st[k]=Math.max(k==="p"?1:0,Math.min(k==="p"?10:k==="n"?12:12,st[k]+d));up()});up();
+ const draw=t=>{g.fillStyle="#0d0b2a";g.fillRect(0,0,420,340);const cx=210,cy=170,N=st.p+st.n;for(let i=0;i<N;i++){const a=i*2.4,r=Math.sqrt(i)*9;g.fillStyle=i<st.p?"#ef5350":"#90a4ae";g.beginPath();g.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,8,0,7);g.fill()}
+  let left=st.e;[2,8,8].forEach((cap,s)=>{const n=Math.min(cap,left);left-=n;const r=60+s*45;g.strokeStyle="rgba(128,222,234,.4)";g.beginPath();g.arc(cx,cy,r,0,7);g.stroke();for(let i=0;i<n;i++){const a=t*.001*(1.5-s*.3)+i*Math.PI*2/n;g.fillStyle="#4fc3f7";g.beginPath();g.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,6,0,7);g.fill()}});raf=requestAnimationFrame(draw)};raf=requestAnimationFrame(draw)}
+// ---- 3. static
+function stat(B){const st={bal:0,hair:0,near:false};
+ B.innerHTML=`<div class="row"><canvas id="c" width="420" height="320"></canvas><div class="side"><p><button id="rub">🧶 Rub balloon on hair</button><button id="near">🤏 Bring balloon close</button><button id="rst">↩️ Reset</button></p><p id="st" class="big"></p><div class="why">Rubbing moves electrons (−) from your hair onto the balloon. Now the balloon has extra − charge and your hair has extra + charge. Opposite charges attract, so your hair reaches toward the balloon! Same charges push apart, so the + hairs also spread away from each other.<br><br>🔬 Try it hands-on in the <a href="timemachine.html#lab">Inventors Lab</a> static experiment!</div></div></div>`;
+ const c=$("c"),g=c.getContext("2d");const draw=()=>{g.fillStyle="#0d0b2a";g.fillRect(0,0,420,320);const bx=st.near?250:330;g.fillStyle="#e53935";g.beginPath();g.ellipse(bx,110,40,50,0,0,7);g.fill();g.fillStyle="#fff";g.font="bold 18px sans-serif";for(let i=0;i<st.bal;i++)g.fillText("−",bx-25+(i%4)*14,95+Math.floor(i/4)*20);
+  g.fillStyle="#f5cba7";g.fillRect(80,180,80,80);g.strokeStyle="#5d4037";g.lineWidth=3;const lift=st.near?Math.min(1,st.hair/6):0;for(let i=0;i<10;i++){g.beginPath();g.moveTo(84+i*8,182);g.lineTo(84+i*8+lift*(60+i*4),182-12-lift*(50-i*2));g.stroke()}g.fillStyle="#ffeb3b";g.font="bold 16px sans-serif";for(let i=0;i<st.hair;i++)g.fillText("+",86+(i%5)*14,220+Math.floor(i/5)*18);
+  $("st").textContent=`Balloon: ${st.bal}− · Hair: ${st.hair}+`};
+ $("rub").onclick=()=>{if(st.bal<8){st.bal++;st.hair++}draw()};$("near").onclick=()=>{st.near=!st.near;draw();if(st.near&&st.bal>=4)badge("static","Static scientist!")};$("rst").onclick=()=>{st.bal=0;st.hair=0;st.near=false;draw()};draw()}
+// ---- 4. conductors vs insulators
+function cond(B){const IT=[["🟠","Copper wire",1,"Metals have free electrons that can move."],["🔩","Iron nail",1,"Iron is a metal, so electrons move through it."],["🥄","Aluminum foil",1,"Aluminum is a metal and a good conductor."],["✏️","Pencil lead (graphite)",1,"Surprise! Graphite is a form of carbon that conducts."],["🧂","Salt water",1,"Salt water has charged particles that carry electricity."],["🟣","Rubber",0,"Rubber holds its electrons tightly: an insulator."],["🧴","Plastic",0,"Plastic is an insulator. That's why wires are coated in it!"],["🪵","Dry wood",0,"Dry wood is an insulator."],["🥛","Glass",0,"Glass is an insulator."]];const done={};let cur=null;
+ B.innerHTML=`<div class="row"><svg id="s" viewBox="0 0 420 260" width="420" height="260"></svg><div class="side"><p>Put something in the gap to test it:</p><div id="it"></div><p id="r" class="big"></p><div class="why"><b>Conductors</b> let electrons flow easily (most metals). <b>Insulators</b> hold their electrons tightly (rubber, plastic, glass, dry wood). Wires use both: copper inside, plastic outside to keep us safe. ⚠️ Never play with outlets: house electricity is dangerous!</div></div></div>`;
+ const draw=()=>{const on=cur&&cur[2];$("s").innerHTML=`<rect x="20" y="90" width="60" height="90" rx="8" fill="#424242"/><path d="M50 90 V30 H330 V100 M330 160 V230 H250 M170 230 H50 V180" stroke="${on?"#ff9800":"#888"}" stroke-width="5" fill="none"/><circle cx="330" cy="130" r="${on?50:0}" fill="#fff59d" opacity=".4"/><circle cx="330" cy="130" r="26" fill="${on?"#ffeb3b":"#eceff1"}" stroke="#000" stroke-width="3"/><rect x="170" y="205" width="80" height="50" rx="8" fill="${cur?"#fff":"none"}" stroke="#fff" stroke-dasharray="${cur?0:6}"/><text x="210" y="240" font-size="28" text-anchor="middle">${cur?cur[0]:"?"}</text>`};
+ $("it").innerHTML=IT.map((o,i)=>`<button data-i="${i}">${o[0]} ${o[1]}</button>`).join("");$("it").querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=IT[+b.dataset.i];done[cur[1]]=1;b.style.background=cur[2]?"#a5d6a7":"#ef9a9a";$("r").textContent=(cur[2]?"💡 Conductor! ":"🚫 Insulator. ")+cur[3];draw();if(Object.keys(done).length===IT.length)badge("cond","Conductor detective!")});draw()}
+// ---- 5. current
+function current(B){const st={v:1,on:false};
+ B.innerHTML=`<div class="row"><canvas id="c" width="440" height="300"></canvas><div class="side"><p><button id="sw">🔘 Switch: OFF</button></p><p>🔋 Battery push (volts): <b id="vv">1.5</b></p><input type="range" id="vr" min="1" max="3" value="1"><div class="why">A battery is like a pump: it pushes electrons (🔵) around the loop, out of the − end and back into the + end. This flow is called <b>electric current</b>. A bigger push (more volts) makes more current, so the bulb glows brighter!<br><br>🤯 Each electron drifts slowly, but when you flip the switch the push travels through the wire almost as fast as light, so the bulb lights instantly.<br><br>🔬 Build real circuits in the <a href="timemachine.html#lab">Inventors Lab</a>!</div></div></div>`;
+ const c=$("c"),g=c.getContext("2d");const path=[[60,80],[380,80],[380,240],[60,240]];const per=2*(320+160);
+ const pt=d=>{d=((d%per)+per)%per;if(d<320)return[60+d,80];d-=320;if(d<160)return[380,80+d];d-=160;if(d<320)return[380-d,240];d-=320;return[60,240-d]};
+ let off=0,last=performance.now();const draw=t=>{const dt=(t-last)/1000;last=t;if(st.on)off-=dt*25*st.v;g.fillStyle="#0d0b2a";g.fillRect(0,0,440,300);g.strokeStyle="#e07a3f";g.lineWidth=14;g.strokeRect(60,80,320,160);
+  g.fillStyle="#424242";g.fillRect(30,120,60,80);g.fillStyle="#fff";g.font="bold 18px sans-serif";g.fillText("−",50,150);g.fillText("+",50,190);g.font="11px sans-serif";g.fillText(st.v*1.5+" V",40,215);
+  const br=st.on?st.v/3:0;g.fillStyle=`rgba(255,245,157,${br*.5})`;g.beginPath();g.arc(380,160,40+br*40,0,7);g.fill();g.fillStyle=st.on?"#ffeb3b":"#eceff1";g.beginPath();g.arc(380,160,22,0,7);g.fill();g.strokeStyle="#000";g.lineWidth=3;g.stroke();
+  if(!st.on){g.fillStyle="#0d0b2a";g.fillRect(200,70,40,20);g.strokeStyle="#fff";g.lineWidth=4;g.beginPath();g.moveTo(200,80);g.lineTo(235,62);g.stroke()}
+  for(let i=0;i<24;i++){const[x,y]=pt(off+i*per/24);g.fillStyle="#4fc3f7";g.beginPath();g.arc(x,y,5,0,7);g.fill()}raf=requestAnimationFrame(draw)};raf=requestAnimationFrame(draw);
+ $("sw").onclick=()=>{st.on=!st.on;$("sw").textContent="🔘 Switch: "+(st.on?"ON":"OFF");if(st.on)badge("current","Current controller!")};$("vr").oninput=e=>{st.v=+e.target.value;$("vv").textContent=(st.v*1.5).toFixed(1)}}
+const h=location.hash.slice(1);if(TABS.some(t=>t[0]===h))tab=h;render();
+window.ATOM={render,setTab:k=>{tab=k;render()}};
+</script>
+<script>
+/* Real Craft Adventures: tiny in-browser chiptune music (original tunes, no files) */
+(function(){
+const KEY="realcraft_music_v1";let on=localStorage.getItem(KEY)!=="off";
+let ctx=null,master=null,cur=null,want="home",timer=null,rate=1;const voices={};
+// note: semitones from A4 (0=A4); null=rest. Each step is an 8th note.
+const T={
+ time:{bpm:96,w:"triangle",bell:true,m:[0,null,7,null,12,null,7,4, 5,null,9,null,12,null,9,5, 7,null,11,null,14,null,11,7, 12,null,7,null,0,null,null,null],b:[-24,null,-17,null,-12,null,-17,null, -19,null,-12,null,-7,null,-12,null, -17,null,-10,null,-5,null,-10,null, -12,null,-17,null,-24,null,null,null]},
+ atom:{bpm:110,w:"sine",bell:true,m:[12,7,4,7,12,16,19,16, 14,9,5,9,14,17,21,17, 12,7,4,7,12,16,19,24, 21,17,14,12,null,null,12,null],b:[-24,null,-12,null,-24,null,-12,null, -22,null,-10,null,-22,null,-10,null, -24,null,-12,null,-24,null,-12,null, -19,null,-7,null,-24,null,null,null]},
+ build:{bpm:120,w:"square",m:[0,4,7,12,null,7,9,7, 5,9,12,null,9,7,5,4, 2,5,9,14,null,12,9,7, 4,7,12,11,12,null,null,null],b:[-24,null,-12,null,-17,null,-12,null, -19,null,-7,null,-17,null,-5,null, -22,null,-10,null,-17,null,-5,null, -20,null,-8,null,-24,null,null,null]},
+ home:{bpm:132,w:"square",m:[3,7,10,15,14,10,7,null, 5,8,12,17,15,12,8,null, 3,7,10,15,17,15,14,10, 12,10,8,7,5,null,3,null],b:[-21,-21,-14,-14,-16,-16,-9,-9, -19,-19,-12,-12,-14,-14,-7,-7, -21,-21,-14,-14,-16,-16,-9,-9, -16,-16,-14,-14,-21,-21,-21,null]},
+ workshop:{bpm:92,w:"triangle",m:[0,null,4,null,7,null,4,null, 2,null,5,null,9,null,5,null, 0,null,4,null,7,null,11,9, 7,null,5,null,4,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -24,null,null,null,-17,null,null,null, -19,null,null,null,-24,null,null,null]},
+ race:{bpm:160,w:"square",m:[7,7,12,7,14,12,7,5, 7,7,12,7,16,14,12,null, 5,5,9,5,12,9,5,4, 5,7,9,12,14,null,12,null],b:[-17,-5,-17,-5,-17,-5,-17,-5, -17,-5,-17,-5,-17,-5,-17,-5, -19,-7,-19,-7,-19,-7,-19,-7, -15,-3,-15,-3,-14,-2,-14,-2]},
+ mansion:{bpm:116,w:"square",m:[10,null,14,17,null,14,10,null, 12,null,15,19,null,15,12,null, 10,12,14,15,17,null,19,17, 15,14,12,null,10,null,null,null],b:[-14,null,-7,null,-14,null,-7,null, -12,null,-5,null,-12,null,-5,null, -14,null,-7,null,-11,null,-4,null, -16,null,-9,null,-14,null,null,null]},
+ spooky:{bpm:126,w:"triangle",m:[0,3,7,3,8,7,3,null, 0,3,7,3,6,5,3,null, 0,null,12,11,10,null,7,null, 8,7,5,3,2,null,0,null],b:[-24,null,-17,null,-24,null,-17,null, -20,null,-13,null,-22,null,-17,null, -24,null,-17,null,-21,null,-14,null, -19,null,-17,null,-24,null,null,null]},
+ sky:{bpm:104,w:"triangle",m:[7,null,12,14,16,null,14,12, 9,null,12,null,14,null,null,null, 5,null,9,12,14,null,12,9, 7,null,4,null,7,null,null,null],b:[-17,null,-10,null,-12,null,-5,null, -15,null,-8,null,-10,null,-3,null, -19,null,-12,null,-14,null,-7,null, -17,null,-10,null,-17,null,null,null]},
+ ocean:{bpm:72,w:"sine",m:[7,null,12,null,16,null,14,12, 9,null,12,null,14,null,null,null, 5,null,9,null,12,null,11,9, 7,null,4,null,7,null,null,null],b:[-17,null,null,null,-10,null,null,null, -15,null,null,null,-8,null,null,null, -19,null,null,null,-12,null,null,null, -17,null,null,null,-10,null,null,null],bell:true},
+ space:{bpm:84,w:"triangle",m:[0,7,12,16,19,16,12,7, 2,9,14,17,21,17,14,9, -3,4,9,12,16,12,9,4, -1,7,11,14,19,null,null,null],b:[-24,null,null,null,-17,null,null,null, -22,null,null,null,-15,null,null,null, -27,null,null,null,-20,null,null,null, -25,null,null,null,-17,null,null,null],bell:true},
+ xmas:{bpm:138,w:"square",m:[7,11,14,11,7,null,9,null, 7,11,14,16,14,null,null,null, 12,11,9,7,9,null,11,null, 7,9,11,9,7,null,null,null],b:[-17,-10,-17,-10,-15,-8,-15,-8, -17,-10,-17,-10,-12,-5,-12,-5, -12,-5,-12,-5,-15,-8,-15,-8, -17,-10,-17,-10,-17,null,null,null],bell:true}
+};
+const hz=n=>440*Math.pow(2,n/12);
+function init(){if(ctx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ctx=new AC();master=ctx.createGain();master.gain.value=.25*.35;master.connect(ctx.destination);timer=setInterval(tick,100)}
+function voice(name){if(!voices[name]){const g=ctx.createGain();g.gain.value=0;g.connect(master);voices[name]={g,step:0,next:ctx.currentTime+.05}}return voices[name]}
+function note(v,f,t,d,w,vol){const o=ctx.createOscillator(),e=ctx.createGain();o.type=w;o.frequency.value=f;e.gain.setValueAtTime(vol,t);e.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(e);e.connect(v.g);o.start(t);o.stop(t+d+.02)}
+function tick(){if(!ctx||ctx.state!=="running")return;const now=ctx.currentTime;
+ for(const name in voices){const v=voices[name];if(name!==cur&&v.g.gain.value<.01)continue;const tr=T[name],sp=60/tr.bpm/2/(name==="race"?rate:1);if(v.next<now-.5)v.next=now+.05;
+  while(v.next<now+.3){const i=v.step%tr.m.length,m=tr.m[i],b=tr.b[i];if(m!=null)note(v,hz(m),v.next,sp*.9,tr.w,.5);if(b!=null)note(v,hz(b),v.next,sp*.95,"triangle",.7);if(tr.bell&&i%4===0)note(v,hz(m!=null?m+24:31),v.next,.25,"sine",.18);if(i%2===0&&tr.bpm>120)note(v,hz(40+(i%4?0:4)),v.next,.03,"square",.08);v.next+=sp;v.step++}}}
+function apply(){if(!ctx)return;const t=ctx.currentTime;for(const name in voices){const g=voices[name].g.gain;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(on&&name===cur?1:0,t+1.2)}}
+function play(name){want=name;if(!ctx)return;if(name===cur)return;cur=name;const v=voice(name);if(v.g.gain.value<.01){v.step=0;v.next=ctx.currentTime+.05}apply()}
+function unlock(){init();if(!ctx)return;if(on&&!document.hidden)ctx.resume();play(want)}
+["pointerdown","touchend","keydown"].forEach(e=>addEventListener(e,unlock,{passive:true}));
+document.addEventListener("visibilitychange",()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else if(on)ctx.resume()});
+function setOn(v){on=v;localStorage.setItem(KEY,on?"on":"off");btn.textContent=on?"🎵":"🔇";btn.title=btn.ariaLabel=on?"Music on (tap to turn off)":"Music off (tap to turn on)";btn.classList.toggle("off",!on);if(ctx){apply();if(on)ctx.resume();else setTimeout(()=>{if(!on)ctx.suspend()},1300)}}
+const st=document.createElement("style");st.textContent="#musicBtn{position:fixed;right:8px;top:8px;z-index:9999;width:54px;height:54px;border-radius:50%;border:3px solid #000;background:#ffca28;font-size:28px;line-height:1;padding:0;box-shadow:0 3px 0 #000;cursor:pointer}#musicBtn.off{background:#9e9e9e}";document.head.appendChild(st);
+const btn=document.createElement("button");btn.id="musicBtn";btn.addEventListener("click",e=>{e.stopPropagation();unlock();setOn(!on)});
+(document.body?Promise.resolve():new Promise(r=>addEventListener("DOMContentLoaded",r))).then(()=>{document.body.appendChild(btn);setOn(on)});
+window.Music={play,setRate:r=>{rate=r},isOn:()=>on,setOn,get ctx(){return ctx},get cur(){return cur},tracks:Object.keys(T)};
+})();
+Music.play("atom");
+</script>
+</body></html>
