@@ -36,6 +36,17 @@ button.go{background:#43a047;color:#fff}
 #hint,#saved{background:rgba(0,0,0,.55);padding:6px 8px;font-size:8px;border-radius:4px;max-width:55vw}
 #look{position:fixed;left:16px;bottom:186px;background:rgba(0,0,0,.55);padding:6px 8px;font-size:8px;z-index:4;border-radius:4px}
 .lbl{display:none}
+#tricks{display:none;position:fixed;left:190px;right:120px;bottom:24px;gap:6px;justify-content:center;flex-wrap:wrap;z-index:6}#tricks button{width:74px;height:62px;font-size:20px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px}#tricks small{font-size:7px}
+body.plane #tricks{display:flex}
+#flyHome{display:none;position:fixed;left:0;right:0;margin:auto;width:fit-content;bottom:100px;font-size:14px;background:#43a047;color:#fff;padding:12px 18px;z-index:12;box-shadow:0 4px 0 #000}body.away #flyHome{display:block}
+body.away #goto,body.away #btnSlot,body.away #btnReset,body.away #btnCar,body.away #hotbar,body.away #modes{display:none}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:60;display:flex;align-items:center;justify-content:center}.ov.hidden{display:none}
+.card2{position:relative;background:#fff;color:#000;border:4px solid #000;border-radius:12px;padding:16px;width:min(680px,94vw);max-height:88vh;overflow-y:auto;touch-action:pan-y;font-size:11px;line-height:1.8;font-family:system-ui,-apple-system,sans-serif}
+.card2 h3{font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.6;margin:6px 0}.card2 h4{margin:12px 0 2px;color:#2e7d32;font-size:15px}.card2 p,.card2 li{font-size:16px;margin:4px 0}.card2 .big{font-size:56px;text-align:center}.card2 .hello{font-size:22px;font-weight:bold;color:#6a1b9a}.card2 .stamp{color:#c62828;font-weight:bold}
+.ovClose{position:absolute;right:8px;top:8px}.ovClose.inl{position:static}#learnSpeak{float:right;margin-right:52px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}.tcard{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;min-height:110px;position:relative;font-family:system-ui,sans-serif;font-size:13px}.tcard .te{font-size:34px}.tcard small{font-size:11px;color:#555}.tcard i{position:absolute;top:4px;right:4px;font-style:normal}.tcard.no{opacity:.5}
+.card2.tv{text-align:center}#travelCv{width:100%;border:3px solid #000;border-radius:8px}#travelTxt{font-family:'Press Start 2P',monospace;font-size:14px!important;line-height:1.6}
+.qz button{margin:3px;font-size:13px;font-family:system-ui,sans-serif}.qz button.right{background:#a5d6a7}.qz button.wrong{background:#ef9a9a}#lmap{width:100%;max-width:320px;border:2px solid #000;border-radius:6px}
 </style>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
@@ -49,6 +60,7 @@ button.go{background:#43a047;color:#fff}
  <button id="btnSlot">💾 Slot 1</button>
  <button id="btnReset">🔄 Reset</button>
  <button id="btnCar">🏎️ My Car</button>
+ <button id="btnPass">🛂 Passport</button>
  <button id="btnHelp">❓ Help</button>
 </div>
 <div id="goto"><button id="goBtn">🚀 Go to…</button><div id="gopanel" class="hidden"></div></div>
@@ -70,8 +82,16 @@ button.go{background:#43a047;color:#fff}
 <div id="look">👉 Drag to look · tap to build</div>
 <div id="zoom"><button id="zIn" title="Zoom in">➕</button><button id="zOut" title="Zoom out">➖</button></div>
 <div id="help" class="hidden"><div class="card"><h3>🌍 How to play</h3>
-🕹️ <b>Move:</b> drag the round stick (bottom left)<br>👉 <b>Look:</b> drag anywhere on the world<br>👆 <b>Build:</b> tap a block. <b>🧱 Place</b> adds a block, <b>⛏️ Break</b> removes one<br>🎨 <b>Pick a block</b> from the bar at the bottom<br>⬆️ <b>Jump</b> · 🕊️ <b>Fly</b> · ➕➖ <b>Zoom</b><br>🚀 <b>Go to</b> any Lincoln place: Capitol, Stadium, Zoo, Airport…<br>🚁 <b>Helicopter:</b> walk up and tap <b>Get in</b>. Hold ⬆️ Up, stick to fly<br>✈️ <b>Plane</b> at the Airport: hold ⏩ Faster to take off, stick to steer<br>🗺️ <b>Top view</b> looks down on the city · ⭐ fly through gold rings!<br>🔒 Locked blocks unlock when you do real quests!<br><br><button class="go" id="helpOk" style="font-size:12px">Let's build!</button></div></div>
+🕹️ <b>Move:</b> drag the round stick (bottom left)<br>👉 <b>Look:</b> drag anywhere on the world<br>👆 <b>Build:</b> tap a block. <b>🧱 Place</b> adds a block, <b>⛏️ Break</b> removes one<br>🎨 <b>Pick a block</b> from the bar at the bottom<br>⬆️ <b>Jump</b> · 🕊️ <b>Fly</b> · ➕➖ <b>Zoom</b><br>🚀 <b>Go to</b> any Lincoln place: Capitol, Stadium, Zoo, Airport…<br>🚁 <b>Helicopter:</b> walk up and tap <b>Get in</b>. Hold ⬆️ Up, stick to fly<br>✈️ <b>Plane</b> at the Airport: hold ⏩ Faster to take off, stick to steer<br>🗺️ <b>Top view</b> looks down on the city · ⭐ fly through gold rings!<br>🔁 <b>Tricks</b> in the plane: Loop, Roll, Flip, Spin and colored 💨 Smoke!<br>🌍 <b>World Trip</b> (in the plane): fly to Paris, India, the USA and family! 🛂 Collect passport stamps<br>🏠 <b>Fly Home</b> brings you back to Lincoln anytime<br>🔒 Locked blocks unlock when you do real quests!<br><br><button class="go" id="helpOk" style="font-size:12px">Let's build!</button></div></div>
 <div id="toast" class="hidden"></div>
+<div id="tricks"><button id="tLoop">🔁<small>Loop</small></button><button id="tRoll">🌀<small>Roll</small></button><button id="tFlip">🤸<small>Flip</small></button><button id="tSpin">💫<small>Spin</small></button><button id="tSmoke">💨<small>Smoke</small></button><button id="tTrip" class="go">🌍<small>World Trip</small></button></div>
+<button id="flyHome">🏠 Fly Home</button>
+<div id="trip" class="ov hidden"><div class="card2"><button class="ovClose" data-c="trip">✖</button><h3>🌍 Where should we fly?</h3><div id="tripBody"></div></div></div>
+<div id="travel" class="ov hidden"><div class="card2 tv"><canvas id="travelCv" width="640" height="320"></canvas><p id="travelTxt"></p></div></div>
+<div id="fact" class="ov hidden"><div class="card2"><div id="factBody"></div><button class="go" id="factLearn">📖 Learn more</button> <button class="ovClose inl" data-c="fact">✈️ Let's fly!</button></div></div>
+<div id="learn" class="ov hidden"><div class="card2"><button class="ovClose" data-c="learn">✖</button><button id="learnSpeak">🔊 Read to me</button><div id="learnBody"></div><button class="ovClose inl go" data-c="learn">👍 Done</button></div></div>
+<div id="passport" class="ov hidden"><div class="card2"><button class="ovClose" data-c="passport">✖</button><h3>🛂 My Passport</h3><div id="ppBody"></div></div></div>
+<div id="askHome" class="ov hidden"><div class="card2"><h3>🏠 Fly home to Lincoln?</h3><button class="go" id="askYes">🏠 Yes, fly home</button> <button id="askNo">🌍 Keep exploring</button></div></div>
 <script type="module">
 import * as THREE from "three";
 
@@ -111,6 +131,7 @@ const BLOCKS=[
  {id:27,n:"Glow",c:"#76ff03",req:"streak",hint:"Keep a 3-day streak or finish today's missions!"},
  {id:28,n:"Asphalt",c:"#424242",req:"cars",hint:"Build a car in the Workshop to unlock!"},
  {id:29,n:"Garage Door",c:"#78909c",req:"cars",hint:"Build a car in the Workshop to unlock!"},
+ {id:30,n:"Iron",c:"#7b5e4a"},{id:31,n:"Marble",c:"#f3eee2"},{id:32,n:"Copper",c:"#5fb3a1"},{id:33,n:"Sandstone",c:"#dcc187"},{id:34,n:"Bridge Orange",c:"#c0362c"},{id:35,n:"Snow",c:"#ffffff"},{id:36,n:"Rock",c:"#6b6b6b"},{id:37,n:"Sea",c:"#2b8bd6"},
 ];
 const BASIC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
 
@@ -280,7 +301,7 @@ LM=[
  {k:"lake",n:"🛶 Holmes Lake",x:48,z:-16,y:7,go:[34.5,-16.5]},
  {k:"airport",n:"✈️ Lincoln Airport",x:-50,z:-50,y:14,go:[-52.5,-42.5],tx:-58,tz:-48},
 ];
-const GO={};for(const L of LM){const tx=L.tx??L.x,tz=L.tz??L.z;GO[L.k]=[L.go[0],L.go[1],Math.atan2(tx-L.go[0],tz-L.go[1])]}
+let curLM=LM;const GO={};for(const L of LM){const tx=L.tx??L.x,tz=L.tz??L.z;GO[L.k]=[L.go[0],L.go[1],Math.atan2(tx-L.go[0],tz-L.go[1])]}
 
 function label(txt,x,y,z,s=1){const c=document.createElement("canvas");c.width=512;c.height=96;const g=c.getContext("2d");g.fillStyle="rgba(0,0,0,.65)";g.fillRect(0,0,512,96);g.fillStyle="#ffeb3b";g.font="bold 38px sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(txt,256,50);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:true}));sp.scale.set(5*s,.9*s,1);sp.position.set(x,y,z);scene.add(sp);SPR.push(sp)}const SPR=[];
 for(const L of LM)label(L.n.replace(/^\S+\s/,""),L.x+(L.k==="kahoa"?0:0),L.y,L.z+(L.k==="kahoa"?-5.2:0),L.s||1);
@@ -349,6 +370,7 @@ function tapAt(cx,cy){if(ride)return;const r=cv.getBoundingClientRect();ray.setF
 let holdT=0,lookT=0;
 function doAction(){
   if(ride)return;
+  if(away)return toast("🏠 Building is for Lincoln. Here you can explore!");
   if(!target)return toast("👀 Look at a block first!");
   if(mode==="break"){set(target.x,target.y,target.z,0);beep(320,.06);saveSoon()}
   else{
@@ -370,8 +392,8 @@ let eng=null;function engine(on){try{actx=actx||new AC();if(on&&!eng&&!(window.M
 let slot=0,saveT=null;
 function diffFromBase(){const d={};for(let i=0;i<vox.length;i++)if(vox[i]!==base[i]){const y=i%H,r=(i-y)/H,z=r%W-OZ,x=(r-r%W)/W-OX;d[x+","+y+","+z]=vox[i]}return d}
 function applyDiff(d){for(const k in d){const[x,y,z]=k.split(",").map(Number);if(Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(z))set(x,y,z,d[k]|0)}}
-function saveNow(){let all={};try{all=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}all.slots=all.slots||[{},{},{}];all.slots[slot]={v:VER,diff:diffFromBase(),p:{x:P.x,y:P.y,z:P.z,cy:P.cy},t:Date.now()};all.slot=slot;localStorage.setItem(KEYW,JSON.stringify(all))}
-function saveSoon(){clearTimeout(saveT);saveT=setTimeout(saveNow,800);document.getElementById("saved").textContent="💾 Saving…";setTimeout(()=>document.getElementById("saved").textContent="💾 Saved",900)}
+function saveNow(){if(away)return;let all={};try{all=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}all.slots=all.slots||[{},{},{}];all.slots[slot]={v:VER,diff:diffFromBase(),p:{x:P.x,y:P.y,z:P.z,cy:P.cy},t:Date.now()};all.slot=slot;localStorage.setItem(KEYW,JSON.stringify(all))}
+function saveSoon(){if(away)return;clearTimeout(saveT);saveT=setTimeout(saveNow,800);document.getElementById("saved").textContent="💾 Saving…";setTimeout(()=>document.getElementById("saved").textContent="💾 Saved",900)}
 function loadSlot(s){slot=s;if(ride)exitNow(true);genBase();base=vox.slice();let all={};try{all=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}const sl=(all.slots||[])[s];let msg="📂 Slot "+(s+1)+" loaded";
   if(sl&&sl.diff){try{applyDiff(sl.diff)}catch(e){}if(!sl.v&&Object.keys(sl.diff).length)msg="🌆 Lincoln got BIGGER! Your builds are still here.";if(sl.p&&Math.abs(sl.p.x)<OX&&Math.abs(sl.p.z)<OZ){P.x=sl.p.x;P.y=sl.p.y;P.z=sl.p.z;P.cy=sl.p.cy||P.cy}}
   else if(!sl||!sl.v)msg="🌆 Welcome to big Lincoln! Find the 🚁 helicopter next to you!";
@@ -438,7 +460,7 @@ function goTo(key){const g=GO[key];if(!g)return;if(ride)exitNow(true);P.x=g[0];P
 gp.querySelectorAll("button").forEach(b=>b.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();goTo(b.dataset.go);gp.classList.add("hidden");document.getElementById("goBtn").classList.remove("on");toast("🚀 Zoom! "+b.textContent);beep(880,.08)}));
 
 // vehicle UI
-function nearVeh(){let best=null,bd=4.5;for(const v of VEH){const d=Math.hypot(v.x-P.x,v.z-P.z);if(d<bd&&Math.abs(v.y-P.y)<3){bd=d;best=v}}return best}
+function nearVeh(){let best=null,bd=4.5;for(const v of VEH){if(!v.g.visible)continue;const d=Math.hypot(v.x-P.x,v.z-P.z);if(d<bd&&Math.abs(v.y-P.y)<3){bd=d;best=v}}return best}
 const getInBtn=document.getElementById("getIn");let nearV=null;
 tapBtn("getIn",()=>{if(nearV)getIn(nearV)});
 function setBody(){document.body.classList.toggle("riding",!!ride);document.body.classList.toggle("heli",!!ride&&ride.t==="heli");document.body.classList.toggle("plane",!!ride&&ride.t==="plane");document.getElementById("btnTop").classList.toggle("on",topView)}
@@ -457,9 +479,9 @@ function drawMapBase(){const c=document.createElement("canvas");c.width=W;c.heig
   for(let x=-OX;x<OX;x++)for(let z=-OZ;z<OZ;z++){const t=groundTop(x,z)-1,id=t>=0?vox[I(x,t,z)]:1,c=cols[id]||cols[1],px=OX-1-x,py=OZ-1-z,o=(py*W+px)*4,sh=t>2?1.12:1;im.data[o]=Math.min(255,c[0]*sh);im.data[o+1]=Math.min(255,c[1]*sh);im.data[o+2]=Math.min(255,c[2]*sh);im.data[o+3]=255}
   g.putImageData(im,0,0);mapImg=c}
 function drawMap(){if(!mapImg)return;const S=mm.width/W;mg.imageSmoothingEnabled=false;mg.drawImage(mapImg,0,0,mm.width,mm.height);mg.font="14px sans-serif";mg.textAlign="center";mg.textBaseline="middle";
-  for(const L of [LM[3],LM[4],LM[13],LM[1]])mg.fillText(L.n.split(" ")[0],(OX-1-L.x)*S,(OZ-1-L.z)*S);
-  for(const v of VEH){mg.fillStyle=v.t==="heli"?"#ff1744":"#ffd600";mg.fillRect((OX-1-v.x)*S-4,(OZ-1-v.z)*S-4,8,8)}
-  for(let i=0;i<RINGS.length;i++)if(!ringGot.includes(i)){mg.strokeStyle="#ffd600";mg.lineWidth=2;mg.beginPath();mg.arc((OX-1-RINGS[i][0])*S,(OZ-1-RINGS[i][2])*S,4,0,7);mg.stroke()}
+  for(const L of (away?curLM:[LM[3],LM[4],LM[13],LM[1]]))mg.fillText(L.n.split(" ")[0],(OX-1-L.x)*S,(OZ-1-L.z)*S);
+  for(const v of VEH){if(!v.g.visible)continue;mg.fillStyle=v.t==="heli"?"#ff1744":"#ffd600";mg.fillRect((OX-1-v.x)*S-4,(OZ-1-v.z)*S-4,8,8)}
+  for(let i=0;i<RINGS.length;i++)if(!away&&!ringGot.includes(i)){mg.strokeStyle="#ffd600";mg.lineWidth=2;mg.beginPath();mg.arc((OX-1-RINGS[i][0])*S,(OZ-1-RINGS[i][2])*S,4,0,7);mg.stroke()}
   const px=(OX-1-P.x)*S,py=(OZ-1-P.z)*S,h=ride?ride.h:P.yaw;mg.fillStyle="#fff";mg.strokeStyle="#000";mg.lineWidth=2;mg.beginPath();mg.moveTo(px-Math.sin(h)*9,py-Math.cos(h)*9);mg.lineTo(px+Math.cos(h)*5,py-Math.sin(h)*5);mg.lineTo(px-Math.cos(h)*5,py+Math.sin(h)*5);mg.closePath();mg.fill();mg.stroke()}
 
 // ---- loop ----
@@ -487,16 +509,16 @@ function vstep(dt,t){const v=ride;let fx=inp.jx,fy=inp.jy;const k=inp.keys;if(k.
     v.y+=climb*dt;v.x+=Math.sin(v.h)*v.s*dt;v.z+=Math.cos(v.h)*v.s*dt;
     const g2=groundTop(v.x,v.z);if(v.y<g2){v.y=g2;if(air&&t-bonkT>2&&g2>2){bonkT=t;toast("🦘 Hop! Pull the stick back to climb.")}}v.y=Math.min(v.y,H+22);air=v.y>g2+.25;
     v.tx=(v.tx||0)+(-climb*.05-(v.tx||0))*Math.min(1,dt*3);v.tz=(v.tz||0)+((air?fx*.45:0)-(v.tz||0))*Math.min(1,dt*3);
-    v.rotor.rotation.z+=dt*(6+v.s*3);v.g.rotation.set(v.tx,v.h,v.tz,"YXZ");
+    v.rotor.rotation.z+=dt*(6+v.s*3);
     if(landing&&!air&&v.s<1){v.s=0;exitNow()}
-    hud.textContent="✈️ Speed "+Math.round(v.s)+(v.s<11&&!air?" (need 11 to fly)":"")+" · ⭐ "+ringGot.length+"/"+RINGS.length;
+    hud.textContent="✈️ Speed "+Math.round(v.s)+(v.s<11&&!air?" (need 11 to fly)":"")+" · ⭐ "+(ringGot.length+bonusStars());
     if(eng)eng.o.frequency.value=50+v.s*3;
   }
   // stay in Lincoln
-  const lim=OX-3;if(Math.abs(v.x)>lim||Math.abs(v.z)>lim){v.x=Math.max(-lim,Math.min(lim,v.x));v.z=Math.max(-lim,Math.min(lim,v.z));if(v.t==="plane"){const want=Math.atan2(-v.x,-v.z);let d=want-v.h;d=Math.atan2(Math.sin(d),Math.cos(d));v.h+=d*Math.min(1,dt*2)}if(t-edgeT>3){edgeT=t;toast("🔄 That's the edge of Lincoln, turning back!")}}
-  v.g.position.set(v.x,v.y,v.z);P.x=v.x;P.z=v.z;P.y=v.y;
+  const lim=OX-3;if(Math.abs(v.x)>lim||Math.abs(v.z)>lim){v.x=Math.max(-lim,Math.min(lim,v.x));v.z=Math.max(-lim,Math.min(lim,v.z));if(v.t==="plane"){const want=Math.atan2(-v.x,-v.z);let d=want-v.h;d=Math.atan2(Math.sin(d),Math.cos(d));v.h+=d*Math.min(1,dt*2)}if(away)askHome(t);else if(t-edgeT>3){edgeT=t;toast("🔄 That's the edge of Lincoln, turning back!")}}
+  v.g.position.set(v.x,v.y,v.z);P.x=v.x;P.z=v.z;P.y=v.y;if(v.t==="plane")trickStep(v,dt);if(away)destRingStep(v);
   // rings
-  for(let i=0;i<RINGS.length;i++){if(ringGot.includes(i))continue;const r=RINGS[i];if(Math.hypot(v.x-r[0],v.y+1.2-r[1],v.z-r[2])<3.3){ringGot.push(i);ringObjs[i].visible=false;localStorage.setItem(KEYR,JSON.stringify(ringGot));beep(988,.12);setTimeout(()=>beep(1318,.15),120);toast(ringGot.length===RINGS.length?"🏆 You flew through ALL the rings! Super pilot!":"⭐ Ring "+ringGot.length+" of "+RINGS.length+"!")}}
+  if(!away)for(let i=0;i<RINGS.length;i++){if(ringGot.includes(i))continue;const r=RINGS[i];if(Math.hypot(v.x-r[0],v.y+1.2-r[1],v.z-r[2])<3.3){ringGot.push(i);ringObjs[i].visible=false;localStorage.setItem(KEYR,JSON.stringify(ringGot));beep(988,.12);setTimeout(()=>beep(1318,.15),120);toast(ringGot.length===RINGS.length?"🏆 You flew through ALL the rings! Super pilot!":"⭐ Ring "+ringGot.length+" of "+RINGS.length+"!")}}
   // camera
   const tv=new THREE.Vector3();if(topView)tv.set(v.x,v.y+48,v.z-1);else{const D=v.t==="heli"?13:17;tv.set(v.x-Math.sin(v.h)*D,v.y+6,v.z-Math.cos(v.h)*D);tv.y=Math.max(tv.y,groundTop(tv.x,tv.z)+1.5)}
   if(camInit)cam.position.lerp(tv,Math.min(1,dt*(topView?6:4)));else{cam.position.copy(tv);camInit=true}cam.lookAt(v.x,v.y+1.5,v.z);
@@ -537,23 +559,432 @@ function step(dt,t){
   for(const c of chunks.values())c.g.visible=Math.hypot(c.cx-cam.position.x,c.cz-cam.position.z)<far+12;
   rebuildDirty(ride?3:2);
   // landmark popup
-  if(++fc%10===0){let best=null,bd=ride?28:16;for(const L of LM){const d=Math.hypot(L.x-P.x,L.z-P.z);if(d<bd){bd=d;best=L}}const s=best?best.n:"";if(s!==lmShown){lmShown=s;lmEl.textContent=s;lmEl.classList.toggle("hidden",!s)}drawMap()}
+  if(++fc%10===0){let best=null,bd=ride?28:16;for(const L of curLM){const d=Math.hypot(L.x-P.x,L.z-P.z);if(d<bd){bd=d;best=L}}const s=best?best.n:"";if(s!==lmShown){lmShown=s;lmEl.textContent=s;lmEl.classList.toggle("hidden",!s)}drawMap()}
   for(const r of ringObjs)if(r.visible)r.rotation.y+=dt*.8;
-  {const _v=new THREE.Vector3();for(const o of SPR){const d=cam.position.distanceTo(o.position);_v.copy(o.position).project(cam);o.visible=!topView&&d>(ride?16:7)&&d<cam.far*.85&&_v.z<1&&_v.z>-1}}
+  {const _v=new THREE.Vector3();for(const o of SPR){const d=cam.position.distanceTo(o.position);_v.copy(o.position).project(cam);o.visible=!o.userData.hideAway&&!topView&&d>(ride?16:7)&&d<cam.far*.85&&_v.z<1&&_v.z>-1}for(const o of DSPR){const d=cam.position.distanceTo(o.position);o.visible=!topView&&d>5&&d<cam.far*.9}}
+  if(away)peopleStep(t);if(!(ride&&ride.t==="plane"))updSmoke(dt);
 }
 let vw=0,vh=0;function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;step(dt,t/1000);if(innerWidth!==vw||innerHeight!==vh)resize();ren.render(scene,cam);requestAnimationFrame(frame)}
 function resize(){vw=innerWidth;vh=innerHeight;ren.setSize(vw,vh,true);cam.aspect=vw/vh;cam.updateProjectionMatrix()}
 addEventListener("resize",resize);addEventListener("orientationchange",()=>setTimeout(resize,200));if(window.visualViewport)visualViewport.addEventListener("resize",resize);resize();
 ["gesturestart","gesturechange","gestureend"].forEach(e=>document.addEventListener(e,ev=>ev.preventDefault(),{passive:false}));document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
-document.addEventListener("touchmove",e=>{if(!e.target.closest("#hotbar,#gopanel"))e.preventDefault()},{passive:false});
+document.addEventListener("touchmove",e=>{if(!e.target.closest("#hotbar,#gopanel,.card2"))e.preventDefault()},{passive:false});
 
+// ---- World Trip data (facts checked against reliable sources) ----
+const LINCOLN=[40.8136,-96.7026];
+const PLACES={
+eiffel:{n:"Eiffel Tower",e:"🗼",city:"Paris",country:"France",cont:"Europe",ll:[48.8584,2.2945],hello:"Bonjour",lang:"French",
+ fact:"The Eiffel Tower is made of iron and gets repainted about every 7 years so it doesn't rust!",
+ when:"It was built from 1887 to 1889 by the company of engineer Gustave Eiffel, for the 1889 World's Fair in Paris.",
+ why:"Many people thought it was ugly at first! Now it is one of the most visited monuments in the world and a symbol of France.",
+ big:"It is about 1,083 feet (330 m) tall. That's more than 2½ times as tall as the Nebraska State Capitol (400 feet)!",
+ cool:["In hot summer weather the iron expands, so the tower can grow about 6 inches taller.","It takes about 60 tons of paint to paint the whole tower.","It was the tallest structure in the world for about 40 years."],
+ quiz:[["What is the Eiffel Tower made of?",["Iron","Wood","Glass"],0],["Which city is it in?",["Rome","Paris","London"],1]]},
+taj:{n:"Taj Mahal",e:"🕌",city:"Agra",country:"India",cont:"Asia",ll:[27.1751,78.0421],hello:"Namaste",lang:"Hindi",
+ fact:"The Taj Mahal is made of white marble that looks pink in the morning and golden at sunset!",
+ when:"Emperor Shah Jahan had it built in memory of his wife, Mumtaz Mahal. Work started in 1632, and about 20,000 workers helped build it.",
+ why:"It is one of the most beautiful buildings in the world, with a giant dome, four tall towers and a long reflecting pool in its garden.",
+ big:"It is about 240 feet (73 m) tall, a bit more than half as tall as the Nebraska State Capitol (400 feet).",
+ cool:["The four towers (minarets) lean slightly outward, so they would fall away from the main tomb in an earthquake.","Its walls are decorated with flowers made of shiny stones set into the marble.","It sits beside the Yamuna River."],
+ quiz:[["What is the Taj Mahal made of?",["White marble","Red brick","Ice"],0],["Which country is it in?",["Japan","India","Egypt"],1]]},
+liberty:{n:"Statue of Liberty",e:"🗽",city:"New York",country:"USA",cont:"North America",ll:[40.6892,-74.0445],hello:"Hello",lang:"English",
+ fact:"The Statue of Liberty was a gift from France! Her copper skin was shiny brown at first and slowly turned green.",
+ when:"French sculptor Frédéric Auguste Bartholdi designed her, and Gustave Eiffel (yes, the Eiffel Tower guy!) designed her iron skeleton. She was dedicated in 1886.",
+ why:"She stands for freedom and welcomed millions of people arriving in America by ship.",
+ big:"From the ground to the tip of her torch she is about 305 feet (93 m) tall, about three-quarters as tall as the Nebraska State Capitol (400 feet).",
+ cool:["Her crown has 7 rays and 25 windows.","Visitors climb 354 steps to reach the crown.","She holds a tablet with the date July 4, 1776 written on it."],
+ quiz:[["Which country gave the statue to the USA?",["France","Canada","Italy"],0],["What color is she now?",["Gold","Green","Blue"],1]]},
+pyramids:{n:"Great Pyramids & Sphinx",e:"🐫",city:"Giza",country:"Egypt",cont:"Africa",ll:[29.9792,31.1342],hello:"Marhaba",lang:"Arabic",
+ fact:"The Great Pyramid is about 4,500 years old, and it was the tallest thing people had built for nearly 4,000 years!",
+ when:"Ancient Egyptians built the Great Pyramid for the pharaoh (king) Khufu around 2560 BC. The Sphinx was carved nearby with a lion's body and a human head.",
+ why:"It is the oldest of the Seven Wonders of the Ancient World, and the only one still standing.",
+ big:"The Great Pyramid was first about 481 feet (147 m) tall, taller than the Nebraska State Capitol (400 feet)! Today it is about 455 feet because its top stones are gone.",
+ cool:["It is made of about 2.3 million stone blocks.","The Sphinx is about 240 feet long, two-thirds as long as a football field with its end zones (360 feet).","The pyramids were tombs for Egyptian kings."],
+ quiz:[["About how old is the Great Pyramid?",["450 years","4,500 years","45 years"],1],["The Sphinx has the body of a...",["Lion","Horse","Camel"],0]]},
+bigben:{n:"Big Ben & London Eye",e:"🕰️",city:"London",country:"United Kingdom",cont:"Europe",ll:[51.5007,-0.1246],hello:"Hello",lang:"English (people also say \"Cheers!\")",
+ fact:"\"Big Ben\" is really the name of the giant bell inside the clock tower, not the tower itself!",
+ when:"The clock tower was finished in 1859. In 2012 it was named the Elizabeth Tower. The London Eye, a giant observation wheel, opened in 2000.",
+ why:"Its bongs ring out every hour beside the River Thames, and it is one of the most famous clocks in the world.",
+ big:"The tower is about 316 feet (96 m) tall and the London Eye is about 443 feet (135 m), so the Eye is a little taller than the Nebraska State Capitol (400 feet)!",
+ cool:["The London Eye has 32 glass capsules.","The tower has a clock face on all four sides.","The Big Ben bell weighs more than 13 tons, heavier than two elephants!"],
+ quiz:[["What is \"Big Ben\" really?",["A bell","A bridge","A king"],0],["Which river flows past it?",["Seine","Thames","Nile"],1]]},
+wall:{n:"Great Wall of China",e:"🐉",city:"Near Beijing",country:"China",cont:"Asia",ll:[40.3594,116.0204],hello:"Nǐ hǎo",lang:"Chinese (Mandarin)",
+ fact:"All its sections together are about 13,000 miles long, more than four times the drive from New York to Los Angeles!",
+ when:"Many Chinese dynasties built walls over about 2,000 years. The famous brick and stone parts you see in pictures were mostly built by the Ming dynasty (1368–1644).",
+ why:"It was built to protect China, with watchtowers where soldiers could send smoke or fire signals.",
+ big:"A survey in 2012 measured all the sections at about 13,171 miles (21,196 km). Walking all of it would take well over a year!",
+ cool:["It is NOT visible from space with just your eyes. That's a myth!","It climbs over mountains, deserts and grasslands.","Some walls were built using sticky rice in the mortar."],
+ quiz:[["Can you see the wall from space with just your eyes?",["Yes","No"],1],["What were the watchtowers used for?",["Signals and lookouts","Swimming","Cooking"],0]]},
+sydney:{n:"Sydney Opera House",e:"🎭",city:"Sydney",country:"Australia",cont:"Australia (Oceania)",ll:[-33.8568,151.2153],hello:"G'day",lang:"Australian English",
+ fact:"The Opera House roof looks like giant sails, and it is covered with more than 1 million tiles!",
+ when:"Danish architect Jørn Utzon won a design contest, and the Opera House opened in 1973.",
+ why:"Its sail-shaped roofs on Sydney Harbour make it one of the most famous buildings of the 1900s. It's a World Heritage Site.",
+ big:"Its tallest roof is about 220 feet (67 m) above the water, about half as tall as the Nebraska State Capitol (400 feet).",
+ cool:["The roof tiles clean themselves when it rains.","It hosts more than 1,500 shows every year.","The Sydney Harbour Bridge is right next door."],
+ quiz:[["What does the roof look like?",["Sails","A pyramid","A bowl"],0],["About how many tiles cover the roof?",["1,000","1 million","10"],1]]},
+rio:{n:"Christ the Redeemer",e:"⛰️",city:"Rio de Janeiro",country:"Brazil",cont:"South America",ll:[-22.9519,-43.2105],hello:"Olá",lang:"Portuguese",
+ fact:"This giant statue stands on top of Corcovado Mountain, about 2,300 feet above the city of Rio!",
+ when:"It was finished in 1931. French sculptor Paul Landowski designed it with Brazilian engineer Heitor da Silva Costa.",
+ why:"With its arms spread wide over the city and beaches, it is a symbol of Rio and Brazil, and one of the New Seven Wonders of the World.",
+ big:"The statue is about 98 feet (30 m) tall, and its arms stretch about 92 feet (28 m) wide, about a quarter as tall as the Nebraska State Capitol (400 feet).",
+ cool:["It is made of concrete covered with small triangle tiles of soapstone.","Lightning strikes it a few times every year!","You can see Sugarloaf Mountain and the ocean from it."],
+ quiz:[["What mountain is it on?",["Corcovado","Mount Fuji","Everest"],0],["What language do people speak in Brazil?",["Spanish","Portuguese","French"],1]]},
+fuji:{n:"Mount Fuji",e:"🗻",city:"Near Tokyo",country:"Japan",cont:"Asia",ll:[35.3606,138.7274],hello:"Konnichiwa",lang:"Japanese",
+ fact:"Mount Fuji is a volcano! It last erupted in 1707 and is the tallest mountain in Japan.",
+ when:"Nobody built it. Nature did! It formed over many thousands of years from layers of lava and ash.",
+ why:"Its snowy, almost perfect cone shape has inspired artists and poets for centuries. It's a sacred place in Japan.",
+ big:"It is 12,388 feet (3,776 m) tall. That's about 31 Nebraska State Capitols stacked up!",
+ cool:["Hundreds of thousands of people climb it every summer.","Its top is covered in snow for much of the year.","On clear days you can see it from Tokyo, about 60 miles away."],
+ quiz:[["What kind of mountain is Mount Fuji?",["A volcano","A sand dune","An iceberg"],0],["How do you say hello in Japanese?",["Ciao","Konnichiwa","Hola"],1]]},
+colosseum:{n:"Colosseum",e:"🏛️",city:"Rome",country:"Italy",cont:"Europe",ll:[41.8902,12.4922],hello:"Ciao",lang:"Italian",
+ fact:"The Colosseum is almost 2,000 years old and could hold about 50,000 people, more than half as many as Memorial Stadium holds!",
+ when:"Emperor Vespasian started building it around AD 70, and his son Titus finished it in AD 80.",
+ why:"It is the largest amphitheater the ancient Romans ever built, where crowds came to watch big shows.",
+ big:"It is about 157 feet (48 m) tall, about 2/5 as tall as the Nebraska State Capitol (400 feet).",
+ cool:["It had a giant cloth awning to shade the crowd from the sun.","There were tunnels and elevators under the floor.","Earthquakes over the centuries knocked down part of its outer wall."],
+ quiz:[["About how old is the Colosseum?",["2,000 years","200 years","20 years"],0],["Which city is it in?",["Rome","Paris","Cairo"],0]]},
+pisa:{n:"Leaning Tower of Pisa",e:"🔔",city:"Pisa",country:"Italy",cont:"Europe",ll:[43.7230,10.3966],hello:"Ciao",lang:"Italian",
+ fact:"The tower started leaning while it was still being built, because the ground under it is soft!",
+ when:"Building started in 1173 and took about 200 years. It is the bell tower of Pisa's cathedral.",
+ why:"It's famous for its tilt! Engineers worked from 1990 to 2001 to straighten it a little so it won't fall.",
+ big:"It is about 186 feet (57 m) tall on its high side and leans about 4 degrees, less than half as tall as the Nebraska State Capitol (400 feet).",
+ cool:["It has 7 bells at the top.","Visitors climb almost 300 steps to the top.","It is made of white marble."],
+ quiz:[["Why does the tower lean?",["Soft ground","Strong wind","It was built that way"],0],["What is inside the top?",["Bells","A pool","A garden"],0]]},
+goldengate:{n:"Golden Gate Bridge",e:"🌉",city:"San Francisco",country:"USA",cont:"North America",ll:[37.8199,-122.4783],hello:"Hello",lang:"English",
+ fact:"The Golden Gate Bridge isn't gold. Its color is called \"International Orange\" so ships can see it in the fog!",
+ when:"It opened in 1937. Chief engineer Joseph Strauss led the project.",
+ why:"When it opened, it was the longest suspension bridge in the world, hanging from two giant cables.",
+ big:"Its towers rise about 746 feet (227 m) above the water, almost twice as tall as the Nebraska State Capitol (400 feet)! The bridge is about 1.7 miles long.",
+ cool:["Each main cable is made of about 27,000 thin wires.","Painters keep repainting it to protect it from salty air.","Fog often rolls in and hides the towers."],
+ quiz:[["What is the bridge's color called?",["International Orange","Golden Yellow","Fire Red"],0],["Which city is it in?",["San Francisco","Chicago","Lincoln"],0]]},
+machu:{n:"Machu Picchu",e:"🦙",city:"Andes Mountains",country:"Peru",cont:"South America",ll:[-13.1631,-72.5450],hello:"Allillanchu (Quechua) / Hola",lang:"Quechua & Spanish",
+ fact:"Machu Picchu is an ancient Inca city high in the mountains, and its stone walls fit together without any glue or mortar!",
+ when:"The Inca built it around 1450, probably for their emperor Pachacuti. Explorer Hiram Bingham made it famous worldwide in 1911, but local farmers already knew it.",
+ why:"Its stone buildings and farm terraces on a mountain ridge are amazing, and it's one of the New Seven Wonders of the World.",
+ big:"It sits about 7,970 feet (2,430 m) above sea level, about 1½ miles up. That's as high as about 20 Nebraska Capitols stacked up!",
+ cool:["Llamas wander around the ruins.","The Inca built step-shaped terraces to grow food on the steep slopes.","The tall peak behind it is called Huayna Picchu."],
+ quiz:[["Who built Machu Picchu?",["The Inca","The Romans","The Vikings"],0],["What holds the walls together?",["Glue","Nothing, the stones fit perfectly","Tape"],1]]},
+rushmore:{n:"Mount Rushmore",e:"🗿",city:"Black Hills, South Dakota",country:"USA",cont:"North America",ll:[43.8791,-103.4591],hello:"Hello / Háu (Lakota)",lang:"English & Lakota",
+ fact:"Mount Rushmore shows four presidents: Washington, Jefferson, Theodore Roosevelt and Abraham Lincoln, the president our city is named after!",
+ when:"Sculptor Gutzon Borglum and about 400 workers carved it from 1927 to 1941.",
+ why:"It's one of America's most famous monuments, carved right into a granite mountain.",
+ big:"Each face is about 60 feet tall, as tall as a 6-story building. Stack about 7 of them to reach the top of the Nebraska Capitol (400 feet)!",
+ cool:["Workers mostly used dynamite to carve the mountain.","Not one worker died while carving it.","It is the closest World Trip stop to Lincoln!"],
+ quiz:[["How many presidents are on Mount Rushmore?",["Four","Two","Ten"],0],["Which president is our city named after?",["Washington","Lincoln","Jefferson"],1]]}
+};
+Object.assign(PLACES,{
+charminar:{n:"Charminar",e:"🕌",city:"Hyderabad",country:"India",cont:"Asia",ll:[17.3616,78.4747],hello:"Namaskaram",lang:"Telugu",india:1,
+ fact:"Charminar means \"four minarets\". It has four tall towers, one on each corner, in the middle of a busy bazaar!",
+ when:"Sultan Muhammad Quli Qutb Shah built it in 1591, around the time he founded the city of Hyderabad.",
+ why:"It is the most famous symbol of Hyderabad. The famous Laad Bazaar, full of sparkly bangles, is right next to it.",
+ big:"Each of its four minarets is about 184 feet (56 m) tall, a bit less than half as tall as the Nebraska State Capitol (400 feet).",
+ cool:["It has a big clock on each of its four sides.","Golconda Fort nearby was once famous for its diamond trade.","Each side has a giant arch facing a different direction."],
+ quiz:[["What does \"Charminar\" mean?",["Four minarets","Big clock","Blue river"],0],["How do you say hello in Telugu?",["Namaskaram","Bonjour","G'day"],0]]},
+indiagate:{n:"India Gate & Qutub Minar",e:"🏛️",city:"New Delhi",country:"India",cont:"Asia",ll:[28.6129,77.2295],hello:"Namaste",lang:"Hindi",india:1,
+ fact:"India Gate is a giant stone arch that honors Indian soldiers. Nearby, Qutub Minar is the tallest brick minaret in the world!",
+ when:"India Gate was designed by Edwin Lutyens and finished in 1931. Qutub Minar was started more than 800 years ago, around 1199.",
+ why:"India Gate is a war memorial with the names of more than 13,000 soldiers carved on it, and families love picnics on its lawns.",
+ big:"India Gate is about 138 feet (42 m) tall. Qutub Minar is about 238 feet (73 m), more than half as tall as the Nebraska State Capitol (400 feet).",
+ cool:["Qutub Minar has five stories, each with a balcony.","India Gate is lit up at night.","Delhi is the capital city of India."],
+ quiz:[["What is Qutub Minar made of?",["Brick","Ice","Wood"],0],["Which is India's capital?",["New Delhi","Mumbai","Paris"],0]]},
+gateway:{n:"Gateway of India",e:"⛵",city:"Mumbai",country:"India",cont:"Asia",ll:[18.9220,72.8347],hello:"Namaskar",lang:"Marathi",india:1,
+ fact:"The Gateway of India is a huge arch right on the edge of the Arabian Sea, where boats come and go!",
+ when:"It was built to remember a visit by King George V and Queen Mary in 1911, and was finished in 1924.",
+ why:"It's Mumbai's most famous landmark, and from here you can take a boat ride across the harbor.",
+ big:"It is about 85 feet (26 m) tall, about one-fifth as tall as the Nebraska State Capitol (400 feet).",
+ cool:["It is built of yellow basalt stone.","The famous Taj Mahal Palace hotel is right across from it.","Mumbai is India's biggest city."],
+ quiz:[["Which sea is next to the Gateway?",["Arabian Sea","Red Sea","Dead Sea"],0],["Which city is it in?",["Mumbai","Agra","Rome"],0]]},
+mysore:{n:"Mysore Palace",e:"👑",city:"Mysuru (Mysore)",country:"India",cont:"Asia",ll:[12.3052,76.6552],hello:"Namaskara",lang:"Kannada",india:1,
+ fact:"On special nights, Mysore Palace lights up with nearly 100,000 light bulbs. It sparkles like a giant birthday cake!",
+ when:"The palace you see today was finished in 1912 for the Wadiyar kings, designed by architect Henry Irwin.",
+ why:"It is one of the most visited places in India, especially during the Dasara festival with parades and decorated elephants.",
+ big:"It is a giant palace with domes, towers and huge halls. Nearly 100,000 bulbs outline its walls and towers!",
+ cool:["The royal family still lives in part of the palace.","Chamundi Hill rises behind the city.","Dasara festival there lasts ten days."],
+ quiz:[["What makes the palace sparkle at night?",["Light bulbs","Fireflies","Diamonds"],0],["Which festival is famous there?",["Dasara","Halloween","Thanksgiving"],0]]}
+});
+// Grandparents' Home: easy to rename/adjust here
+const GRAND={place:"My Home Mangala",city:"Hyderabad",ll:[17.4600,78.3600],grandma:"Ammamma",grandpa:"Thatha"};
+const grandNames=()=>GRAND.grandma+" & "+GRAND.grandpa;
+PLACES.grand={n:GRAND.place,e:"❤️",city:GRAND.city,country:"India",cont:"Asia",ll:GRAND.ll,hello:"Namaskaram",lang:"Telugu",india:1,grand:1,
+ fact:"Welcome to "+GRAND.place+" in Hyderabad, where "+GRAND.grandma+" and "+GRAND.grandpa+" live! Find them waving by the playground.",
+ when:"Hyderabad was founded in 1591, the same time the Charminar was built. Today it is the capital of the state of Telangana.",
+ why:"Hyderabad is called the \"City of Pearls\" because it has been famous for pearl trading for hundreds of years. It's also famous for its yummy Hyderabadi biryani, a spiced rice dish!",
+ big:GRAND.place+" is a big apartment community with 11 towers, each 15 floors tall, plus a clubhouse, a swimming pool, tennis courts and play areas.",
+ cool:["Most people in Hyderabad speak Telugu, and say \"Namaskaram\" to say hello.","Hyderabad is a big technology city where lots of computer companies work.","The Charminar is only a short trip across the city!"],
+ quiz:[["Why is Hyderabad called the City of Pearls?",["Pearl trading","Pearl-colored buildings","It rains pearls"],0],["What language do most people in Hyderabad speak?",["Telugu","French","Japanese"],0]]};
+Object.assign(PLACES,{
+grandcanyon:{n:"Grand Canyon",e:"🏜️",city:"Arizona",country:"USA",cont:"North America",ll:[36.0544,-112.1401],hello:"Hello",lang:"English",
+ fact:"The Colorado River carved the Grand Canyon over millions of years. It's more than a mile deep!",
+ when:"Nobody built it. The river and wind slowly wore away the rock. It became a national park in 1919.",
+ why:"Its colorful layers of rock show almost 2 billion years of Earth's history, like pages in a giant book.",
+ big:"It is 277 river miles long, up to 18 miles wide and about 6,000 feet deep. You could stack 15 Nebraska Capitols (400 feet) inside it!",
+ cool:["The rocks at the bottom are almost 2 billion years old.","California condors, some of the biggest birds in North America, fly there.","Millions of people visit every year."],
+ quiz:[["Which river carved the Grand Canyon?",["Colorado River","Missouri River","Platte River"],0],["About how deep is it?",["A mile","10 feet","100 feet"],0]]},
+dc:{n:"Washington, D.C.",e:"🏛️",city:"Washington, D.C.",country:"USA",cont:"North America",ll:[38.8895,-77.0353],hello:"Hello",lang:"English",
+ fact:"The Washington Monument is the tallest stone structure in the world at 555 feet. That's taller than the Nebraska Capitol!",
+ when:"Presidents have lived in the White House since 1800. The Washington Monument was finished in 1884, and the Lincoln Memorial opened in 1922.",
+ why:"It's the capital of the United States, where the President lives and Congress makes laws.",
+ big:"The Washington Monument is 555 feet (169 m) tall, about 1.4 times the Nebraska State Capitol (400 feet). Lincoln's statue in the memorial is 19 feet tall, sitting down!",
+ cool:["The White House has 132 rooms.","Abraham Lincoln, our city's namesake, has a giant memorial on the National Mall.","Look closely at the Washington Monument: the stone changes color partway up because building stopped for years."],
+ quiz:[["Who lives in the White House?",["The President","The Queen","A wizard"],0],["How tall is the Washington Monument?",["555 feet","55 feet","5 feet"],0]]},
+spaceneedle:{n:"Space Needle",e:"🛸",city:"Seattle",country:"USA",cont:"North America",ll:[47.6205,-122.3493],hello:"Hello",lang:"English",
+ fact:"The Space Needle looks like a flying saucer on a tall stand. It was built for the 1962 World's Fair!",
+ when:"It was built in about 400 days and opened in 1962 for the World's Fair in Seattle.",
+ why:"Its space-age look made it a symbol of Seattle. Today it has a rotating glass floor you can stand on!",
+ big:"It is 605 feet (184 m) tall, about 1½ times as tall as the Nebraska State Capitol (400 feet).",
+ cool:["The elevators zip to the top in about 41 seconds.","On clear days you can see Mount Rainier.","It was built to survive strong winds and earthquakes."],
+ quiz:[["What does the top look like?",["A flying saucer","A pumpkin","A boat"],0],["It was built for which event?",["A World's Fair","The Olympics","A birthday"],0]]},
+arch:{n:"Gateway Arch",e:"🌈",city:"St. Louis, Missouri",country:"USA",cont:"North America",ll:[38.6247,-90.1848],hello:"Hello",lang:"English",
+ fact:"The Gateway Arch is the tallest arch in the world, and it's exactly as wide as it is tall: 630 feet!",
+ when:"Architect Eero Saarinen designed it, and it was finished in 1965.",
+ why:"It celebrates St. Louis as the \"Gateway to the West,\" where many pioneers started their journeys.",
+ big:"At 630 feet (192 m) tall, it's more than 1½ times as tall as the Nebraska State Capitol (400 feet).",
+ cool:["It is covered in shiny stainless steel.","Little egg-shaped tram cars carry visitors to the top.","It stands beside the Mississippi River."],
+ quiz:[["How wide is the Arch?",["630 feet, same as its height","10 feet","1 mile"],0],["Which river is next to it?",["Mississippi","Thames","Seine"],0]]},
+hollywood:{n:"Hollywood Sign",e:"🎬",city:"Los Angeles, California",country:"USA",cont:"North America",ll:[34.1341,-118.3215],hello:"Hello",lang:"English",
+ fact:"The Hollywood Sign first said \"HOLLYWOODLAND\". It was an advertisement for new houses!",
+ when:"It was put up in 1923. In 1949 the letters \"LAND\" were taken off.",
+ why:"Hollywood is where lots of movies are made, so the sign became a symbol of the movie world.",
+ big:"Each letter is about 45 feet tall, about as tall as a 4-story building.",
+ cool:["The sign sits on Mount Lee in the Hollywood Hills.","It was meant to stay up for only about a year and a half!","The letters were rebuilt with steel in 1978."],
+ quiz:[["What did the sign first say?",["HOLLYWOODLAND","HELLO","MOVIES"],0],["What is Hollywood famous for?",["Movies","Volcanoes","Pyramids"],0]]},
+yellowstone:{n:"Yellowstone & Old Faithful",e:"♨️",city:"Wyoming",country:"USA",cont:"North America",ll:[44.4605,-110.8281],hello:"Hello",lang:"English",
+ fact:"Yellowstone was the world's very first national park, and its geyser Old Faithful shoots hot water high into the sky!",
+ when:"It became a national park in 1872. Nature made the geysers, heated by hot rock deep underground.",
+ why:"It has about half of all the geysers in the world, plus bison, elk and bubbling colorful hot springs.",
+ big:"Old Faithful erupts about every hour and a half and can shoot water up to about 185 feet high, almost half as tall as the Nebraska State Capitol (400 feet).",
+ cool:["Bison have lived in Yellowstone since prehistoric times.","The Grand Prismatic Spring is rainbow-colored because of tiny living things called microbes.","Most of the park is in Wyoming."],
+ quiz:[["Yellowstone was the world's first...?",["National park","Zoo","Airport"],0],["What does Old Faithful shoot out?",["Hot water","Lava","Candy"],0]]},
+niagara:{n:"Niagara Falls",e:"💦",city:"New York & Ontario",country:"USA & Canada",cont:"North America",ll:[43.0962,-79.0377],hello:"Hello / Bonjour",lang:"English & French (Canada)",
+ fact:"Niagara Falls is three waterfalls on the border between the USA and Canada!",
+ when:"The falls formed about 12,000 years ago, at the end of the last Ice Age, when melting glaciers made the Niagara River.",
+ why:"So much water rushes over that you can hear the roar and feel the mist from far away. Boats sail right up to the falls!",
+ big:"The Horseshoe Falls is about 188 feet tall, almost half as tall as the Nebraska State Capitol (400 feet).",
+ cool:["The three falls are the Horseshoe Falls, American Falls and Bridal Veil Falls.","At night, colorful lights shine on the falls.","Some of the water is used to make electricity."],
+ quiz:[["How many waterfalls make up Niagara Falls?",["Three","One","Ten"],0],["Which two countries share it?",["USA and Canada","USA and Mexico","France and Spain"],0]]},
+chicago:{n:"Chicago",e:"🏙️",city:"Chicago, Illinois",country:"USA",cont:"North America",ll:[41.8827,-87.6233],hello:"Hello",lang:"English",
+ fact:"Chicago has a giant shiny sculpture people call \"The Bean\". You can see your own funny reflection in it!",
+ when:"Artist Anish Kapoor made the sculpture, officially called Cloud Gate. It was finished in 2006. Chicago built one of the world's first skyscrapers in 1885.",
+ why:"Chicago is famous for its skyscrapers along Lake Michigan, deep-dish pizza and its fun Millennium Park.",
+ big:"The Bean is 33 feet tall and 66 feet long. Willis Tower is 1,451 feet tall, more than 3½ times the Nebraska State Capitol (400 feet)!",
+ cool:["The Bean is made of 168 stainless steel plates welded together.","Willis Tower has glass boxes where you can stand over the city.","The Chicago River is dyed green every St. Patrick's Day."],
+ quiz:[["What is the Bean's real name?",["Cloud Gate","Big Ben","Space Needle"],0],["Which lake is Chicago on?",["Lake Michigan","Holmes Lake","Lake Elizabeth"],0]]},
+kennedy:{n:"Kennedy Space Center",e:"🚀",city:"Florida",country:"USA",cont:"North America",ll:[28.5729,-80.6490],hello:"Hello",lang:"English",
+ fact:"Astronauts blasted off from here in 1969 on Apollo 11, the first mission to land people on the Moon!",
+ when:"NASA's launch center opened in the 1960s. Apollo 11 launched on July 16, 1969.",
+ why:"Rockets for the Moon missions and the Space Shuttle launched from here, and rockets still launch today.",
+ big:"The Saturn V Moon rocket was 363 feet tall, almost as tall as the Nebraska State Capitol (400 feet)! The giant Vehicle Assembly Building is 526 feet tall.",
+ cool:["The Vehicle Assembly Building's doors are the tallest in the world.","Alligators and birds live in the wildlife refuge around the center.","Rockets launch toward the east, over the Atlantic Ocean."],
+ quiz:[["Which mission first landed people on the Moon?",["Apollo 11","Apollo 1","Lincoln 1"],0],["Which state is it in?",["Florida","Nebraska","Alaska"],0]]}
+});
+const FAM={place:"Fremont",city:"Fremont, California",ll:[37.5485,-121.9886],aunt:"Inni"};
+PLACES.fremont={n:"Fremont, California",e:"💛",city:FAM.city,country:"USA",cont:"North America",ll:FAM.ll,hello:"Hello",lang:"English",grand:1,
+ fact:"Welcome to Fremont, where "+FAM.aunt+" lives! Wave hello, then fly to Mission Peak and Lake Elizabeth.",
+ when:"Fremont became a city in 1956 when five small towns joined together: Centerville, Irvington, Mission San Jose, Niles and Warm Springs.",
+ why:"Mission San José was founded there in 1797, and early silent movies were filmed in Niles, including Charlie Chaplin's \"The Tramp\" in 1915.",
+ big:"Mission Peak is about 2,517 feet tall, more than 6 Nebraska Capitols (400 feet) stacked up! Hikers climb it for the view of the Bay Area.",
+ cool:["Lake Elizabeth is in Fremont's Central Park, with paddle boats and ducks.","Fremont is in the San Francisco Bay Area, near the Golden Gate Bridge.","A tall pole sits on top of Mission Peak, and hikers love taking pictures with it."],
+ quiz:[["Which hill do hikers climb in Fremont?",["Mission Peak","Mount Fuji","Mount Rushmore"],0],["What lake is in Fremont's Central Park?",["Lake Elizabeth","Holmes Lake","Lake Michigan"],0]]};
+const SECTIONS=[["🌍 World",["eiffel","taj","pyramids","bigben","wall","sydney","rio","fuji","colosseum","pisa","machu"]],["🇺🇸 USA",["liberty","goldengate","rushmore","grandcanyon","dc","spaceneedle","arch","hollywood","yellowstone","niagara","chicago","kennedy"]],["🇮🇳 India",["taj","charminar","grand","indiagate","gateway","mysore"]],["❤️ Family",["grand","fremont"]]];
+
+// ======== WORLD TRIP + TRICKS ========
+const KEYP="realcraft_passport_v1",KEYST="realcraft_bw_stars";
+function loadPP(){try{const p=JSON.parse(localStorage.getItem(KEYP)||"{}");p.stamps=p.stamps||{};p.rings=p.rings||{};p.quiz=p.quiz||{};return p}catch(e){return{stamps:{},rings:{},quiz:{}}}}
+function savePP(p){localStorage.setItem(KEYP,JSON.stringify(p))}
+function bonusStars(){return +localStorage.getItem(KEYST)||0}
+function addStars(n){localStorage.setItem(KEYST,bonusStars()+n)}
+function miles(k){const b=PLACES[k].ll;if(!b)return 0;const R=3958.8,r=Math.PI/180,a=LINCOLN,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r,x=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;const m=2*R*Math.asin(Math.sqrt(x));return m<1000?Math.round(m/10)*10:Math.round(m/100)*100}
+let away=null,DSPR=[],destObjs=[],destRings=[],people=[];
+// --- scene helpers ---
+function cyl(cx,cz,r,y0,y1,id,hollow){for(let x=Math.floor(cx-r);x<=Math.ceil(cx+r);x++)for(let z=Math.floor(cz-r);z<=Math.ceil(cz+r);z++){const d=Math.hypot(x-cx,z-cz);if(d<=r+.3&&(!hollow||d>r-1.2))for(let y=y0;y<=y1;y++)set(x,y,z,id)}}
+function dome(cx,cy,cz,r,id){for(let x=-r;x<=r;x++)for(let z=-r;z<=r;z++)for(let y=0;y<=r;y++)if(Math.hypot(x,y,z)<=r+.3)set(cx+x,cy+y,cz+z,id)}
+function col(x,z,h,top,below=2){for(let y=1;y<=h;y++)set(x,y,z,y===h?top:below)}
+function terrain(f,top=1,below=2,topFn){for(let x=-OX;x<OX;x++)for(let z=-OZ;z<OZ;z++){const h=Math.max(0,Math.min(44,Math.round(f(x,z))));if(h>0)col(x,z,h,topFn?topFn(x,z,h):top,below)}}
+function treeG(x,z,h=3,leaf=16){const g=groundTop(x,z);if(g>40)return;for(let y=g;y<g+h;y++)set(x,y,z,4);for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(let dy=0;dy<=2;dy++)if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy-1)<3&&!get(x+dx,g+h-1+dy,z+dz))set(x+dx,g+h-1+dy,z+dz,leaf)}
+function palm(x,z,h=6){const g=groundTop(x,z);for(let y=g;y<g+h;y++)set(x,y,z,4);for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1],[2,0],[-2,0],[0,2],[0,-2]])set(x+a,g+h-(Math.abs(a+b)>1?1:0),z+b,11);set(x,g+h,z,11)}
+function cypress(x,z,h=6){const g=groundTop(x,z);for(let y=g;y<g+h;y++)set(x,y,z,16)}
+function forest(n,seed,ok,fn=treeG){const R=rng(seed);for(let i=0;i<n;i++){const x=-OX+3+(R()*(W-6)|0),z=-OZ+3+(R()*(W-6)|0);if(ok(x,z))fn(x,z,3+(R()*3|0))}}
+const clear=(x,z,r=2)=>{const g=groundTop(x,z);for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++)if(groundTop(x+dx,z+dz)!==g||[18,37,28,3,17].includes(get(x+dx,g-1,z+dz)))return false;return g<20};
+function sea(){flat(-OX,OX-1,-OZ,OZ-1,37)}
+function skyline(x0,x1,z0,z1,seed,maxH=26){const R=rng(seed);for(let x=x0;x<=x1;x+=7)for(let z=z0;z<=z1;z+=7){const h=6+(R()*(maxH-6)|0),c=[15,3,6,12,31][R()*5|0];box(x,x+4,1,h,z,z+4,c,true);for(let y=3;y<h;y+=3)for(let i=x+1;i<x+4;i++){set(i,y,z,6)}}}
+function apt(x0,z0,w,d,h,wall,band){box(x0,x0+w-1,1,h,z0,z0+d-1,wall,true);for(let y=2;y<h;y+=2)for(let x=x0+1;x<x0+w-1;x+=2){set(x,y,z0,6);set(x,y,z0+d-1,6)}for(let y=2;y<h;y+=2)for(let z=z0+1;z<z0+d-1;z+=2){set(x0,y,z,6);set(x0+w-1,y,z,6)}box(x0,x0+w-1,h+1,h+1,z0,z0+d-1,band);for(let y=1;y<=2;y++)set(x0+(w>>1),y,z0,0)}
+function smallHouse(x,z,wall,roof){box(x-2,x+2,1,3,z-2,z+2,wall,true);box(x-2,x+2,4,4,z-2,z+2,roof);box(x-1,x+1,5,5,z-1,z+1,roof);set(x,1,z-2,0);set(x,2,z-2,0);set(x-1,2,z-2,6);set(x+1,2,z-2,6)}
+function pad(x,z){const g=groundTop(x,z);for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){for(let y=g;y<g+6;y++)set(x+dx,y,z+dz,0);set(x+dx,g-1,z+dz,3)}for(let dz=-1;dz<=1;dz++){set(x-1,g-1,z+dz,15);set(x+1,g-1,z+dz,15)}set(x,g-1,z,15)}
+function dlabel(t,x,y,z,s=1.4){const c=document.createElement("canvas");c.width=512;c.height=96;const g=c.getContext("2d");g.fillStyle="rgba(0,0,0,.65)";g.fillRect(0,0,512,96);g.fillStyle="#ffeb3b";g.font="bold 38px sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(t,256,50);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c)}));sp.scale.set(5*s,.9*s,1);sp.position.set(x,y,z);scene.add(sp);DSPR.push(sp);return sp}
+function person(x,z,shirt,pants,hair,name,greet){const g=new THREE.Group(),add=(w,h,d,c,px,py,pz)=>bx(g,w,h,d,c,px,py,pz);add(.25,.7,.25,pants,-.14,.35,0);add(.25,.7,.25,pants,.14,.35,0);add(.62,.78,.36,shirt,0,1.09,0);add(.2,.7,.2,shirt,-.42,1.1,0);
+ const arm=new THREE.Group();arm.position.set(.42,1.45,0);g.add(arm);bx(arm,.2,.7,.2,shirt,0,.3,0);bx(arm,.22,.2,.22,"#e0ac69",0,.7,0);
+ add(.5,.5,.5,"#e0ac69",0,1.72,0);add(.54,.16,.54,hair,0,2.02,0);add(.54,.3,.12,hair,0,1.85,-.22);for(const s of[-1,1])add(.08,.08,.02,"#212121",s*.12,1.76,.26);add(.18,.04,.02,"#c62828",0,1.6,.26);
+ const y=groundTop(x,z);g.position.set(x,y,z);scene.add(g);destObjs.push(g);dlabel(name,x,y+3,z,.9);people.push({g,arm,name,greet,x,z,said:0});return g}
+function rings6(cx,cz,r,y0){const p=loadPP(),got=p.rings[away]||[];for(let i=0;i<6;i++){const a=i*Math.PI/3,x=cx+Math.cos(a)*r,z=cz+Math.sin(a)*r,y=y0+(i%3)*6;const m=new THREE.Mesh(new THREE.TorusGeometry(3,.35,6,20),new THREE.MeshBasicMaterial({color:"#ffd600"}));m.position.set(x,y,z);m.rotation.y=-a;m.visible=!got.includes(i);scene.add(m);destObjs.push(m);destRings.push({m,i,x,y,z})}}
+// --- destination builders: each returns {sp:[x,y,z], lm:[x,y,z], r:ringRadius, ry:ringY} ---
+const DB={
+eiffel(){flat(-OX,OX-1,22,30,18);flat(-OX,OX-1,21,21,3);flat(-OX,OX-1,31,31,3);flat(-3,3,-60,-12,17);for(let z=-58;z<=-14;z+=5){treeG(-9,z);treeG(9,z)}
+ for(let y=1;y<=40;y++){const w=Math.round(1+11*Math.pow(1-y/42,1.8));if(y<9){for(const sx of[-1,1])for(const sz of[-1,1])box(sx*(w-1)-1,sx*(w-1)+1,y,y,sz*(w-1)-1,sz*(w-1)+1,30)}else if(y===9||y===23||y===33)box(-w,w,y,y,-w,w,30);else{box(-w,w,y,y,-w,-w,30);box(-w,w,y,y,w,w,30);box(-w,-w,y,y,-w,w,30);box(w,w,y,y,-w,w,30)}}
+ for(let y=41;y<=45;y++)set(0,y,0,30);set(0,46,0,8);skyline(-60,-20,36,60,3,10);skyline(20,58,36,60,4,10);forest(80,5,(x,z)=>z<18&&Math.abs(x)>14&&clear(x,z));return{sp:[0,22,-58],lm:[0,30,0],r:22,ry:12}},
+taj(){box(-24,24,1,2,-10,38,31);flat(-2,2,-60,-11,18);for(let z=-60;z<=-11;z++){set(-3,0,z,3);set(3,0,z,3)}for(let z=-58;z<=-14;z+=4){cypress(-8,z);cypress(8,z)}
+ box(-10,10,3,14,4,24,31,true);box(-3,3,4,11,4,4,36);dome(0,15,14,7,31);for(let y=22;y<=25;y++)set(0,y,14,25);for(const[a,b]of[[-7,7],[7,7],[-7,21],[7,21]])dome(a,15,b,2,31);
+ for(const[a,b]of[[-21,-7],[21,-7],[-21,35],[21,35]]){cyl(a,b,1.5,3,24,31);dome(a,25,b,2,31)}flat(-OX,OX-1,44,56,18);forest(60,6,(x,z)=>Math.abs(x)>28&&z<40&&clear(x,z));return{sp:[0,22,-58],lm:[0,28,14],r:26,ry:12}},
+liberty(){sea();for(let x=-25;x<=25;x++)for(let z=-25;z<=25;z++){const d=Math.hypot(x,z);if(d<22)set(x,0,z,1);else if(d<25)set(x,0,z,17)}
+ box(-9,9,1,3,-9,9,3);box(-12,12,1,1,-3,3,3);box(-3,3,1,1,-12,12,3);box(-4,4,4,13,-4,4,3);box(-3,3,14,20,-3,3,32);box(-2,2,21,27,-2,2,32);box(-1,1,28,30,-1,1,32);for(const[a,b]of[[2,0],[-2,0],[0,2],[0,-2]])set(a,31,b,32);set(0,32,0,32);
+ box(2,3,24,34,0,0,32);box(1,4,35,35,-1,1,25);set(2,36,0,9);set(3,36,0,9);set(2,37,0,10);box(-4,-3,22,25,1,2,32);skyline(-50,50,44,60,7,40);forest(14,8,(x,z)=>Math.hypot(x,z)<20&&Math.hypot(x,z)>12&&clear(x,z,1));return{sp:[0,24,-58],lm:[0,40,0],r:20,ry:16}},
+pyramids(){flat(-OX,OX-1,-OZ,OZ-1,17);const pyr=(cx,cz,s)=>{for(let y=1;y<=s;y++){const h=s-y;for(let x=-h;x<=h;x++)for(let z=-h;z<=h;z++)if(Math.max(Math.abs(x),Math.abs(z))>=h-1)set(cx+x,y,cz+z,33)}};pyr(0,12,26);pyr(-34,34,21);pyr(-50,-14,12);
+ box(19,25,1,4,-22,-8,33);box(19,20,1,1,-27,-22,33);box(24,25,1,1,-27,-22,33);box(20,24,5,9,-25,-21,33);for(let y=5;y<=8;y++){set(19,y,-23,12);set(25,y,-23,12)}set(21,8,-26,36);set(23,8,-26,36);set(22,7,-26,33);
+ flat(48,58,-OZ,OZ-1,18);for(let z=-60;z<60;z+=7){palm(45,z);palm(61,z+3)}return{sp:[10,24,-58],lm:[0,30,12],r:32,ry:14}},
+bigben(){flat(-OX,OX-1,4,14,18);flat(-OX,OX-1,3,3,3);flat(-OX,OX-1,15,15,3);flat(-OX,OX-1,-31,-27,28);box(-50,-14,1,9,-16,-6,33,true);for(let x=-49;x<=-15;x+=2)for(const y of[3,6]){set(x,y,-16,6)}for(let x=-48;x<=-16;x+=8){box(x,x+1,10,12,-16,-15,33)}
+ box(-13,-7,1,28,-14,-8,33,true);for(const[fx,fz]of[[-10,-15],[-10,-7]]){box(fx-1,fx+1,23,25,fz,fz,15);set(fx,24,fz,36)}for(const fx of[-14,-6]){box(fx,fx,23,25,-12,-10,15);set(fx,24,-11,36)}box(-12,-8,29,31,-13,-9,36);for(let y=32;y<=39;y++){const h=Math.max(0,2-Math.floor((y-32)/3));box(-10-h,-10+h,y,y,-11-h,-11+h,36)}set(-10,40,-11,25);
+ for(let a=0;a<360;a+=3){const x=Math.round(18+Math.cos(a*Math.PI/180)*16),y=Math.round(19+Math.sin(a*Math.PI/180)*16);set(x,y,26,15)}for(let a=0;a<360;a+=30){for(let r=1;r<16;r+=2)set(Math.round(18+Math.cos(a*Math.PI/180)*r),Math.round(19+Math.sin(a*Math.PI/180)*r),26,15);const x=Math.round(18+Math.cos(a*Math.PI/180)*16),y=Math.round(19+Math.sin(a*Math.PI/180)*16);box(x-1,x+1,y-1,y,25,27,6)}
+ for(let y=1;y<19;y++){const o=Math.round((19-y)*.4);set(18-o,y,23,3);set(18+o,y,23,3)}box(-5,-1,1,3,-30,-28,8);return{sp:[0,24,-58],lm:[-10,34,-11],r:24,ry:14}},
+wall(){const hf=(x,z)=>4+3*Math.sin(x/11)+2.5*Math.cos(z/13)+(z>30?(z-30)*.7:0);terrain(hf,1,2,(x,z,h)=>h>24?35:1);const wz=x=>Math.round(10*Math.sin(x/16));
+ for(let x=-OX;x<OX;x++){const z0=wz(x);let g=0;for(let dz=-2;dz<=2;dz++)g=Math.max(g,groundTop(x,z0+dz));for(let dz=-1;dz<=1;dz++)for(let y=1;y<=g+2;y++)set(x,y,z0+dz,3);for(const dz of[-2,2]){for(let y=1;y<=g+2;y++)set(x,y,z0+dz,3);if(x%2===0)set(x,g+3,z0+dz,3)}
+  if((x+64)%22===0)box(x-3,x+3,g,g+7,z0-3,z0+3,3,true)}forest(160,9,(x,z)=>Math.abs(z-wz(x))>4&&clear(x,z,1));return{sp:[-50,28,-50],lm:[0,14,0],r:24,ry:16}},
+sydney(){sea();for(let x=-OX;x<OX;x++)for(let z=-OZ;z<-14;z++)set(x,0,z,1);flat(-12,12,-14,12,3);
+ for(const[cx,z0,h,len]of[[-4,-8,16,10],[-4,0,13,8],[-4,6,9,6],[5,-6,13,8],[5,2,10,6]])for(let y=1;y<=h;y++){const w=Math.max(1,Math.round(3*(1-y/h))+1),zz=Math.round(z0+(y/h)*len*.6),ze=Math.round(z0+len-(y/h)*len*.7);for(let x=cx-w;x<=cx+w;x++)for(let z=zz;z<=Math.max(zz,ze);z++)set(x,y,z,z===zz||y===h?15:31)}
+ for(let z=-20;z<=50;z++){for(let x=38;x<=42;x++)set(x,8,z,28);const y=Math.round(8+18*(1-((z-15)/35)**2));if(y>=9){set(38,y,z,3);set(42,y,z,3);if(z%3===0)for(let yy=9;yy<y;yy++){set(38,yy,z,3);set(42,yy,z,3)}}}box(37,43,1,12,-22,-20,33);box(37,43,1,12,50,52,33);
+ skyline(-60,30,-60,-34,11,24);forest(60,12,(x,z)=>z<-16&&z>-32&&clear(x,z));return{sp:[-30,24,40],lm:[0,18,0],r:22,ry:12}},
+rio(){sea();for(let x=-OX;x<OX;x++)for(let z=-OZ;z<20;z++)set(x,0,z,z>13?17:1);terrain((x,z)=>{const d=Math.hypot(x,z+10);return d<33?30-d*.9:0},1,36,(x,z,h)=>h>20?36:1);
+ box(-1,1,31,32,-11,-9,3);box(-1,1,33,40,-10,-10,31);box(-6,6,39,39,-10,-10,31);set(0,41,-10,31);set(0,42,-10,31);
+ for(let x=-14;x<=14;x++)for(let z=14;z<=34;z++){const d=Math.hypot(x,z-24);if(d<9){const h=Math.round(14*(1-d/9)**.6);for(let y=1;y<=h;y++)set(x+38,y,z,y===h?11:36)}}
+ const R=rng(13);for(let i=0;i<40;i++){const x=-60+(R()*120|0),z=-60+(R()*70|0);if(Math.hypot(x,z+10)>35&&clear(x,z,2))box(x-1,x+1,1,2+(R()*3|0),z-1,z+1,[8,9,10,12,14,15][R()*6|0])}for(let x=-60;x<60;x+=8)palm(x,16);return{sp:[-50,30,40],lm:[0,44,-10],r:20,ry:34}},
+fuji(){terrain((x,z)=>{const d=Math.hypot(x,z-20);let h=44*(1-d/58);if(d<3)h=Math.min(h,40);return h},1,36,(x,z,h)=>h>=34?35:h>=20?36:1);flat(-50,-10,-44,-30,18);
+ for(let t=0;t<5;t++){const s=3-Math.floor(t/2),y=1+t*3;box(-30-s,-30+s,y,y+1,-52-s,-52+s,8);box(-31-s,-29+s,y+2,y+2,-53-s,-51+s,36)}
+ forest(70,14,(x,z)=>z<-10&&clear(x,z),(x,z,h)=>treeG(x,z,h,14));return{sp:[40,34,-58],lm:[0,46,20],r:30,ry:30}},
+colosseum(){flat(-OX,OX-1,-4,4,3);flat(-4,4,-OZ,OZ-1,3);const rx=24,rz=19;for(let x=-rx;x<=rx;x++)for(let z=-rz;z<=rz;z++){const e=(x/rx)**2+(z/rz)**2;if(e>1)continue;if(e<.6){set(x,0,z,17);continue}const Ht=(x>8&&z>0)?11:16;const h=e>.9?Ht:Math.round(2+(e-.6)/.3*(Ht-4));for(let y=1;y<=h;y++){if(e>.9&&y<h-1&&y%4>1&&(x+z)%2===0)continue;set(x,y,z,33)}}
+ box(-40,-28,1,8,-36,-33,33);box(-36,-32,1,5,-36,-33,0);forest(90,15,(x,z)=>(x/rx)**2+(z/rz)**2>1.6&&clear(x,z,1),cypress);return{sp:[0,24,-58],lm:[0,20,0],r:30,ry:12}},
+pisa(){box(-32,-6,1,10,-8,6,31,true);dome(-19,11,-1,4,31);cyl(-44,-1,6,1,10,31,true);dome(-44,11,-1,5,31);
+ for(let y=1;y<=30;y++){const ox=Math.round(y*.09);cyl(14+ox,10,4,y,y,y%4===0?31:(y%4===2?6:31),true)}for(let y=31;y<=34;y++)cyl(17,10,3,y,y,31,true);
+ flat(-60,40,-30,-28,15);forest(60,16,(x,z)=>(Math.abs(z)>20||Math.abs(x)>50)&&clear(x,z));return{sp:[-10,24,-58],lm:[16,38,10],r:18,ry:14}},
+goldengate(){sea();terrain((x,z)=>Math.abs(z)>16?Math.min(14,(Math.abs(z)-16)*.8+2+2*Math.sin(x/9)):0,1,2);box(28,34,1,4,-3,3,3);
+ for(let z=-46;z<=46;z++){for(let x=-2;x<=2;x++)set(x,10,z,Math.abs(x)===2?34:28);const az=Math.abs(z);const cy=az<=20?Math.round(12+22*(z/20)**2):Math.round(34-(az-20)*1.0);if(cy>10){set(-2,cy,z,34);set(2,cy,z,34);if(z%2===0)for(let y=11;y<cy;y++){set(-2,y,z,34);set(2,y,z,34)}}}
+ for(const tz of[-20,20]){for(let y=1;y<=35;y++){set(-3,y,tz,34);set(3,y,tz,34)}for(const y of[18,26,34])box(-3,3,y,y,tz,tz,34)}return{sp:[-50,26,0],lm:[0,38,0],r:24,ry:18}},
+machu(){terrain((x,z)=>{let h=Math.abs(z)<20?14+Math.sin(x/9)*2:14-(Math.abs(z)-20)*1.1;h=Math.max(h,40-Math.hypot(x,z-40)*1.4);return Math.max(1,h)},1,2,(x,z,h)=>h>30?36:1);
+ const R=rng(17);for(let i=0;i<22;i++){const x=-40+(R()*80|0),z=-14+(R()*26|0),g=groundTop(x,z);box(x-2,x+2,g,g+2,z-2,z+1,3,true);set(x,g,z-2,0);if(R()<.4)box(x-2,x+2,g+3,g+3,z-2,z+1,10)}
+ {const x=8,z=-4,g=groundTop(x,z);box(x,x+2,g,g+1,z,z,15);set(x+2,g+2,z,15);set(x+2,g+3,z,15)}return{sp:[-50,32,-50],lm:[0,22,0],r:26,ry:22}},
+rushmore(){terrain((x,z)=>z>=0&&Math.abs(x)<44?30-Math.abs(x)*.25-Math.max(0,z-14)*.9+Math.sin(x*1.7)*1.2:0,3,36);
+ for(const cx of[-21,-7,7,21]){box(cx-4,cx+4,12,24,-4,-1,3);box(cx-3,cx+3,25,26,-3,-1,3);set(cx-2,20,-5,36);set(cx+2,20,-5,36);set(cx,18,-5,3);set(cx,17,-5,3);box(cx-1,cx+1,15,15,-5,-5,36)}
+ forest(220,18,(x,z)=>clear(x,z,1),(x,z,h)=>cypress(x,z,h+2));return{sp:[0,26,-58],lm:[0,28,0],r:26,ry:16}},
+grandcanyon(){terrain((x,z)=>{const c=Math.round(12*Math.sin(x/20));const d=Math.abs(z-c);return d<4?2:d<14?2+(d-4)*2.6:28},9,7,(x,z,h)=>h>=28?17:[9,7,33,8][Math.floor(h/5)%4]);for(let x=-OX;x<OX;x++){const c=Math.round(12*Math.sin(x/20));for(let dz=-1;dz<=1;dz++){for(let y=1;y<=2;y++)set(x,y,c+dz,0);set(x,1,c+dz,18)}}
+ forest(60,19,(x,z)=>groundTop(x,z)>=28&&clear(x,z,1),cypress);return{sp:[-50,40,-50],lm:[0,30,0],r:28,ry:24}},
+dc(){flat(-4,4,-OZ,OZ-1,17);flat(-OX,OX-1,-4,4,1);for(let y=1;y<=44;y++){const w=y>40?Math.max(0,44-y)>>1:2;box(-w,w,y,y,-w,w,y>20?15:31)}flat(-3,3,-40,-12,18);
+ box(-8,8,1,8,-56,-48,15);for(let x=-7;x<=7;x+=2)box(x,x,1,7,-57,-57,15);box(-6,6,9,9,-55,-49,15);{const x=-1;box(x,x+2,1,4,-52,-51,31)}
+ box(-9,9,1,6,40,50,15,true);for(let x=-8;x<=8;x+=2)set(x,3,40,6);box(-3,3,1,4,40,40,15);dome(0,7,45,4,15);forest(60,20,(x,z)=>Math.abs(x)>12&&clear(x,z));dlabel("Lincoln Memorial",0,12,-52,1);dlabel("White House",0,13,45,1);return{sp:[-40,30,-58],lm:[0,46,0],r:22,ry:18}},
+spaceneedle(){for(let y=1;y<=30;y++){const o=Math.round(4*(1-y/30)**1.5)+1;for(const[a,b]of[[o,0],[-o,0],[0,o],[0,-o]])set(a,y,b,15)}cyl(0,0,1,1,40,15);cyl(0,0,7,31,32,15);cyl(0,0,6,33,33,6);cyl(0,0,8,34,34,15);cyl(0,0,4,35,36,9);for(let y=37;y<=44;y++)set(0,y,0,15);
+ flat(-OX,OX-1,40,63,37);skyline(-60,-14,-60,-14,21,28);skyline(14,60,-60,-14,22,28);terrain((x,z)=>z>50?(z-50)*1.5+Math.sin(x/7)*2:0,1,36,(x,z,h)=>h>14?35:1);return{sp:[-40,28,-58],lm:[0,40,0],r:20,ry:22}},
+arch(){flat(-OX,OX-1,24,40,18);for(let t=-1;t<=1;t+=.004){const x=Math.round(t*20),y=Math.round(42*(1-Math.pow(Math.abs(t),1.6)));for(let dz=-1;dz<=1;dz++)set(x,Math.max(1,y),dz,3);if(y<1)for(let dz=-1;dz<=1;dz++)set(x,1,dz,3)}for(let x=-20;x<=20;x++){const t=x/20,y=Math.round(42*(1-Math.pow(Math.abs(t),1.6)));for(let yy=Math.max(1,y-1);yy<=y;yy++)for(let dz=-1;dz<=1;dz++)set(x,yy,dz,3)}
+ skyline(-60,60,-60,-24,23,22);forest(50,24,(x,z)=>z<20&&z>-20&&Math.abs(x)>24&&clear(x,z));return{sp:[0,26,-58],lm:[0,44,0],r:24,ry:20}},
+hollywood(){terrain((x,z)=>z>0?Math.min(30,z*.8+4*Math.sin(x/8)):1,1,2,(x,z,h)=>h>3?20:1);const L={H:["101","101","111","101","101"],O:["111","101","101","101","111"],L:["100","100","100","100","111"],Y:["101","101","010","010","010"],W:["101","101","101","111","101"],D:["110","101","101","101","110"]};
+ let x=-26;for(const ch of"HOLLYWOOD"){const g=L[ch];for(let r=0;r<5;r++)for(let c=0;c<3;c++)if(g[r][c]==="1")for(let dy=0;dy<2;dy++)set(x+c*2,26-r*2-dy,20,15),set(x+c*2+1,26-r*2-dy,20,15);x+=6}
+ skyline(-60,60,-60,-14,25,18);for(let i=-60;i<60;i+=6)palm(i,-8);return{sp:[0,26,-58],lm:[0,30,20],r:22,ry:20}},
+yellowstone(){terrain((x,z)=>2+Math.sin(x/12)*1.5+Math.cos(z/10)*1.5+(Math.hypot(x,z)<10?-2:0),1,2,(x,z,h)=>Math.hypot(x,z)<10?15:1);cyl(0,0,1,1,3,15);
+ const gy=new THREE.Mesh(new THREE.CylinderGeometry(.8,1.6,1,8,1,true),new THREE.MeshLambertMaterial({color:"#e3f2fd",transparent:true,opacity:.8}));gy.position.set(0,3,0);scene.add(gy);destObjs.push(gy);gy.userData.geyser=1;
+ for(let x=24;x<=36;x++)for(let z=14;z<=26;z++){const d=Math.hypot(x-30,z-20);if(d<6)set(x,groundTop(x,z)-1,z,d<2?12:d<4?11:9)}for(const[x,z]of[[-20,10],[-24,14],[-18,16]])bison(x,z);forest(160,26,(x,z)=>Math.hypot(x,z)>16&&clear(x,z,1),cypress);return{sp:[0,24,-58],lm:[0,14,0],r:18,ry:12}},
+niagara(){flat(-OX,OX-1,-OZ,OZ-1,1);for(let x=-OX;x<OX;x++)for(let z=-OZ;z<OZ;z++){if(z<0)col(x,z,20,Math.abs(x)<40?18:1,2);else if(z>=0&&Math.abs(x)<40)set(x,0,z,18)}for(let x=-40;x<40;x++)for(let y=1;y<20;y++){if((x+y)%3)set(x,y,0,15)}
+ box(-40,-34,1,20,-2,2,2);const R=rng(27);for(let i=0;i<8;i++){const x=-30+i*8;box(x,x+2,1,2,10+(i%3)*6,12+(i%3)*6,12)}forest(90,27,(x,z)=>Math.abs(x)>42&&clear(x,z,1));return{sp:[0,30,58],lm:[0,24,0],r:24,ry:14}},
+chicago(){flat(-OX,OX-1,24,63,37);skyline(-60,60,-60,-12,28,34);box(-30,-24,1,44,-46,-40,36,true);for(let y=3;y<44;y+=3)set(-27,y,-40,6);flat(-20,20,-8,18,1);
+ for(let x=-7;x<=7;x++)for(let y=1;y<=7;y++)for(let z=-4;z<=4;z++){const e=(x/7.5)**2+((y-4)/3.8)**2+(z/4.5)**2;if(e<=1&&!(y<3&&Math.abs(x)<4))set(x,y,z,15)}forest(30,28,(x,z)=>z>-8&&z<18&&Math.hypot(x,z)>10&&clear(x,z,1));return{sp:[0,26,58],lm:[0,12,0],r:20,ry:12}},
+kennedy(){flat(-OX,OX-1,40,63,37);flat(-10,10,-10,10,3);cyl(0,0,2,1,30,15);for(const y of[10,20])cyl(0,0,2,y,y,36);for(let y=31;y<=36;y++)cyl(0,0,Math.max(0,2-(y-31)/3),y,y,15);box(5,7,1,34,-2,2,8);
+ box(-50,-26,1,40,-50,-30,15,true);box(-42,-34,1,30,-50,-50,6);forest(60,29,(x,z)=>z<36&&Math.hypot(x,z)>16&&clear(x,z,1),palm);return{sp:[30,26,-58],lm:[0,38,0],r:18,ry:16}},
+charminar(){flat(-OX,OX-1,-3,3,28);flat(-3,3,-OZ,OZ-1,28);flat(-12,12,-12,12,3);box(-8,8,1,16,-8,8,33,true);for(const[a,b]of[[0,-8],[0,8]])box(a-3,a+3,1,10,b,b,0);for(const a of[-8,8])box(a,a,1,10,-3,3,0);for(const f of[[0,-9],[0,9]])set(f[0],13,f[1],15);
+ for(const[a,b]of[[-8,-8],[8,-8],[-8,8],[8,8]]){cyl(a,b,1.5,1,30,33);for(const y of[17,24])cyl(a,b,2.4,y,y,33);dome(a,31,b,2,33)}box(-6,6,17,18,-6,6,33);
+ const R=rng(31);for(let i=0;i<30;i++){const x=-60+(R()*120|0),z=-60+(R()*120|0);if(Math.max(Math.abs(x),Math.abs(z))>16&&clear(x,z,2))box(x-2,x+2,1,2+(R()*4|0),z-2,z+2,[8,9,10,12,14,15,13][R()*7|0])}
+ terrain((x,z)=>Math.hypot(x+44,z-40)<16?12-Math.hypot(x+44,z-40)*.6:0,36,36);box(-52,-36,7,9,32,48,3,true);dlabel("Golconda Fort",-44,16,40,1);return{sp:[0,26,-58],lm:[0,34,0],r:20,ry:14}},
+indiagate(){flat(-5,5,-OZ,OZ-1,9);for(const sx of[-1,1]){flat(sx*10,sx*12,-60,-10,18)}box(-8,-3,1,20,-2,2,33);box(3,8,1,20,-2,2,33);box(-8,8,14,20,-2,2,33);box(-3,3,21,22,-1,1,33);
+ for(let y=1;y<=44;y++){const r=3.6-y*.05;cyl(40,30,Math.max(1.2,r),y,y,y%9===0?33:7)}forest(70,32,(x,z)=>Math.abs(x)>14&&clear(x,z));dlabel("Qutub Minar",40,47,30,1);return{sp:[0,24,-58],lm:[0,26,0],r:20,ry:14}},
+gateway(){sea();for(let x=-OX;x<OX;x++)for(let z=-OZ;z<8;z++)set(x,0,z,3);box(-9,9,1,16,-4,4,33,true);box(-3,3,1,10,-4,4,0);for(const[a,b]of[[-9,-4],[9,-4],[-9,4],[9,4]]){box(a-1,a+1,17,20,b-1,b+1,33)}
+ box(-20,20,1,16,-34,-22,15,true);for(let x=-19;x<=19;x+=2)for(let y=3;y<16;y+=3)set(x,y,-22,6);dome(0,17,-28,5,8);for(const a of[-18,18])dome(a,17,-24,2,8);for(let i=0;i<6;i++){const x=-30+i*12,z=20+(i%2)*10;box(x,x+3,1,1,z,z+1,[15,10,8][i%3]);set(x+1,2,z,15)}return{sp:[0,24,58],lm:[0,22,0],r:20,ry:12}},
+mysore(){box(-20,20,1,10,-6,6,31,true);for(let x=-19;x<=19;x+=2)for(const y of[3,6,9])set(x,y,-6,6);box(-3,3,11,22,-3,3,31);dome(0,23,0,4,14);for(const a of[-16,-8,8,16]){box(a-1,a+1,11,16,-2,2,31);dome(a,17,0,2,14)}
+ for(let x=-20;x<=20;x++){set(x,11,-6,25);set(x,11,6,25)}for(let y=1;y<=10;y++){set(-20,y,-6,25);set(20,y,-6,25)}flat(-4,4,-60,-8,3);flat(-1,1,-50,-14,18);terrain((x,z)=>Math.hypot(x,z-50)<20?16-Math.hypot(x,z-50)*.8:0,1,2);forest(70,33,(x,z)=>Math.abs(x)>24&&clear(x,z));return{sp:[0,24,-58],lm:[0,28,0],r:24,ry:12}},
+grand(){flat(-OX,OX-1,-OZ,OZ-1,1);flat(-OX,OX-1,-56,-52,28);flat(-3,3,-52,40,28);
+ // gate + sign
+ box(-6,-5,1,8,-50,-49,7);box(5,6,1,8,-50,-49,7);box(-6,6,9,10,-50,-49,9);dlabel(GRAND.place,0,12.5,-50,2);
+ // 11 cream towers with terracotta tops
+ const T=[[-40,-38],[-24,-38],[16,-38],[32,-38],[-44,-14],[-28,-14],[24,-14],[40,-14],[-40,14],[-24,14],[30,16]];for(const[x,z]of T)apt(x,z,9,9,31,31,9);
+ // clubhouse + pool + tennis + playground
+ box(-12,12,1,7,22,34,31,true);for(let x=-11;x<=11;x+=2)set(x,4,22,6);box(-12,12,8,8,22,34,9);flat(-12,12,8,18,3);flat(-9,9,10,16,18);flat(14,30,32,46,11);for(let x=14;x<=30;x++)set(x,0,39,15);for(let z=32;z<=46;z++){set(14,0,z,15);set(30,0,z,15)}flat(-34,-18,32,46,11);for(let x=-34;x<=-18;x++)set(x,0,39,15);
+ flat(6,22,-4,8,17);box(8,8,1,4,0,0,8);box(12,12,1,4,0,0,8);box(8,12,4,4,0,0,8);for(let y=1;y<=3;y++)set(18,y,4,12);for(let z=-2;z<=3;z++)set(19,Math.max(1,4-(z+2)*.6|0),z,10);box(14,15,1,1,-2,-1,14);
+ for(let z=-48;z<=40;z+=6){treeG(-6,z);treeG(6,z)}forest(80,34,(x,z)=>clear(x,z,1),(x,z,h)=>treeG(x,z,h,[16,14,11][Math.abs(x+z)%3]));pad(-14,-2);
+ person(10,6,"#7b1fa2","#4a148c","#bdbdbd",GRAND.grandma,"Namaskaram! I'm "+GRAND.grandma+". So happy you came!");person(14,6,"#1565c0","#eeeeee","#9e9e9e",GRAND.grandpa,"Namaskaram! I'm "+GRAND.grandpa+". Want to fly around together?");
+ dlabel("Welcome! "+grandNames()+" ❤️",12,10,6,1.8);return{sp:[0,26,-58],lm:[0,20,0],r:28,ry:22,pad:[-14,-2]}},
+fremont(){flat(-OX,OX-1,-OZ,OZ-1,1);terrain((x,z)=>{const d=Math.hypot(x-30,z-44);return d<34?30-d*.85:0},1,2,(x,z,h)=>h>8?33:1);{const g=groundTop(30,44);for(let y=g;y<g+4;y++)set(30,y,44,15)}dlabel("Mission Peak",30,40,44,1.2);
+ for(let x=-50;x<=-20;x++)for(let z=10;z<=34;z++){const e=((x+35)/15)**2+((z-22)/12)**2;if(e<1)set(x,0,z,18)}dlabel("Lake Elizabeth",-35,6,22,1.2);for(let i=0;i<3;i++)box(-40+i*5,-39+i*5,1,1,20,21,[8,10,12][i]);
+ flat(-OX,OX-1,-6,-4,28);flat(-2,0,-OZ,OZ-1,28);const R=rng(35);for(let x=-56;x<=56;x+=10)for(const z of[-20,-34,-48]){if(Math.abs(x+1)>4)smallHouse(x,z,[15,10,14,12,9,5][R()*6|0],[7,36,8][R()*3|0]);treeG(x+4,z+3)}
+ apt(-6,-16,9,8,5,10,8);dlabel("Welcome! "+FAM.aunt+" ❤️",-2,9,-17,1.6);person(-4,-20,"#e91e63","#3949ab","#3e2723",FAM.aunt,"Hi! I'm "+FAM.aunt+"! Welcome to Fremont!");pad(10,-12);forest(60,36,(x,z)=>clear(x,z,1)&&z>-2);
+ return{sp:[0,26,-58],lm:[-2,10,-14],r:22,ry:14,pad:[10,-12]}}
+};
+// --- travel ---
+let destInfo=null;
+function destVehicles(show){VEH[0].g.visible=VEH[1].g.visible=show;ringObjs.forEach((r,i)=>r.visible=show&&!ringGot.includes(i));for(const s of SPR)s.userData.hideAway=!show;for(const r of ringObjs)r.userData.hideAway=!show}
+function clearDest(){for(const o of destObjs){scene.remove(o);o.geometry&&o.geometry.dispose()}for(const s of DSPR){scene.remove(s);s.material.map.dispose();s.material.dispose()}destObjs=[];DSPR=[];destRings=[];people=[]}
+function genDest(k){for(const q of smP)q.life=Math.min(q.life,.001);vox.fill(0);count=0;for(const c of chunks.values())c.dirty=true;clearDest();const info=DB[k]();destInfo=info;rings6(info.lm[0],info.lm[2],info.r,info.ry);return info}
+function travel(k){if(!PLACES[k]||travelling)return;closeOv("trip");const from=away;if(!away)saveNow();playTravel(from||"lincoln",k,()=>{away=k;document.body.classList.add("away");destVehicles(false);const info=genDest(k);const v=VEH[2];if(ride!==v){if(ride)exitNow(true);getIn(v)}
+  v.x=info.sp[0];v.z=info.sp[2];v.y=info.sp[1];v.h=Math.atan2(info.lm[0]-v.x,info.lm[2]-v.z);v.s=14;landing=false;P.x=v.x;P.z=v.z;P.y=v.y;camInit=false;rebuildNear(60);drawMapBase();
+  curLM=[{n:PLACES[k].e+" "+PLACES[k].n,x:info.lm[0],z:info.lm[2]}];const pp=loadPP(),first=!pp.stamps[k];if(first){pp.stamps[k]=new Date().toISOString().slice(0,10);savePP(pp)}showFact(k,first)})}
+function flyHome(){if(travelling||!away)return;for(const q of smP)q.life=Math.min(q.life,.001);closeAll();const from=away;playTravel(from,"lincoln",()=>{const v=VEH[2];away=null;document.body.classList.remove("away");clearDest();destVehicles(true);const r=ride;ride=null;loadSlot(slot);
+  v.x=-6;v.z=14;v.y=16;v.h=Math.PI;v.s=8;if(r!==v){if(r)r.g.visible=true;ride=null;getIn(v);v.x=-6;v.z=14;v.y=16;v.h=Math.PI;v.s=8}else{ride=v;av.g.visible=false;setBody()}landing=true;curLM=LM;P.x=v.x;P.z=v.z;P.y=v.y;camInit=false;toast("🏠 Welcome home to Lincoln! Landing near the helipad…")})}
+let travelling=false;
+const CONT=[[-100,45,30,18],[-60,-15,14,24],[15,50,16,8],[20,5,20,28],[90,45,45,18],[78,20,8,10],[105,12,10,10],[134,-25,16,10],[-42,72,10,6],[140,37,4,6]];
+function drawWorld(g,W2,H2){g.fillStyle="#4fc3f7";g.fillRect(0,0,W2,H2);g.fillStyle="#66bb6a";for(const[lo,la,rx,ry]of CONT){g.beginPath();g.ellipse((lo+180)/360*W2,(90-la)/180*H2,rx/360*W2,ry/180*H2,0,0,7);g.fill()}}
+const proj=(ll,W2,H2)=>[(ll[1]+180)/360*W2,(90-ll[0])/180*H2];
+function playTravel(from,to,done){travelling=true;const ov=document.getElementById("travel"),cv2=document.getElementById("travelCv"),g=cv2.getContext("2d");ov.classList.remove("hidden");const W2=cv2.width,H2=cv2.height;
+  const a=from==="lincoln"?LINCOLN:(PLACES[from].ll||LINCOLN),b=to==="lincoln"?LINCOLN:(PLACES[to].ll||LINCOLN);const A=proj(a,W2,H2),B=proj(b,W2,H2);const k=to==="lincoln"?from:to,mi=miles(k),nm=to==="lincoln"?"Lincoln":PLACES[to].city;
+  document.getElementById("travelTxt").textContent=(to==="lincoln"?PLACES[from].city+" to Lincoln":"Lincoln to "+nm)+(mi?": "+mi.toLocaleString()+" miles!":"!");if(window.Music)Music.play("sky");
+  const t0=performance.now(),dur=2600;beep(523,.1);setTimeout(()=>beep(659,.1),150);setTimeout(()=>beep(784,.15),300);
+  (function an(){const p=Math.min(1,(performance.now()-t0)/dur);drawWorld(g,W2,H2);const mx=(A[0]+B[0])/2,my=Math.min(A[1],B[1])-H2*.25;g.strokeStyle="#fff";g.setLineDash([8,8]);g.lineWidth=4;g.beginPath();g.moveTo(A[0],A[1]);g.quadraticCurveTo(mx,my,B[0],B[1]);g.stroke();g.setLineDash([]);
+   for(const[P2,c]of[[A,"#e53935"],[B,"#ffd600"]]){g.fillStyle=c;g.beginPath();g.arc(P2[0],P2[1],9,0,7);g.fill();g.strokeStyle="#000";g.lineWidth=2;g.stroke()}
+   const q=1-p,x=q*q*A[0]+2*q*p*mx+p*p*B[0],y=q*q*A[1]+2*q*p*my+p*p*B[1];g.font="40px sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText("✈️",x,y);
+   if(p<1)requestAnimationFrame(an);else setTimeout(()=>{ov.classList.add("hidden");travelling=false;done()},350)})()}
+// --- overlays ---
+function openOv(id){document.getElementById(id).classList.remove("hidden")}
+function closeOv(id){document.getElementById(id).classList.add("hidden");if(id==="learn"&&window.speechSynthesis)speechSynthesis.cancel()}
+function closeAll(){["trip","fact","learn","passport","askHome"].forEach(closeOv)}
+function renderTrip(){document.getElementById("tripBody").innerHTML=SECTIONS.map(([t,ks])=>`<h4>${t}</h4><div class="tgrid">${ks.map(k=>{const P2=PLACES[k],st=loadPP().stamps[k];return`<button class="tcard" data-k="${k}"><span class="te">${P2.e}</span><b>${P2.n}</b><small>${P2.city}${P2.ll?" · "+miles(k).toLocaleString()+" mi":""}</small>${st?'<i>✅</i>':""}</button>`}).join("")}</div>`).join("");
+  document.querySelectorAll("#tripBody .tcard").forEach(b=>b.onclick=()=>travel(b.dataset.k))}
+function openTrip(){if(!ride||ride.t!=="plane"){toast("✈️ Get in the plane at the Airport to go on a World Trip!");return}renderTrip();openOv("trip")}
+function showFact(k,first){const P2=PLACES[k];document.getElementById("factBody").innerHTML=`<div class="big">${P2.e}</div><h3>${P2.n}</h3><p>${P2.fact}</p>${first?'<p class="stamp">🛂 New passport stamp!</p>':""}`;document.getElementById("factLearn").onclick=()=>{closeOv("fact");openLearn(k)};openOv("fact");beep(880,.08)}
+function speak(t){if(!window.speechSynthesis)return toast("🔇 Read-aloud isn't available here");speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;speechSynthesis.speak(u)}
+function openLearn(k){const P2=PLACES[k],pp=loadPP();const sec=(t,b)=>b?`<h4>${t}</h4><p>${b}</p>`:"";
+  const where=P2.country?`${P2.city}, ${P2.country}${P2.cont?" · "+P2.cont:""}`:P2.city;
+  document.getElementById("learnBody").innerHTML=`<div class="big">${P2.e}</div><h3>${P2.n}</h3><h4>📍 Where is it?</h4><p>${where}${P2.ll?" · "+miles(k).toLocaleString()+" miles from Lincoln":""}</p><canvas id="lmap" width="320" height="160"></canvas>`+sec("🏗️ When & who",P2.when)+sec("⭐ Why it's famous",P2.why)+sec("📏 How big?",P2.big)+`<h4>🤩 Cool facts</h4><ul>${P2.cool.map(c=>"<li>"+c+"</li>").join("")}</ul><h4>👋 Say hello!</h4><p class="hello">"${P2.hello}"${P2.lang?" ("+P2.lang+")":""}</p>`+
+   (P2.quiz.length?`<h4>❓ Quiz for bonus stars ${pp.quiz[k]?"(done ✅)":""}</h4>`+P2.quiz.map((q,i)=>`<div class="qz" data-i="${i}"><p>${q[0]}</p>${q[1].map((o,j)=>`<button data-j="${j}">${o}</button>`).join("")}</div>`).join(""):"");
+  const g=document.getElementById("lmap").getContext("2d");drawWorld(g,320,160);if(P2.ll){const[x,y]=proj(P2.ll,320,160),[lx,ly]=proj(LINCOLN,320,160);g.fillStyle="#e53935";g.beginPath();g.arc(lx,ly,5,0,7);g.fill();g.fillStyle="#ffd600";g.strokeStyle="#000";g.beginPath();g.arc(x,y,7,0,7);g.fill();g.stroke()}
+  let right=0,answered=0;document.querySelectorAll("#learnBody .qz").forEach(d=>d.querySelectorAll("button").forEach(b=>b.onclick=()=>{if(d.dataset.done)return;d.dataset.done=1;const q=P2.quiz[+d.dataset.i],ok=+b.dataset.j===q[2];b.classList.add(ok?"right":"wrong");if(!ok)d.querySelectorAll("button")[q[2]].classList.add("right");beep(ok?988:300,.12);if(ok)right++;answered++;
+    if(answered===P2.quiz.length){const p2=loadPP();if(!p2.quiz[k]){p2.quiz[k]=right;savePP(p2);addStars(right);toast("⭐ Quiz done! +"+right+" bonus star"+(right===1?"":"s")+"!")}else toast("🎉 Quiz done! "+right+"/"+answered+" right")}}));
+  document.getElementById("learnSpeak").onclick=()=>speak([P2.n,P2.fact,P2.when,P2.why,P2.big,...P2.cool,"Say hello: "+P2.hello].filter(Boolean).join(". "));openOv("learn")}
+function openPassport(){const pp=loadPP(),ks=[...new Set(SECTIONS.flatMap(s=>s[1]))],n=Object.keys(pp.stamps).length;
+  document.getElementById("ppBody").innerHTML=`<p>${n} of ${ks.length} stamps · ⭐ ${bonusStars()+ringGot.length} stars</p><div class="tgrid">${ks.map(k=>{const P2=PLACES[k],s=pp.stamps[k];return`<button class="tcard ${s?"st":"no"}" data-k="${k}"><span class="te">${s?P2.e:"❔"}</span><b>${s?P2.n:"???"}</b><small>${s?"Stamped "+s:"Not visited yet"}</small></button>`}).join("")}</div>`;
+  document.querySelectorAll("#ppBody .tcard.st").forEach(b=>b.onclick=()=>{closeOv("passport");openLearn(b.dataset.k)});openOv("passport")}
+// --- tricks & smoke ---
+let trick=null,smokeMode=0;const SMOKE=["off","#ffffff","#e53935","#1e88e5","rainbow"];
+const smk=new THREE.InstancedMesh(new THREE.BoxGeometry(.7,.7,.7),new THREE.MeshBasicMaterial({color:"#fff",transparent:true,opacity:.8}),300);smk.count=300;smk.frustumCulled=false;scene.add(smk);
+const smP=[];for(let i=0;i<300;i++)smP.push({life:0,x:0,y:-99,z:0});let smI=0,smT=0;const _m4=new THREE.Matrix4(),_c=new THREE.Color();for(let i=0;i<300;i++){smk.setMatrixAt(i,_m4.makeScale(0,0,0));smk.setColorAt(i,_c.set("#fff"))}
+const TR={loop:{d:2.6,s:[523,659,784,1047]},roll:{d:1.6,s:[659,880]},flip:{d:1.4,s:[784,523,784]},spin:{d:1.8,s:[440,554,659,880]}};
+function doTrick(k){const v=ride;if(!v||v.t!=="plane")return;if(trick)return;if(v.y-groundTop(v.x,v.z)<3||v.s<11)return toast("🛫 Take off first, then do tricks!");trick={k,t:0};TR[k].s.forEach((f,i)=>setTimeout(()=>beep(f,.12),i*140));toast({loop:"🔁 Loop-the-loop!",roll:"🌀 Barrel roll!",flip:"🤸 Flip!",spin:"💫 Spin!"}[k])}
+function trickStep(v,dt){let ox=0,oz=0,oyaw=0,oy=0;if(trick){trick.t+=dt;const T=TR[trick.k],p=Math.min(1,trick.t/T.d),e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+  if(trick.k==="loop"){ox=-e*Math.PI*2;oy=6*(1-Math.cos(e*Math.PI*2))}else if(trick.k==="roll")oz=e*Math.PI*2;else if(trick.k==="flip"){ox=e*Math.PI*2;oy=4*Math.sin(e*Math.PI)}else oyaw=e*Math.PI*2;
+  if(p>=1){trick=null;addStars(1);toast("⭐ Awesome trick! +1 star");beep(1318,.15)}}
+  v.g.position.y=v.y+oy;v.g.rotation.set(v.tx+ox,v.h+oyaw,v.tz+oz,"YXZ");
+  // smoke
+  smT+=dt;if(smokeMode&&smT>.05&&v.y>groundTop(v.x,v.z)+1){smT=0;const w=v.g.localToWorld(new THREE.Vector3(0,1.2,-2.8)),s=smP[smI];s.life=2.5;s.x=w.x;s.y=w.y;s.z=w.z;_c.set(SMOKE[smokeMode]==="rainbow"?["#e53935","#fb8c00","#fdd835","#43a047","#1e88e5","#8e24aa"][smI%6]:SMOKE[smokeMode]);smk.setColorAt(smI,_c);smk.instanceColor.needsUpdate=true;smI=(smI+1)%300}
+  updSmoke(dt)}
+function updSmoke(dt){let any=false;for(let i=0;i<300;i++){const s=smP[i];if(s.life<=0)continue;s.life-=dt;any=true;const k=Math.max(0,s.life/2.5)*1.4+.1;smk.setMatrixAt(i,_m4.makeScale(k,k,k).setPosition(s.x,s.y,s.z));if(s.life<=0)smk.setMatrixAt(i,_m4.makeScale(0,0,0))}if(any)smk.instanceMatrix.needsUpdate=true}
+function cycleSmoke(){smokeMode=(smokeMode+1)%SMOKE.length;const n=["Smoke off","White smoke","Red smoke","Blue smoke","Rainbow smoke!"][smokeMode];document.getElementById("tSmoke").classList.toggle("on",!!smokeMode);toast("💨 "+n);beep(600+smokeMode*80,.06)}
+let askT=0;function askHome(t){if(t-askT<8)return;askT=t;openOv("askHome")}
+function peopleStep(t){for(const p of people){p.arm.rotation.z=Math.PI*.85+Math.sin(t*4+p.x)*.35;const d=Math.hypot(P.x-p.x,P.z-p.z);if(d<6&&t-p.said>12&&!ride){p.said=t;toast("👋 "+p.greet);beep(700,.06);setTimeout(()=>beep(880,.08),120)}}
+ for(const o of destObjs)if(o.userData.geyser){const c=(t%14);const h=c<4?Math.sin(c/4*Math.PI)*20:0;o.scale.set(1,Math.max(.01,h),1);o.position.y=3+h/2;o.visible=h>.2}}
+function destRingStep(v){for(const r of destRings){if(!r.m.visible)continue;r.m.rotation.y+=.01;if(Math.hypot(v.x-r.x,v.y+1.2-r.y,v.z-r.z)<3.4){r.m.visible=false;const pp=loadPP();(pp.rings[away]=pp.rings[away]||[]).push(r.i);savePP(pp);addStars(1);beep(988,.12);setTimeout(()=>beep(1318,.15),120);const n=pp.rings[away].length;toast(n>=6?"🏆 All 6 rings at "+PLACES[away].n+"!":"⭐ Ring "+n+" of 6!")}}}
+
+// trip UI wiring
+tapBtn("tLoop",()=>doTrick("loop"));tapBtn("tRoll",()=>doTrick("roll"));tapBtn("tFlip",()=>doTrick("flip"));tapBtn("tSpin",()=>doTrick("spin"));tapBtn("tSmoke",cycleSmoke);document.getElementById("tTrip").onclick=openTrip;tapBtn("flyHome",flyHome);
+document.getElementById("btnPass").onclick=openPassport;document.querySelectorAll(".ovClose").forEach(b=>b.onclick=()=>closeOv(b.dataset.c));
+document.getElementById("askYes").onclick=()=>{closeOv("askHome");flyHome()};document.getElementById("askNo").onclick=()=>closeOv("askHome");
+{const mk=(t,f)=>{const b=document.createElement("button");b.textContent=t;b.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();gp.classList.add("hidden");document.getElementById("goBtn").classList.remove("on");f()});gp.appendChild(b)};
+ mk("🌍 World Trip",()=>{if(ride&&ride.t==="plane")openTrip();else{goTo("airport");toast("✈️ Walk to the plane, get in, then tap 🌍 World Trip!")}});mk("🛂 Passport",openPassport)}
 // boot
 let all0={};try{all0=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}slot=all0.slot||0;
 loadSlot(slot);document.getElementById("btnSlot").textContent="💾 Slot "+(slot+1);
 requestAnimationFrame(frame);
 if(window.Music)Music.play("build");
 
-window.BW={GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren};
+window.BW={GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
 
 </script>
 <script>
