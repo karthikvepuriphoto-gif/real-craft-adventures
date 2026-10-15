@@ -218,8 +218,8 @@ function rebuildChunk(ck){
 }
 function rebuildDirty(limit=4){let n=0;for(const[k,c]of chunks){if(c.dirty){rebuildChunk(k);if(++n>=limit)return}}}
 
-function label(txt,x,y,z){const c=document.createElement("canvas");c.width=512;c.height=96;const g=c.getContext("2d");g.fillStyle="rgba(0,0,0,.65)";g.fillRect(0,0,512,96);g.fillStyle="#ffeb3b";g.font="bold 40px sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(txt,256,50);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:true}));sp.scale.set(6,1.1,1);sp.position.set(x,y,z);scene.add(sp)}
-label("State Capitol",0,16,18);label("Kahoa Elementary",16,7,-4);label("Park & Pond",-15,6,13);label("Home Street",0,6,-14);
+function label(txt,x,y,z){const c=document.createElement("canvas");c.width=512;c.height=96;const g=c.getContext("2d");g.fillStyle="rgba(0,0,0,.65)";g.fillRect(0,0,512,96);g.fillStyle="#ffeb3b";g.font="bold 40px sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(txt,256,50);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:true}));sp.scale.set(5,.9,1);sp.position.set(x,y,z);scene.add(sp)}
+label("State Capitol",0,16,18);label("Kahoa Elementary",16,6.6,-9.2);label("Park & Pond",-15,6,13);label("Home Street",0,6,-14);
 // ---- avatar ----
 function M(c){return new THREE.MeshLambertMaterial({color:c})}
 function avatar(){const g=new THREE.Group(),add=(w,h,d,c,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);g.add(m);return m};
@@ -262,7 +262,7 @@ function tapAt(cx,cy){const r=cv.getBoundingClientRect();ray.setFromCamera(new T
  const ms=[];for(const c of chunks.values())ms.push(...c.g.children);const h=ray.intersectObjects(ms,false)[0];if(!h)return;const n=h.face.normal;
  const x=Math.floor(h.point.x-n.x*.01),y=Math.floor(h.point.y-n.y*.01),z=Math.floor(h.point.z-n.z*.01);
  if(Math.hypot(x+.5-P.x,z+.5-P.z,y-P.y)>12)return toast("🚶 Walk closer to build there!");target={x,y,z,nx:Math.round(n.x),ny:Math.round(n.y),nz:Math.round(n.z)};outline.position.set(x+.5,y+.5,z+.5);outline.visible=true;holdT=performance.now();doAction()}
-let holdT=0,lookT=0;
+let holdT=0,lookT=0;const _fd=new Set();
 function doAction(){
   if(!target)return toast("👀 Look at a block first!");
   if(mode==="break"){
@@ -373,9 +373,13 @@ function step(dt,t){
   // camera
   let dist=camDist;const tv=new THREE.Vector3(P.x+Math.sin(P.cy)*dist*Math.cos(P.cp),P.y+1.6+Math.sin(P.cp)*dist,P.z+Math.cos(P.cy)*dist*Math.cos(P.cp));
   // pull in if blocked
-  for(let s=.8;s<dist;s+=.25){const cx=P.x+Math.sin(P.cy)*s*Math.cos(P.cp),cy=P.y+1.6+Math.sin(P.cp)*s,cz=P.z+Math.cos(P.cy)*s*Math.cos(P.cp);if(solid(cx,cy,cz)){tv.set(P.x+Math.sin(P.cy)*(s-.4)*Math.cos(P.cp),P.y+1.6+Math.sin(P.cp)*(s-.4),P.z+Math.cos(P.cy)*(s-.4)*Math.cos(P.cp));break}}
+  if(solid(tv.x,tv.y,tv.z))for(let s=.8;s<dist;s+=.25){const cx=P.x+Math.sin(P.cy)*s*Math.cos(P.cp),cy=P.y+1.6+Math.sin(P.cp)*s,cz=P.z+Math.cos(P.cy)*s*Math.cos(P.cp);if(solid(cx,cy,cz)){tv.set(P.x+Math.sin(P.cy)*(s-.4)*Math.cos(P.cp),P.y+1.6+Math.sin(P.cp)*(s-.4),P.z+Math.cos(P.cy)*(s-.4)*Math.cos(P.cp));break}}
   if(camInit)cam.position.lerp(tv,Math.min(1,dt*8));else{cam.position.copy(tv);camInit=true}cam.lookAt(P.x,P.y+1.35,P.z);
-  if(performance.now()-holdT>1500)aim();rebuildDirty(3);
+  {const fr=new THREE.Raycaster(),ms=[];for(const c of chunks.values())ms.push(...c.g.children);const hitS=new Set();
+  for(const yo of[.3,1,1.6]){const o=new THREE.Vector3(P.x,P.y+yo,P.z),d=cam.position.clone().sub(o),L=d.length();fr.set(o,d.normalize());fr.far=L+.5;for(const h of fr.intersectObjects(ms,false))hitS.add(h.object);fr.set(cam.position,d.clone().negate());fr.far=Math.max(0,L-.4);for(const h of fr.intersectObjects(ms,false))hitS.add(h.object)}
+  const nw=performance.now();for(const o of hitS){if(!o.userData.fm){o.userData.om=o.material;o.material=o.material.clone();o.material.transparent=true;o.userData.fm=1;_fd.add(o)}o.userData.ft=nw}
+  for(const o of _fd){const hit=nw-o.userData.ft<150,m=o.material;m.opacity+=((hit?.22:(o.userData.om.opacity))-m.opacity)*Math.min(1,dt*10);m.depthWrite=m.opacity>.95;if(!hit&&Math.abs(m.opacity-o.userData.om.opacity)<.02){m.dispose();o.material=o.userData.om;o.userData.fm=0;_fd.delete(o)}}}
+ if(performance.now()-holdT>1500)aim();rebuildDirty(3);
 }
 let vw=0,vh=0;function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;step(dt,t/1000);if(innerWidth!==vw||innerHeight!==vh)resize();ren.render(scene,cam);requestAnimationFrame(frame)}
 function resize(){vw=innerWidth;vh=innerHeight;ren.setSize(vw,vh,true);cam.aspect=vw/vh;cam.updateProjectionMatrix()}
