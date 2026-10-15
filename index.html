@@ -105,6 +105,7 @@ small{font-size:9px;color:#ccc}
 <div id="celebrate" class="hidden"></div>
 <script>
 var HT0=null;(function(){try{HT0=JSON.parse(localStorage.getItem("realcraft_hometown_v1")||"null")}catch(e){}if(!HT0&&(localStorage.getItem("realcraft_buildworld_v1")||localStorage.getItem("questcraft_save_v1"))){HT0={id:"lincoln",name:"Lincoln"};localStorage.setItem("realcraft_hometown_v1",JSON.stringify(HT0))}window.__htNeedPick=!HT0})();
+if(HT0&&HT0.id==="lincoln")document.write('<script src="lincoln.js"><\/script>');
 var HTNAME=HT0&&HT0.name?String(HT0.name).replace(/[<>&]/g,""):"Lincoln",HTLIN=!HT0||HT0.id==="lincoln";
 </script>
 <script>
@@ -113,21 +114,21 @@ const KEY = "questcraft_save_v1";
 
 const BIOMES = [
  {id:"backyard",name:"Home Base Backyard",ic:"🏡",color:"#5fa83a",quest:"Be a map maker! Draw your backyard on paper and mark 3 treasure spots, like a tree, a rock, and a flower.",item:"🗺️ Backyard Map",xp:20},
- {id:"pioneers",name:"Pioneers Park",ic:"🦬",color:"#7a9a3a",quest:"Look for the bison and spot 3 kinds of birds or animal tracks.",item:"🪶 Prairie Feather",xp:40},
- {id:"zoo",name:"Lincoln Children's Zoo",ic:"🦒",color:"#c9a227",quest:"Visit 5 different animals and learn one fun fact about your favorite.",item:"🥚 Mob Egg",xp:40},
+ {id:"pioneers",name:"Big City Park",ic:"🌳",color:"#7a9a3a",quest:"Spot 3 kinds of birds or animal tracks at a big park.",item:"🪶 Prairie Feather",xp:40},
+ {id:"zoo",name:"Zoo",ic:"🦒",color:"#c9a227",quest:"Visit 5 different animals and learn one fun fact about your favorite.",item:"🥚 Mob Egg",xp:40},
  {id:"library",name:"Public Library",ic:"📚",color:"#7b5aa6",quest:"Find a book about building, nature, or Minecraft and read one chapter.",item:"📖 Enchanted Book",xp:35},
  {id:"grocery",name:"Grocery Store",ic:"🛒",color:"#d0503a",quest:"Help find 5 items on the shopping list. Spot a fruit you've never tried!",item:"🍎 Golden Apple",xp:25},
  {id:"park",name:"Neighborhood Park",ic:"🌳",color:"#3f8f3f",quest:"Climb, run, or slide. Then collect 3 cool rocks (leave the rest!).",item:"🪨 Cobblestone",xp:25},
- {id:"lake",name:"Holmes Lake",ic:"🌊",color:"#3a7bd5",quest:"Walk along the lake path and count the ducks and geese.",item:"🐟 Raw Fish",xp:35},
- {id:"kahoa",name:"Kahoa Elementary",ic:"🏫",color:"#b5651d",quest:"Invent a new recess game and teach it to a friend at Kahoa!",item:"🧩 Redstone Idea",xp:30},
- {id:"capitol",name:"Nebraska State Capitol",ic:"🏛️",color:"#c9b27a",quest:"Find The Sower statue on top of the tall tower and count the steps at the entrance!",item:"🌾 Golden Seed",xp:40},
- {id:"garden",name:"Sunken Gardens",ic:"🌷",color:"#d46aa0",quest:"Find 4 flower colors. Which smells best?",item:"🌸 Flower Pot",xp:35},
+ {id:"lake",name:"Lake or River",ic:"🌊",color:"#3a7bd5",quest:"Walk by the water and count the ducks, geese or boats.",item:"🐟 Raw Fish",xp:35},
+ {id:"kahoa",name:"My School",ic:"🏫",color:"#b5651d",quest:"Invent a new recess game and teach it to a friend at school!",item:"🧩 Redstone Idea",xp:30},
+ {id:"capitol",name:"State Capitol or City Hall",ic:"🏛️",color:"#c9b27a",quest:"Find a statue or a flag and count the steps at the entrance!",item:"🌾 Golden Seed",xp:40},
+ {id:"garden",name:"Flower Garden",ic:"🌷",color:"#d46aa0",quest:"Find 4 flower colors. Which smells best?",item:"🌸 Flower Pot",xp:35},
  {id:"kitchen",name:"Kitchen Crafting Table",ic:"🍳",color:"#8a6a4a",quest:"Make a snack together. You're the chef!",item:"🍪 Cookie",xp:20},
- {id:"museum",name:"Morrill Hall Museum",ic:"🦣",color:"#6a6a6a",quest:"Find the giant mammoth and one fossil. Draw it!",item:"🦴 Fossil Bone",xp:40},
+ {id:"museum",name:"Natural History Museum",ic:"🦣",color:"#6a6a6a",quest:"Find a dinosaur or mammoth fossil. Draw it!",item:"🦴 Fossil Bone",xp:40},
  {id:"trail",name:"Bike Trail",ic:"🚲",color:"#4a8a6a",quest:"Ride or walk a trail and spot 5 different trees.",item:"🪵 Oak Log",xp:30},
 ];
 
-if(!HTLIN){const RN={pioneers:["Big City Park","🌳","Spot 3 kinds of birds or animal tracks at a big park."],zoo:["Zoo","🦒",null],lake:["Lake or River","🌊","Walk by the water and count the ducks, geese or boats."],kahoa:["My School","🏫","Invent a new recess game and teach it to a friend at school!"],capitol:["State Capitol or City Hall","🏛️","Find a statue or a flag and count the steps at the entrance!"],garden:["Flower Garden","🌷",null],museum:["Natural History Museum","🦣","Find a dinosaur or mammoth fossil. Draw it!"]};for(const b of BIOMES){const r=RN[b.id];if(r){b.name=r[0];b.ic=r[1];if(r[2])b.quest=r[2]}}}
+if(HTLIN&&window.RCA_LINCOLN){const RN=window.RCA_LINCOLN.BIOMES;for(const b of BIOMES){const r=RN[b.id];if(r)Object.assign(b,r)}}
 const MISSIONS = [
  ["Gather 5 different leaves","🍂 Leaf Stack"],["Build a shelter for a stuffed animal","🛖 Mini Shelter"],
  ["Find 3 rocks of different colors","🪨 Rock Set"],["Build a tower of 20 blocks/LEGO/cups","🧱 Tower Block"],
@@ -203,7 +204,7 @@ const SNAPS={
  backyard:["#8fd3ff","#5fa83a","#8b5a2b","🏡","Backyard Base"],pioneers:["#ffd27f","#9bb04a","#6b4a2b","🦬","Prairie Bison"],
  zoo:["#9be3ff","#c9a227","#7a5a1a","🦒","Zoo Safari"],library:["#6a4a8a","#8a6a4a","#4a2a1a","📚","Book Vault"],
  grocery:["#bfe6ff","#d0d0d0","#d0503a","🛒","Market Run"],park:["#8fd3ff","#3f8f3f","#6b4a2b","🌳","Park Grove"],
- lake:["#a8e0ff","#3a7bd5","#2a5ba5","🦆","Lake Ducks"],school:["#9fd8ff","#b5651d","#8a4a10","🏫","Kahoa Recess"],capitol:["#8fd3ff","#5fa83a","#e0d2a8","🏛️","Capitol Tower"],
+ lake:["#a8e0ff","#3a7bd5","#2a5ba5","🦆","Lake Ducks"],school:["#9fd8ff","#b5651d","#8a4a10","🏫",(HTLIN&&window.RCA_LINCOLN?window.RCA_LINCOLN.sticker:"School Recess")],capitol:["#8fd3ff","#5fa83a","#e0d2a8","🏛️","Capitol Tower"],
  garden:["#ffe0f0","#4a9a4a","#d46aa0","🌷","Flower Garden"],kitchen:["#ffe9c9","#8a6a4a","#5a3a2a","🍳","Crafting Kitchen"],
  museum:["#c9c9c9","#6a6a6a","#4a4a4a","🦣","Mammoth Hall"],trail:["#8fd3ff","#4a8a6a","#7a6a5a","🚲","Trail Ride"],
  leaves:["#ffcf8f","#c8762a","#a0401a","🍂","Leaf Pile"],shelter:["#7a9fd5","#5fa83a","#8b5a2b","🛖","Cozy Shelter"],

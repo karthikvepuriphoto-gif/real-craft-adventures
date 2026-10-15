@@ -51,6 +51,7 @@ body.away #goto,body.away #btnSlot,body.away #btnReset,body.away #btnCar,body.aw
 .card2.tv{text-align:center}#travelCv{width:100%;border:3px solid #000;border-radius:8px}#travelTxt{font-family:'Press Start 2P',monospace;font-size:14px!important;line-height:1.6}
 .qz button{margin:3px;font-size:13px;font-family:system-ui,sans-serif}.qz button.right{background:#a5d6a7}.qz button.wrong{background:#ef9a9a}#lmap{width:100%;max-width:320px;border:2px solid #000;border-radius:6px}
 </style>
+<script>try{var _h=JSON.parse(localStorage.getItem("realcraft_hometown_v1")||"null");if(!_h&&(localStorage.getItem("realcraft_buildworld_v1")||localStorage.getItem("questcraft_save_v1")))_h={id:"lincoln"};if(_h&&_h.id==="lincoln")document.write('<script src="lincoln.js"><\/script>')}catch(e){}</script>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
 <div id="view"></div>
@@ -132,8 +133,8 @@ const BLOCKS=[
  {id:20,n:"Bush",c:"#66bb6a",req:"park",hint:"Do a park quest to unlock!"},
  {id:21,n:"Cake",c:"#ffe0b2",top:"#f48fb1",req:"kitchen",hint:"Do the Kitchen Crafting Table quest to unlock!"},
  {id:22,n:"Cookie",c:"#a1887f",req:"kitchen",hint:"Do the Kitchen quest to unlock!"},
- {id:23,n:"Flag",c:"#1565c0",req:"kahoa",hint:"Do the Kahoa Elementary quest to unlock!"},
- {id:24,n:"Bell",c:"#ffd54f",req:"kahoa",hint:"Do the Kahoa Elementary quest to unlock!"},
+ {id:23,n:"Flag",c:"#1565c0",req:"kahoa",hint:"Do the School quest to unlock!"},
+ {id:24,n:"Bell",c:"#ffd54f",req:"kahoa",hint:"Do the School quest to unlock!"},
  {id:25,n:"Gold",c:"#ffc107",req:"capitol",hint:"Do the Nebraska State Capitol quest to unlock!"},
  {id:26,n:"Rainbow",c:"#e91e63",req:"streak",hint:"Keep a 3-day streak or finish today's missions!"},
  {id:27,n:"Glow",c:"#76ff03",req:"streak",hint:"Keep a 3-day streak or finish today's missions!"},
@@ -141,7 +142,7 @@ const BLOCKS=[
  {id:29,n:"Garage Door",c:"#78909c",req:"cars",hint:"Build a car in the Workshop to unlock!"},
  {id:30,n:"Iron",c:"#7b5e4a"},{id:31,n:"Marble",c:"#f3eee2"},{id:32,n:"Copper",c:"#5fb3a1"},{id:33,n:"Sandstone",c:"#dcc187"},{id:34,n:"Bridge Orange",c:"#c0362c"},{id:35,n:"Snow",c:"#ffffff"},{id:36,n:"Rock",c:"#6b6b6b"},{id:37,n:"Sea",c:"#2b8bd6"},
 ];
-if(!HTL)for(const b of BLOCKS)if(b.hint)b.hint=b.hint.replace("Kahoa Elementary","School").replace("Nebraska State Capitol","State Capitol");
+if(HTL&&window.RCA_LINCOLN)window.RCA_LINCOLN.patchBlocks(BLOCKS);if(!HTL)for(const b of BLOCKS)if(b.hint)b.hint=b.hint.replace("Nebraska State Capitol","State Capitol");
 const BASIC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
 
 function loadQuest(){try{return JSON.parse(localStorage.getItem(KEYS)||"{}")}catch(e){return{}}}
@@ -417,7 +418,7 @@ function genBase(){
   for(const[x,z]of[[38,20],[42,23],[46,20],[50,23],[54,20],[58,23],[60,18]])tree(x,z,4);for(let x=35;x<=62;x++)set(x,0,21,17);
   // Pioneers Park
   lake(-54,20,3,2);for(const[x,z]of[[-58,10],[-40,8],[-38,22],[-44,24],[-60,24],[-52,6],[-36,14]])tree(x,z,5);bison(-48,12);bison(-44,16);bison(-51,16);
-  // Holmes Lake
+  // the lake
   lake(48,-16,11,8);for(let x=36;x<=60;x+=6)tree(x,-28,4);
   airport();
   // more neighborhoods
@@ -429,7 +430,7 @@ function genBase(){
 }
 LM=[
  {k:"home",n:"🏡 Home Street",x:0,z:-14,y:7,go:[0.5,-9.5]},
- {k:"kahoa",n:"🏫 Kahoa Elementary",x:16,z:-4,y:9,go:[16.5,-11.5]},
+ {k:"kahoa",n:"🏫 School",x:16,z:-4,y:9,go:[16.5,-11.5]},
  {k:"park",n:"🌳 Park & Pond",x:-15,z:13,y:7,go:[-9.5,13.5]},
  {k:"capitol",n:"🏛️ Nebraska State Capitol",x:0,z:46,y:42,go:[0.5,24.5],s:1.6},
  {k:"stadium",n:"🏈 Memorial Stadium",x:48,z:46,y:14,go:[48.5,30.5],s:1.3},
@@ -440,10 +441,10 @@ LM=[
  {k:"zoo",n:"🦒 Lincoln Children's Zoo",x:48,z:9,y:11,go:[48.5,2.5]},
  {k:"antelope",n:"🌲 Antelope Park",x:48,z:21,y:9,go:[34.5,21.5]},
  {k:"pioneers",n:"🦬 Pioneers Park",x:-48,z:15,y:9,go:[-48.5,2.5]},
- {k:"lake",n:"🛶 Holmes Lake",x:48,z:-16,y:7,go:[34.5,-16.5]},
+ {k:"lake",n:"🛶 The Lake",x:48,z:-16,y:7,go:[34.5,-16.5]},
  {k:"airport",n:"✈️ Lincoln Airport",x:-50,z:-50,y:14,go:[-52.5,-42.5],tx:-58,tz:-48},
 ];
-if(!HTL)LM=cityLM();
+if(!HTL)LM=cityLM();else if(window.RCA_LINCOLN)window.RCA_LINCOLN.patchLM(LM);
 let curLM=LM;const GO={};for(const L of LM){const tx=L.tx??L.x,tz=L.tz??L.z;GO[L.k]=[L.go[0],L.go[1],Math.atan2(tx-L.go[0],tz-L.go[1])]}
 
 function label(txt,x,y,z,s=1){const c=document.createElement("canvas");c.width=512;c.height=96;const g=c.getContext("2d");g.fillStyle="rgba(0,0,0,.65)";g.fillRect(0,0,512,96);g.fillStyle="#ffeb3b";g.font="bold 38px sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(txt,256,50);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:true}));sp.scale.set(5*s,.9*s,1);sp.position.set(x,y,z);scene.add(sp);SPR.push(sp)}const SPR=[];
@@ -611,7 +612,7 @@ const TMX={x:28,z:36};let nearTM=false;
 {const g=new THREE.Group(),m=c=>new THREE.MeshLambertMaterial({color:c});const base=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,.5,16),m("#7e57c2"));base.position.y=.25;g.add(base);const pod=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,2.6,16,1,true),new THREE.MeshLambertMaterial({color:"#b3e5fc",transparent:true,opacity:.45,side:THREE.DoubleSide}));pod.position.y=1.8;g.add(pod);const top=new THREE.Mesh(new THREE.ConeGeometry(1.6,1,16),m("#5e35b1"));top.position.y=3.6;g.add(top);
  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.6,.15,8,24),new THREE.MeshBasicMaterial({color:"#ffd54f"}));ring.rotation.x=Math.PI/2;ring.position.y=1.8;g.add(ring);const clk=new THREE.Mesh(new THREE.CircleGeometry(.6,16),new THREE.MeshBasicMaterial({color:"#fff8e1"}));clk.position.set(0,3.2,1.25);g.add(clk);
  g.position.set(TMX.x,groundTop(TMX.x,TMX.z),TMX.z);scene.add(g);TMX.g=g;TMX.ring=ring;try{const lb=label("⏳ Time Machine",TMX.x,groundTop(TMX.x,TMX.z)+5,TMX.z);if(lb&&!lb.parent)scene.add(lb)}catch(e){}}
-// --- Sea Mode submarine dock at Holmes Lake (opens sea.html) ---
+// --- Sea Mode submarine dock at the lake (opens sea.html) ---
 const SUB={x:44,z:-16};let nearSub=false;
 {const g=new THREE.Group(),y=new THREE.MeshLambertMaterial({color:"#ffca28"});const b=new THREE.Mesh(new THREE.SphereGeometry(1.2,14,10),y);b.scale.set(1,.9,1.8);g.add(b);const t=new THREE.Mesh(new THREE.CylinderGeometry(.45,.5,.8,10),y);t.position.y=1.2;g.add(t);
  const w=new THREE.Mesh(new THREE.SphereGeometry(.45,10,8),new THREE.MeshLambertMaterial({color:"#4fc3f7"}));w.position.set(0,.3,1.9);g.add(w);g.position.set(SUB.x,groundTop(SUB.x,SUB.z)+.2,SUB.z);g.rotation.y=Math.PI/2;scene.add(g);SUB.g=g;
@@ -869,15 +870,10 @@ mysore:{n:"Mysore Palace",e:"👑",city:"Mysuru (Mysore)",country:"India",cont:"
  quiz:[["What makes the palace sparkle at night?",["Light bulbs","Fireflies","Diamonds"],0],["Which festival is famous there?",["Dasara","Halloween","Thanksgiving"],0]]}
 });
 // Grandparents' Home: easy to rename/adjust here
-const GRAND={place:"My Home Mangala",city:"Hyderabad",ll:[17.4600,78.3600],grandma:"Ammamma",grandpa:"Thatha"};
+const LX=window.RCA_LINCOLN&&HTL?window.RCA_LINCOLN:null;
+const GRAND=LX?LX.GRAND:{place:"",city:"",ll:[0,0],grandma:"",grandpa:""};
 const grandNames=()=>GRAND.grandma+" & "+GRAND.grandpa;
-PLACES.grand={n:GRAND.place,e:"❤️",city:GRAND.city,country:"India",cont:"Asia",ll:GRAND.ll,hello:"Namaskaram",lang:"Telugu",india:1,grand:1,
- fact:"Welcome to "+GRAND.place+" in Hyderabad, where "+GRAND.grandma+" and "+GRAND.grandpa+" live! Find them waving by the playground.",
- when:"Hyderabad was founded in 1591, the same time the Charminar was built. Today it is the capital of the state of Telangana.",
- why:"Hyderabad is called the \"City of Pearls\" because it has been famous for pearl trading for hundreds of years. It's also famous for its yummy Hyderabadi biryani, a spiced rice dish!",
- big:GRAND.place+" is a big apartment community with 11 towers, each 15 floors tall, plus a clubhouse, a swimming pool, tennis courts and play areas.",
- cool:["Most people in Hyderabad speak Telugu, and say \"Namaskaram\" to say hello.","Hyderabad is a big technology city where lots of computer companies work.","The Charminar is only a short trip across the city!"],
- quiz:[["Why is Hyderabad called the City of Pearls?",["Pearl trading","Pearl-colored buildings","It rains pearls"],0],["What language do most people in Hyderabad speak?",["Telugu","French","Japanese"],0]]};
+if(LX)LX.addGrand(PLACES);
 Object.assign(PLACES,{
 grandcanyon:{n:"Grand Canyon",e:"🏜️",city:"Arizona",country:"USA",cont:"North America",ll:[36.0544,-112.1401],hello:"Hello",lang:"English",
  fact:"The Colorado River carved the Grand Canyon over millions of years. It's more than a mile deep!",
@@ -934,7 +930,7 @@ chicago:{n:"Chicago",e:"🏙️",city:"Chicago, Illinois",country:"USA",cont:"No
  why:"Chicago is famous for its skyscrapers along Lake Michigan, deep-dish pizza and its fun Millennium Park.",
  big:"The Bean is 33 feet tall and 66 feet long. Willis Tower is 1,451 feet tall, more than 3½ times the Nebraska State Capitol (400 feet)!",
  cool:["The Bean is made of 168 stainless steel plates welded together.","Willis Tower has glass boxes where you can stand over the city.","The Chicago River is dyed green every St. Patrick's Day."],
- quiz:[["What is the Bean's real name?",["Cloud Gate","Big Ben","Space Needle"],0],["Which lake is Chicago on?",["Lake Michigan","Holmes Lake","Lake Elizabeth"],0]]},
+ quiz:[["What is the Bean's real name?",["Cloud Gate","Big Ben","Space Needle"],0],["Which lake is Chicago on?",["Lake Michigan","Lake Tahoe","Lake Erie"],0]]},
 kennedy:{n:"Kennedy Space Center",e:"🚀",city:"Florida",country:"USA",cont:"North America",ll:[28.5729,-80.6490],hello:"Hello",lang:"English",
  fact:"Astronauts blasted off from here in 1969 on Apollo 11, the first mission to land people on the Moon!",
  when:"NASA's launch center opened in the 1960s. Apollo 11 launched on July 16, 1969.",
@@ -950,16 +946,10 @@ PLACES.omaha={n:"Omaha, Nebraska",e:"🦍",city:"Omaha, Nebraska",country:"USA",
  big:"The Lied Jungle is 80 feet tall, about one-fifth as tall as the Nebraska State Capitol (400 feet). The Desert Dome is 13 stories tall, and the aquarium's shark tunnel is 70 feet long.",
  cool:["Under the Desert Dome is Kingdoms of the Night, the world's largest exhibit for nighttime (nocturnal) animals.","On the Bob Kerrey Pedestrian Bridge you can stand with one foot in Nebraska and one in Iowa!","The Old Market's brick streets and warehouses date back to the 1880s."],
  quiz:[["What is inside the zoo's giant dome?",["A desert","An ocean","A volcano"],0],["The Bob Kerrey Bridge connects Nebraska and...",["Iowa","Texas","Ohio"],0]]};
-const FAM={place:"Fremont",city:"Fremont, California",ll:[37.5485,-121.9886],aunt:"Inni"};
-PLACES.fremont={n:"Fremont, California",e:"💛",city:FAM.city,country:"USA",cont:"North America",ll:FAM.ll,hello:"Hello",lang:"English",grand:1,
- fact:"Welcome to Fremont, where "+FAM.aunt+" lives! Wave hello, then fly to Mission Peak and Lake Elizabeth.",
- when:"Fremont became a city in 1956 when five small towns joined together: Centerville, Irvington, Mission San Jose, Niles and Warm Springs.",
- why:"Mission San José was founded there in 1797, and early silent movies were filmed in Niles, including Charlie Chaplin's \"The Tramp\" in 1915.",
- big:"Mission Peak is about 2,500 feet tall, more than 6 Nebraska Capitols (400 feet) stacked up! Hikers climb it for the view of the Bay Area.",
- cool:["Lake Elizabeth is in Fremont's Central Park, with ducks, geese and (in summer) paddle boats.","Fremont is in the San Francisco Bay Area, near the Golden Gate Bridge.","A famous pole stands near the top of Mission Peak, and hikers love taking pictures with it."],
- quiz:[["Which hill do hikers climb in Fremont?",["Mission Peak","Mount Fuji","Mount Rushmore"],0],["What lake is in Fremont's Central Park?",["Lake Elizabeth","Holmes Lake","Lake Michigan"],0]]};
+const FAM=LX?LX.FAM:{place:"",city:"",ll:[0,0],aunt:""};
+if(LX)LX.addFam(PLACES);
 const SECTIONS=[["🌍 World",["eiffel","taj","pyramids","bigben","wall","sydney","rio","fuji","colosseum","pisa","machu"]],["🇺🇸 USA",["liberty","goldengate","rushmore","grandcanyon","dc","spaceneedle","arch","hollywood","yellowstone","niagara","chicago","kennedy","omaha"]],["🇮🇳 India",["taj","charminar","grand","indiagate","gateway","mysore"]],["❤️ Family",["grand","fremont"]]];
-if(!HTL){SECTIONS.pop();SECTIONS[2][1]=SECTIONS[2][1].filter(k=>k!=="grand")}
+if(!LX){SECTIONS.pop();SECTIONS[2][1]=SECTIONS[2][1].filter(k=>k!=="grand")}
 
 // ======== WORLD TRIP + TRICKS ========
 const KEYP="realcraft_passport_v1",KEYST="realcraft_bw_stars";
@@ -1106,8 +1096,8 @@ grand(){flat(-OX,OX-1,-OZ,OZ-1,1);flat(-OX,OX-1,-56,-52,28);flat(-3,3,-52,40,28)
  // playground: swings, slide, see-saw, sandbox
  flat(6,22,-6,8,17);box(8,8,1,4,0,0,8);box(12,12,1,4,0,0,8);box(8,12,4,4,0,0,8);set(9,1,0,10);set(11,1,0,10);for(let y=1;y<=3;y++)set(18,y,4,12);for(let z=-2;z<=3;z++)set(19,Math.max(1,4-(z+2)*.6|0),z,10);box(14,15,1,1,-2,-1,14);box(16,20,1,1,-5,-5,13);set(18,1,-4,3);dlabel("🛝 Playground",14,7,1,1.1);
  for(let z=-48;z<=40;z+=6){treeG(-6,z);treeG(6,z)}forest(60,34,(x,z)=>clear(x,z,1)&&Math.abs(z)>2&&Math.abs(z-28)>2&&Math.abs(z+26)>2,(x,z,h)=>treeG(x,z,h,[16,14,11][Math.abs(x+z)%3]));pad(-14,-2);
- person(10,6,"#7b1fa2","#4a148c","#bdbdbd",GRAND.grandma,["Namaskaram! I'm "+GRAND.grandma+". So happy you came!","Have you eaten? Come, I made your favorite snacks!","Let's go to the playground together!","You've grown so tall! Give me a big hug!"]);
- person(14,6,"#1565c0","#eeeeee","#9e9e9e",GRAND.grandpa,["Namaskaram! I'm "+GRAND.grandpa+". Want to fly around together?","Shall we play tennis? I'll go easy on you!","Did you see the pool? Let's go swimming later!","I'm so proud of you, kanna!"]);
+ person(10,6,"#7b1fa2","#4a148c","#bdbdbd",GRAND.grandma,LX?LX.greetMa:[""]);
+ person(14,6,"#1565c0","#eeeeee","#9e9e9e",GRAND.grandpa,LX?LX.greetPa:[""]);
  dlabel("Welcome! "+grandNames()+" ❤️",12,10,6,1.8);return{sp:[0,26,-40],lm:[0,20,0],r:28,ry:22,pad:[-14,-2]}},
 omaha(){flat(-OX,OX-1,-OZ,OZ-1,1);
  flat(46,OX-1,-OZ,OZ-1,18);for(let x=30;x<OX;x++){const z=Math.round(-10+Math.sin((x-30)/34*Math.PI)*3);set(x,6,z,15);set(x,6,z+1,15);set(x,7,z,3);set(x,7,z+1,3)}for(const x of[40,54]){const z=Math.round(-10+Math.sin((x-30)/34*Math.PI)*3);for(let y=1;y<=20;y++)set(x,y,z,15)}for(let x=26;x<30;x++)for(let y=1;y<=5;y++)set(x,y,-10,3);
