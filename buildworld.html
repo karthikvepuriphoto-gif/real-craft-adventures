@@ -367,7 +367,7 @@ const CITYGEN={
   for(const[x,z]of[[-8,38],[8,38]])tree(x,z,4)}
 };
 function genCity(){(CITYGEN[HT]||CITYGEN.custom)()}
-function cityLM(){const H=HOMES[HT]||HOMES.custom,L=[{k:"home",n:"🏡 Home Street",x:0,z:-14,y:7,go:[0.5,-9.5]},{k:"kahoa",n:"🏫 School",x:16,z:-4,y:9,go:[16.5,-11.5]},{k:"pond",n:"🌳 Park & Pond",x:-15,z:13,y:7,go:[-9.5,13.5]}];
+function cityLM(){const H=HOMES[HT]||HOMES.custom,L=[{k:"home",n:"🏡 Home Street",x:0,z:-14,y:7,go:[0.5,-9.5]},{k:"kahoa",n:"🏫 Elementary School",x:16,z:-4,y:9,go:[16.5,-11.5]},{k:"pond",n:"🌳 Park & Pond",x:-15,z:13,y:7,go:[-9.5,13.5]}];
   for(const m of H.lm||[])L.push(m);
   if(HT==="seattle")L.push({k:"rainier",n:"🏔️ Mount Rainier View",x:-40,z:56,y:9,go:[-40.5,46.5],tz:80,tx:-60,fact:"From this hill you can see Mount Rainier! It's an active volcano about 14,410 feet tall, covered in glaciers.",more:["It's about 60 miles from Seattle, but it's so big it looks close.","It became a national park in 1899.","It's quiet now, but scientists watch it carefully."],src:"nps.gov/mora"});
   if(HT==="custom"){L.push({k:"townhall",n:"🏛️ "+HTN+" Town Hall",x:0,z:46,y:15,go:[0.5,24.5],s:1.4});L.push({k:"lake",n:"🛶 "+HTN+" Lake",x:48,z:-16,y:6,go:[34.5,-16.5]})}
@@ -430,7 +430,7 @@ function genBase(){
 }
 LM=[
  {k:"home",n:"🏡 Home Street",x:0,z:-14,y:7,go:[0.5,-9.5]},
- {k:"kahoa",n:"🏫 School",x:16,z:-4,y:9,go:[16.5,-11.5]},
+ {k:"kahoa",n:"🏫 Elementary School",x:16,z:-4,y:9,go:[16.5,-11.5]},
  {k:"park",n:"🌳 Park & Pond",x:-15,z:13,y:7,go:[-9.5,13.5]},
  {k:"capitol",n:"🏛️ Nebraska State Capitol",x:0,z:46,y:42,go:[0.5,24.5],s:1.6},
  {k:"stadium",n:"🏈 Memorial Stadium",x:48,z:46,y:14,go:[48.5,30.5],s:1.3},
@@ -606,9 +606,15 @@ gp.querySelectorAll("button").forEach(b=>b.addEventListener("pointerdown",e=>{e.
 // vehicle UI
 function nearVeh(){let best=null,bd=4.5;for(const v of VEH){if(!v.g.visible)continue;const d=Math.hypot(v.x-P.x,v.z-P.z);if(d<bd&&Math.abs(v.y-P.y)<3){bd=d;best=v}}return best}
 const getInBtn=document.getElementById("getIn");let nearV=null;
-tapBtn("getIn",()=>{if(nearV)getIn(nearV);else if(nearRocket)goSpace();else if(nearSub)location.href="sea.html";else if(nearTM)location.href="timemachine.html"});
+tapBtn("getIn",()=>{if(nearV)getIn(nearV);else if(nearRocket)goSpace();else if(nearSub)location.href="sea.html";else if(nearTM)location.href="timemachine.html";else if(nearSchool)enterSchool()});
 // --- Time Machine near UNL / Morrill Hall (opens timemachine.html) ---
-const TMX={x:28,z:36};let nearTM=false;
+const TMX={x:28,z:36};let nearTM=false,nearSchool=false;
+const KEYG="realcraft_grade_v1";
+async function enterSchool(){try{const r=await fetch("school.html",{method:"HEAD",cache:"no-store"});if(r.ok){location.href="school.html";return}}catch(e){}openGradePicker()}
+function openGradePicker(){let o=document.getElementById("gradeOv");if(!o){o=document.createElement("div");o.id="gradeOv";o.className="ov";document.body.appendChild(o)}const cur=localStorage.getItem(KEYG);
+ o.innerHTML=`<div class="card2"><button class="ovClose" id="gClose">✖</button><div class="big">🏫</div><h3>Welcome to Elementary School!</h3><p>Which grade are you in?</p><div class="tgrid">${["K","1","2","3","4","5"].map(g=>`<button class="tcard" data-g="${g}" style="${cur===g?"background:#ffca28":""}"><span class="te">${g==="K"?"🧸":"📘"}</span><b>${g==="K"?"Kindergarten":"Grade "+g}</b></button>`).join("")}</div><p id="gMsg"></p></div>`;
+ o.classList.remove("hidden");o.querySelector("#gClose").onclick=()=>o.classList.add("hidden");
+ o.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{localStorage.setItem(KEYG,b.dataset.g);o.querySelectorAll("[data-g]").forEach(x=>x.style.background="");b.style.background="#ffca28";o.querySelector("#gMsg").textContent="✅ "+(b.dataset.g==="K"?"Kindergarten":"Grade "+b.dataset.g)+" saved! Your classroom is getting ready. Check back soon!";beep(880,.08)})}
 {const g=new THREE.Group(),m=c=>new THREE.MeshLambertMaterial({color:c});const base=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,.5,16),m("#7e57c2"));base.position.y=.25;g.add(base);const pod=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,2.6,16,1,true),new THREE.MeshLambertMaterial({color:"#b3e5fc",transparent:true,opacity:.45,side:THREE.DoubleSide}));pod.position.y=1.8;g.add(pod);const top=new THREE.Mesh(new THREE.ConeGeometry(1.6,1,16),m("#5e35b1"));top.position.y=3.6;g.add(top);
  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.6,.15,8,24),new THREE.MeshBasicMaterial({color:"#ffd54f"}));ring.rotation.x=Math.PI/2;ring.position.y=1.8;g.add(ring);const clk=new THREE.Mesh(new THREE.CircleGeometry(.6,16),new THREE.MeshBasicMaterial({color:"#fff8e1"}));clk.position.set(0,3.2,1.25);g.add(clk);
  g.position.set(TMX.x,groundTop(TMX.x,TMX.z),TMX.z);scene.add(g);TMX.g=g;TMX.ring=ring;try{const lb=label("⏳ Time Machine",TMX.x,groundTop(TMX.x,TMX.z)+5,TMX.z);if(lb&&!lb.parent)scene.add(lb)}catch(e){}}
@@ -718,6 +724,7 @@ function step(dt,t){
   {const nr=!nearV&&!away&&Math.hypot(P.x-ROCKET.x,P.z-ROCKET.z)<4;if(nr){if(!nearRocket||getInBtn.classList.contains("hidden")){getInBtn.textContent="🚀 Get in the rocket!";getInBtn.classList.remove("hidden")}}else if(nearRocket&&!nearV)getInBtn.classList.add("hidden");nearRocket=nr}
   {const ns=!nearV&&!nearRocket&&!away&&Math.hypot(P.x-SUB.x,P.z-SUB.z)<4.5;if(ns){if(!nearSub||getInBtn.classList.contains("hidden")){getInBtn.textContent="🌊 Get in the submarine!";getInBtn.classList.remove("hidden")}}else if(nearSub&&!nearV&&!nearRocket)getInBtn.classList.add("hidden");nearSub=ns}
   {const nt=!nearV&&!nearRocket&&!nearSub&&!away&&Math.hypot(P.x-TMX.x,P.z-TMX.z)<4;if(nt){if(!nearTM||getInBtn.classList.contains("hidden")){getInBtn.textContent="⏳ Enter the Time Machine!";getInBtn.classList.remove("hidden")}}else if(nearTM&&!nearV&&!nearRocket&&!nearSub)getInBtn.classList.add("hidden");nearTM=nt}
+  {const ns=!nearV&&!nearRocket&&!nearSub&&!nearTM&&!away&&!ride&&Math.abs(P.x-16)<5.5&&P.z>-10&&P.z<0;if(ns){if(!nearSchool||getInBtn.classList.contains("hidden")){getInBtn.textContent="🏫 Enter the Elementary School!";getInBtn.classList.remove("hidden")}}else if(nearSchool&&!nearV&&!nearRocket&&!nearSub&&!nearTM)getInBtn.classList.add("hidden");nearSchool=ns}
   }
   if(ride&&nearV){nearV=null;getInBtn.classList.add("hidden")}
   {const nw=performance.now();for(const o of _fd){const hit=!ride&&nw-o.userData.ft<150,m=o.material;m.opacity+=((hit?.22:(o.userData.om.opacity))-m.opacity)*Math.min(1,dt*10);m.depthWrite=m.opacity>.95;if(!hit&&Math.abs(m.opacity-o.userData.om.opacity)<.02){m.dispose();o.material=o.userData.om;o.userData.fm=0;_fd.delete(o)}}}
@@ -1219,7 +1226,7 @@ requestAnimationFrame(frame);
 if(window.Music)Music.play("build");
 
 document.getElementById("btnChar").onclick=()=>openDressUp({onChange:reAv});
-window.BW={HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
+window.BW={enterSchool,openGradePicker,nearSchool:()=>nearSchool,HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
 
 </script>
 <script>
