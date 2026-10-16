@@ -10,10 +10,10 @@ export const SPORTS={
  cycling:{e:"🚴",n:"Cycling Race",how:["Riders race bikes on roads, often for many days in a big tour.","Riding close behind another rider is called drafting: the front rider blocks the wind so you save energy.","The first rider across the finish line wins the stage."],play:"Tap PEDAL fast to go! Ride right behind someone to draft, then switch lanes to pass."},
  hockey:{e:"🏒",n:"Ice Hockey",how:["Players skate on ice and use sticks to pass and shoot a rubber puck.","Each team has 6 players on the ice, including the goalie.","Score by shooting the puck into the other team's net."],play:"Drag to skate (it's slippery!). Tap PASS or SHOOT. Then be the goalie and block the shots!"}};
 export const SPORT_AT={
- charminar:["cricket","India","Cricket is the most popular sport in India! India won the Cricket World Cup in 1983 and 2011."],
- mysore:["cricket","India","Cricket is the most popular sport in India! Kids play \"gully cricket\" in streets and parks everywhere."],
- taj:["cricket","India","India won the Cricket World Cup in 1983 and 2011, and the T20 World Cup in 2007 and 2024."],
- indiagate:["cricket","India","Cricket is India's most popular sport. Huge crowds watch matches in stadiums across the country."],
+ charminar:["cricket","India","Cricket is hugely popular in India! India won the Cricket World Cup in 1983 and 2011."],
+ mysore:["cricket","India","Cricket is hugely popular in India! Kids play \"gully cricket\" in streets and parks everywhere."],
+ taj:["cricket","India","India won the Cricket World Cup in 1983 and 2011, and the T20 World Cup in 2007, 2024 and 2026!"],
+ indiagate:["cricket","India","Cricket is hugely popular in India. Huge crowds watch matches in stadiums across the country."],
  gateway:["cricket","India","Mumbai is famous for cricket! Kids play on big open grounds called maidans."],
  sydney:["cricket","Australia","Australia has won the men's Cricket World Cup 6 times — more than any other country!"],
  bigben:["soccer","England","The first official rules of modern football (soccer) were written in London in 1863 by the Football Association."],
@@ -21,8 +21,8 @@ export const SPORT_AT={
  colosseum:["soccer","Italy","Italy has won the men's World Cup 4 times: 1934, 1938, 1982 and 2006."],
  pisa:["soccer","Italy","In Italy, soccer is called \"calcio\", which means \"kick\"!"],
  pyramids:["soccer","Egypt","Egypt has won the Africa Cup of Nations 7 times — more than any other country!"],
- machu:["soccer","Peru","Soccer is the most popular sport in Peru. Peru won the Copa América in 1939 and 1975."],
- eiffel:["cycling","France","The Tour de France bike race started in 1903, and it traditionally finishes in Paris!"],
+ machu:["soccer","Peru","Soccer is very popular in Peru! Peru won the Copa América in 1939 and 1975."],
+ eiffel:["cycling","France","The Tour de France bike race started in 1903. Since 1975 it has usually finished on the Champs-Élysées in Paris!"],
  fuji:["baseball","Japan","An American teacher, Horace Wilson, taught baseball to students in Tokyo in 1872. Today it is one of Japan's most popular sports!"],
  wall:["tabletennis","China","China has won more Olympic gold medals in table tennis than any other country!"],
  niagara:["hockey","Canada","The first organized ice hockey game was played indoors in Montreal, Canada, on March 3, 1875!"],
@@ -33,13 +33,13 @@ export const SPORT_AT={
  kennedy:["baseball","USA","Florida hosts baseball \"spring training\" every year, when big-league teams practice before the season."],
  goldengate:["basketball","USA","Basketball was invented in the USA in 1891 by James Naismith, using peach baskets as hoops!"],
  dc:["basketball","USA","Basketball was invented in 1891 by James Naismith in Springfield, Massachusetts."],
- spaceneedle:["basketball","USA","The first basketball games used peach baskets, so the ball had to be taken out by hand after every basket!"],
+ spaceneedle:["basketball","USA","The first basketball games used peach baskets, and a person had to take the ball out after every basket!"],
  grandcanyon:["basketball","USA","Basketball was invented in the USA in 1891. Now it is played all around the world!"],
  hollywood:["basketball","USA","In James Naismith's first rules (1891), players could not run with the ball — dribbling became part of the game later!"],
  omaha:["baseball","USA","Omaha, Nebraska hosts the College World Series baseball tournament every June!"],
  chicago:["basketball","USA","Basketball was invented in the USA in 1891. Chicago has had a pro basketball team since 1966!"]};
 export function sportFor(k){if(SPORT_AT[k])return SPORT_AT[k];const c=((window.BW&&window.BW.PLACES&&window.BW.PLACES[k])||{}).country||"";
- if(c==="India")return["cricket","India","Cricket is the most popular sport in India! India won the Cricket World Cup in 1983 and 2011."];
+ if(c==="India")return["cricket","India","Cricket is hugely popular in India! India won the Cricket World Cup in 1983 and 2011."];
  if(c==="USA")return["basketball","USA","Basketball was invented in the USA in 1891 by James Naismith, using peach baskets as hoops!"];
  return["soccer",c||"the world","Soccer is the most popular sport in the world!"]}
 export function loadSP(){try{const s=JSON.parse(localStorage.getItem(KEY)||"{}");s.played=s.played||{};s.where=s.where||{};s.best=s.best||{};return s}catch(e){return{played:{},where:{},best:{}}}}
