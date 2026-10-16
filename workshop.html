@@ -99,7 +99,7 @@ const K=(x,y,z)=>x+","+y+","+z, P=k=>k.split(",").map(Number), inB=(x,y,z)=>x>=0
 
 // ---------- three setup ----------
 const view=document.getElementById("view"), renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
-renderer.setPixelRatio(Math.min(2,devicePixelRatio));view.prepend(renderer.domElement);
+renderer.setPixelRatio(window.RCA_DPR?RCA_DPR(2):Math.min(2,devicePixelRatio));view.prepend(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color("#8fd3ff");
 const cam=new THREE.PerspectiveCamera(45,1,.1,200);
 scene.add(new THREE.HemisphereLight(0xffffff,0x557744,1.1));const sun=new THREE.DirectionalLight(0xffffff,1.3);sun.position.set(10,20,8);scene.add(sun);

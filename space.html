@@ -154,7 +154,7 @@ import * as THREE from "three";
 import {loadAvatar,buildAvatar} from "./avatar.js";
 localStorage.setItem("realcraft_space_visited","1");
 const $=id=>document.getElementById(id);
-const ren=new THREE.WebGLRenderer({antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,1.5));ren.setSize(innerWidth,innerHeight);$("view").appendChild(ren.domElement);
+const ren=new THREE.WebGLRenderer({antialias:true});ren.setPixelRatio(window.RCA_DPR?RCA_DPR(1.5):Math.min(devicePixelRatio,1.5));ren.setSize(innerWidth,innerHeight);$("view").appendChild(ren.domElement);
 const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,3000);
 addEventListener("resize",()=>{ren.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()});
 let actx=null;const AC=window.AudioContext||window.webkitAudioContext;

@@ -163,7 +163,7 @@ function unlocked(id){const B=BLOCKS[id];if(!B||!B.req)return true;return !!unlo
 // ---- scene ----
 const scene=new THREE.Scene();scene.background=new THREE.Color("#87ceeb");scene.fog=new THREE.Fog("#87ceeb",45,90);
 const cam=new THREE.PerspectiveCamera(70,1,.1,100);
-const ren=new THREE.WebGLRenderer({antialias:false,powerPreference:"high-performance"});ren.setPixelRatio(Math.min(1.5,devicePixelRatio||1));
+const ren=new THREE.WebGLRenderer({antialias:false,powerPreference:"high-performance"});ren.setPixelRatio(window.RCA_DPR?RCA_DPR(1.5):Math.min(1.5,devicePixelRatio||1));
 const view=document.getElementById("view");view.appendChild(ren.domElement);
 const sun=new THREE.DirectionalLight("#fff8e1",1.1);sun.position.set(30,50,20);scene.add(sun,new THREE.HemisphereLight("#ffffff","#7cb342",.9),new THREE.AmbientLight("#ffffff",.25));
 const mats={};function mat(id){if(mats[id])return mats[id];const B=BLOCKS[id];const m=new THREE.MeshLambertMaterial({color:B.c||"#fff",transparent:!!B.a,opacity:B.a||1,depthWrite:!B.a});mats[id]=m;return m}

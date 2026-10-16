@@ -6,7 +6,7 @@ header{position:sticky;top:0;z-index:5;background:#1b5e20;border-bottom:4px soli
 header h1{font-size:18px;margin:0;flex:1}header .st{background:#ffca28;color:#000;padding:6px 10px;border:3px solid #000;font-weight:bold}
 button{font:inherit;font-size:16px;padding:12px 14px;border:3px solid #000;background:#fff;color:#000;box-shadow:0 3px 0 #000;cursor:pointer;border-radius:4px}button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}
 button.go{background:#66bb6a}button.y{background:#ffca28}button.b{background:#4fc3f7}
-main{max-width:860px;margin:0 auto;padding:12px}
+main{max-width:860px;margin:0 auto;padding:12px}main>.row:first-child{position:sticky;top:var(--hh,62px);z-index:4;background:#2e3b2e;padding:6px 0}html.phone header h1{font-size:14px}html.phone header button{font-size:13px;padding:8px 10px}
 .card{background:#fffde7;color:#212121;border:4px solid #000;padding:16px;margin:12px 0;border-radius:6px;line-height:1.55;font-size:17px}
 .card h2{margin:0 0 8px;font-size:22px}.card h3{margin:6px 0}.std{display:inline-block;background:#e3f2fd;border:2px solid #1565c0;color:#0d47a1;font-size:12px;padding:2px 6px;border-radius:4px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
@@ -79,6 +79,7 @@ function report(){const word=p=>p>=.85?"🌟 Excellent":p>=.6?"👍 Good":p>0?"�
  $.innerHTML=`<div class="row"><button id="bk">⬅ Grades</button><h2 style="margin:0">📋 Report Card</h2></div><div class="card"><p>Student in <b>${htName(HTO)}</b> · Total ⭐ ${total()} · Badges ${S.badges.length}</p>`+GRADES.map(g=>{const rows=SUBJ.map(([k,e,n])=>{const L=lessons(g,k,STK);const got=L.reduce((a,l)=>a+(S.stars[g+"|"+k+"|"+l.id]||0),0),max=L.length*3;return`<tr><td>${e} ${n}</td><td>${L.map(l=>`${l.t}: ${"⭐".repeat(S.stars[g+"|"+k+"|"+l.id]||0)||"–"}`).join("<br>")}</td><td>${got}/${max}</td><td>${word(got/max)}</td></tr>`}).join("");return`<h3>${gname(g)}</h3><table><tr><th>Subject</th><th>Topics</th><th>Stars</th><th>Grade</th></tr>${rows}</table>`}).join("")+
   `<h3>⚡ Times-table facts to practice</h3><p>${Object.keys(S.missed).map(k=>k.replace("x"," × ")).join(", ")||"None right now! 🎉"}</p></div>`;$.querySelector("#bk").onclick=home;scrollTo(0,0)}
 function badges(){$.innerHTML=`<div class="row"><button id="bk">⬅ Grades</button><h2 style="margin:0">🏅 Badges</h2></div><div class="card">${BADGES.map(([id,e,n,d])=>`<span class="badge ${S.badges.includes(id)?"":"off"}"><b>${e}</b><span><b style="font-size:13px">${n}</b><br>${d}</span></span>`).join("")}</div>`;$.querySelector("#bk").onclick=home;scrollTo(0,0)}
+{const hd=document.querySelector("header"),sh=()=>document.documentElement.style.setProperty("--hh",hd.offsetHeight+"px");sh();addEventListener("resize",sh)}
 upd();(location.hash==="#grade"?grade:home)();
 window.SCHOOL={S,home,grade,room,teach,run,drill,report,badges,lessons:(g,s)=>lessons(g,s,STK)};
 </script></body></html>

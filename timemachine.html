@@ -148,7 +148,7 @@ let toastT=0;function toast(t,ms=2600){const el=$("toast");el.textContent=t;el.s
 function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
 function beep(f=660,d=.08){try{const c=window.Music&&Music.ctx;if(!c)return;const o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.stop(c.currentTime+d+.02)}catch(e){}}
 
-const ren=new THREE.WebGLRenderer({antialias:true});ren.setPixelRatio(Math.min(2,devicePixelRatio));$("view").appendChild(ren.domElement);
+const ren=new THREE.WebGLRenderer({antialias:true});ren.setPixelRatio(window.RCA_DPR?RCA_DPR(2):Math.min(2,devicePixelRatio));$("view").appendChild(ren.domElement);
 const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(60,1,.1,700);
 const hemi=new THREE.HemisphereLight(0xffffff,0x6d6d55,1.05);scene.add(hemi);const sun=new THREE.DirectionalLight(0xffffff,.85);sun.position.set(40,80,30);scene.add(sun);
 let world=new THREE.Group();scene.add(world);
@@ -482,7 +482,7 @@ function labTimeline(L){if(!tlSet){const s=[...INV].sort(()=>Math.random()-.5).s
  ul.querySelectorAll(".mv button").forEach(b=>b.addEventListener("click",e=>{const li=b.closest("li"),m=+b.dataset.m;if(m<0&&li.previousElementSibling)ul.insertBefore(li,li.previousElementSibling);if(m>0&&li.nextElementSibling)ul.insertBefore(li.nextElementSibling,li);clearMarks()}));
  const clearMarks=()=>ul.querySelectorAll("li").forEach(li=>{li.classList.remove("ok","no");li.querySelector(".yr").textContent=""});
  let drag=null;
- ul.querySelectorAll("li").forEach(li=>{li.addEventListener("pointerdown",e=>{if(e.target.closest(".mv"))return;e.preventDefault();drag={li,y0:e.clientY,id:e.pointerId};li.setPointerCapture(e.pointerId);li.classList.add("drag");clearMarks()});
+ ul.querySelectorAll("li").forEach(li=>{li.addEventListener("pointerdown",e=>{if(e.target.closest(".mv"))return;if(document.documentElement.classList.contains("phone")&&!e.target.closest(".em"))return;e.preventDefault();drag={li,y0:e.clientY,id:e.pointerId};li.setPointerCapture(e.pointerId);li.classList.add("drag");clearMarks()});
   li.addEventListener("pointermove",e=>{if(!drag||drag.li!==li)return;const dy=e.clientY-drag.y0;li.style.transform=`translateY(${dy}px)`;const h=li.offsetHeight+12;
    if(dy>h*.6&&li.nextElementSibling){ul.insertBefore(li.nextElementSibling,li);drag.y0+=h;li.style.transform=`translateY(${e.clientY-drag.y0}px)`}
    else if(dy<-h*.6&&li.previousElementSibling){ul.insertBefore(li,li.previousElementSibling);drag.y0-=h;li.style.transform=`translateY(${e.clientY-drag.y0}px)`}});

@@ -184,7 +184,7 @@ let ui=null;
 export function openDressUp(opts={}){ensureCss();if(ui)return;let s=loadAvatar(),tab="outfits";
  const ov=document.createElement("div");ov.id="dzOv";ov.innerHTML=`<div id="dzPrev"><div class="t">👕 My Character</div><div class="b"><button id="dzRand">🎲 Surprise me</button><button id="dzReset">↩ Start over</button><button class="ok" id="dzDone">✅ Done</button></div></div><div id="dzSide"><div id="dzTabs">${TABS.map(([k,n])=>`<button data-t="${k}">${n}</button>`).join("")}</div><div id="dzBody"></div></div>`;
  document.body.appendChild(ov);const pv=ov.querySelector("#dzPrev");
- const ren=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});ren.setPixelRatio(Math.min(2,devicePixelRatio));pv.prepend(ren.domElement);
+ const ren=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});ren.setPixelRatio(window.RCA_DPR?RCA_DPR(2):Math.min(2,devicePixelRatio));pv.prepend(ren.domElement);
  const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0xffffff,0x8866aa,1.6));const dl=new THREE.DirectionalLight(0xffffff,1.2);dl.position.set(3,5,6);sc.add(dl);
  const ped=new THREE.Mesh(new THREE.CylinderGeometry(1,1.1,.2,24),mat("#fdd835"));ped.position.y=-.1;sc.add(ped);
  const cam=new THREE.PerspectiveCamera(35,1,.1,50);cam.position.set(0,1.5,5.6);cam.lookAt(0,1.1,0);const av=buildAvatar(sc,s);

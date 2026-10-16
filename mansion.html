@@ -36,7 +36,7 @@ import * as THREE from 'three';
 import {buildAvatar,buildAvatarInto,openDressUp} from './avatar.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 const SAVE_KEY="questcraft_save_v1",MKEY="realcraft_mansion_v1",WKEY="realcraft_workshop_v1";
-const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));document.body.prepend(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(window.RCA_DPR?RCA_DPR(2):Math.min(2,devicePixelRatio));document.body.prepend(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color("#8fd3ff");scene.fog=new THREE.Fog("#8fd3ff",60,140);
 const cam=new THREE.PerspectiveCamera(65,1,.1,300);
 scene.add(new THREE.HemisphereLight(0xffffff,0xbba888,1.5));{const l=new THREE.DirectionalLight(0xffffff,1.1);l.position.set(20,40,30);scene.add(l)}
