@@ -14,7 +14,7 @@ export const SPORT_AT={
  mysore:["cricket","India","Cricket is the most popular sport in India! Kids play \"gully cricket\" in streets and parks everywhere."],
  taj:["cricket","India","India won the Cricket World Cup in 1983 and 2011, and the T20 World Cup in 2007 and 2024."],
  indiagate:["cricket","India","Cricket is India's most popular sport. Huge crowds watch matches in stadiums across the country."],
- gateway:["cricket","India","Mumbai is famous for cricket! Kids play on the big open grounds called maidans."],
+ gateway:["cricket","India","Mumbai is famous for cricket! Kids play on big open grounds called maidans."],
  sydney:["cricket","Australia","Australia has won the men's Cricket World Cup 6 times — more than any other country!"],
  bigben:["soccer","England","The first official rules of modern football (soccer) were written in London in 1863 by the Football Association."],
  rio:["soccer","Brazil","Brazil has won the men's World Cup 5 times — more than any other country!"],
@@ -23,9 +23,9 @@ export const SPORT_AT={
  pyramids:["soccer","Egypt","Egypt has won the Africa Cup of Nations 7 times — more than any other country!"],
  machu:["soccer","Peru","Soccer is the most popular sport in Peru. Peru won the Copa América in 1939 and 1975."],
  eiffel:["cycling","France","The Tour de France bike race started in 1903, and it traditionally finishes in Paris!"],
- fuji:["baseball","Japan","Baseball came to Japan in the 1870s. Today the national high school tournament at Koshien Stadium is watched by millions!"],
+ fuji:["baseball","Japan","An American teacher, Horace Wilson, taught baseball to students in Tokyo in 1872. Today it is one of Japan's most popular sports!"],
  wall:["tabletennis","China","China has won more Olympic gold medals in table tennis than any other country!"],
- niagara:["hockey","Canada","The first organized indoor ice hockey game was played in Montreal, Canada, in 1875!"],
+ niagara:["hockey","Canada","The first organized ice hockey game was played indoors in Montreal, Canada, on March 3, 1875!"],
  liberty:["baseball","USA","Baseball is often called \"America's pastime\". New York has two big-league teams!"],
  rushmore:["baseball","USA","Baseball has been played in the United States since the 1800s and is called \"America's pastime\"."],
  arch:["baseball","USA","St. Louis has a big-league baseball team with a long history — baseball is called \"America's pastime\"."],
@@ -33,11 +33,11 @@ export const SPORT_AT={
  kennedy:["baseball","USA","Florida hosts baseball \"spring training\" every year, when big-league teams practice before the season."],
  goldengate:["basketball","USA","Basketball was invented in the USA in 1891 by James Naismith, using peach baskets as hoops!"],
  dc:["basketball","USA","Basketball was invented in 1891 by James Naismith in Springfield, Massachusetts."],
- spaceneedle:["basketball","USA","The first basketball games used peach baskets — someone had to climb up to get the ball out!"],
+ spaceneedle:["basketball","USA","The first basketball games used peach baskets, so the ball had to be taken out by hand after every basket!"],
  grandcanyon:["basketball","USA","Basketball was invented in the USA in 1891. Now it is played all around the world!"],
- hollywood:["basketball","USA","Basketball was invented in 1891. Players first dribbled only rarely — dribbling became a big part of the game later!"],
+ hollywood:["basketball","USA","In James Naismith's first rules (1891), players could not run with the ball — dribbling became part of the game later!"],
  omaha:["baseball","USA","Omaha, Nebraska hosts the College World Series baseball tournament every June!"],
- chicago:["basketball","USA","Chicago has a famous pro basketball team. Basketball was invented in the USA in 1891!"]};
+ chicago:["basketball","USA","Basketball was invented in the USA in 1891. Chicago has had a pro basketball team since 1966!"]};
 export function sportFor(k){if(SPORT_AT[k])return SPORT_AT[k];const c=((window.BW&&window.BW.PLACES&&window.BW.PLACES[k])||{}).country||"";
  if(c==="India")return["cricket","India","Cricket is the most popular sport in India! India won the Cricket World Cup in 1983 and 2011."];
  if(c==="USA")return["basketball","USA","Basketball was invented in the USA in 1891 by James Naismith, using peach baskets as hoops!"];
