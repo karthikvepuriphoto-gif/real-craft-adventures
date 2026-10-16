@@ -26,7 +26,7 @@ html.phone #playOv button{font-size:11px;padding:7px 9px}
 html.phone #top{right:56px!important;padding:max(4px,env(safe-area-inset-top)) 4px 4px max(4px,env(safe-area-inset-left))!important;gap:4px!important}
 html.phone #top button,html.phone #goBtn{font-size:8px!important;padding:5px 7px!important;min-height:34px!important}
 html.phone:not(.menuOpen) #top>button:not(:first-child):not(#rcaMenu){display:none!important}
-html.phone:not(.menuOpen) #top>#hint{display:none}
+html.phone:not(.menuOpen) #top>#hint,html.phone:not(.menuOpen) #top>a.idea{display:none!important}html.phone #top a.idea{font-size:8px!important;padding:5px 7px!important;min-height:34px!important}
 html.phone #saved{display:none}
 html.phone #goto{top:calc(48px + env(safe-area-inset-top))!important;left:max(4px,env(safe-area-inset-left))!important}
 html.phone.menuOpen #goto{top:auto!important;bottom:-200px!important}
