@@ -101,6 +101,7 @@ body.away #goto,body.away #btnSlot,body.away #btnReset,body.away #btnCar,body.aw
 import * as THREE from "three";
 import {buildAvatar,buildAvatarInto,openDressUp,offerLocalOutfit,revertLocalOutfit,loadAvatar} from "./avatar.js";
 import {ANIMALS,showCard,hideCard,openBook,makeAnimal,animate as animateAnimal} from "./animalbook.js";
+import {openFootball,openPlayground,openSandcastle,isOpen as playOpen} from "./play.js";
 import {HOMES,getHometown,ensureDefault,openPicker,htName,stateCardHTML} from "./hometown.js";
 const HT_SET=ensureDefault(),HTO=getHometown()||{id:"lincoln",name:"Lincoln"},HT=HTO.id,HTN=htName(HTO),HTL=HT==="lincoln",HOME_LL=(HOMES[HT]&&HOMES[HT].ll)||[39.83,-98.58];
 
@@ -271,8 +272,8 @@ function cityCommon(){
   road(-1,1,-OZ,30);road(-OX,OX-1,-1,1);road(-OX,OX-1,27,29);road(-33,-31,-OZ,OZ-1);road(31,33,-OZ,OZ-1);road(-OX,OX-1,-33,-31);
   for(let x=-OX;x<OX;x+=4)if(Math.abs(x)>2&&Math.abs(Math.abs(x)-32)>2)set(x,0,28,10);
   for(let x=-18;x<=-12;x++)for(let z=10;z<=16;z++){set(x,0,z,17);if(x>-17&&x<-13&&z>11&&z<15)set(x,0,z,18)}
-  oldHouse(-10,-14);oldHouse(-4,-14);oldHouse(2,-14);oldHouse(8,-14);school(16,-4);garage(-16,-14);helipad(-6,-4);
-  airport();
+  oldHouse(-10,-14);oldHouse(-4,-14);oldHouse(2,-14);oldHouse(8,-14);school(16,-4);garage(-16,-14);helipad(-6,-4);flat(-31,-20,8,15,17);
+  airport();stadium(-48,-14);
 }
 function cityFinish(seed){
   const R=rng(seed),walls=[5,15,10,12,14,2,9],roofs=[7,12,3,16,13,8];
@@ -366,17 +367,32 @@ const CITYGEN={
   flat(-8,8,38,54,3);box(-6,6,1,6,42,50,15,true);for(let x=-5;x<=5;x+=2)set(x,3,42,6);for(let y=1;y<=2;y++)set(0,y,42,0);for(let y=7;y<=12;y++)set(0,y,46,4);set(1,12,46,12);set(2,12,46,12);set(1,11,46,12);set(2,11,46,12);
   for(const[x,z]of[[-8,38],[8,38]])tree(x,z,4)}
 };
-function genCity(){(CITYGEN[HT]||CITYGEN.custom)()}
+function genCity(){(CITYGEN[HT]||CITYGEN.custom)();flat(34,37,-30,-22,17);for(let z=-30;z<=-22;z++)set(38,0,z,18)}
 function cityLM(){const H=HOMES[HT]||HOMES.custom,L=[{k:"home",n:"🏡 Home Street",x:0,z:-14,y:7,go:[0.5,-9.5]},{k:"kahoa",n:"🏫 Elementary School",x:16,z:-4,y:9,go:[16.5,-11.5]},{k:"pond",n:"🌳 Park & Pond",x:-15,z:13,y:7,go:[-9.5,13.5]}];
   for(const m of H.lm||[])L.push(m);
   if(HT==="seattle")L.push({k:"rainier",n:"🏔️ Mount Rainier View",x:-40,z:56,y:9,go:[-40.5,46.5],tz:80,tx:-60,fact:"From this hill you can see Mount Rainier! It's an active volcano about 14,410 feet tall, covered in glaciers.",more:["It's about 60 miles from Seattle, but it's so big it looks close.","It became a national park in 1899.","It's quiet now, but scientists watch it carefully."],src:"nps.gov/mora"});
   if(HT==="custom"){L.push({k:"townhall",n:"🏛️ "+HTN+" Town Hall",x:0,z:46,y:15,go:[0.5,24.5],s:1.4});L.push({k:"lake",n:"🛶 "+HTN+" Lake",x:48,z:-16,y:6,go:[34.5,-16.5]})}
+  L.push({k:"stadium",n:"🏈 Stadium",x:-48,z:-14,y:14,go:[-48.5,-27.5],s:1.2},{k:"beach",n:"🏖️ Sandy Beach",x:35.5,z:-26,y:5,go:[32.5,-26.5],tx:40,tz:-26});
   L.push({k:"airport",n:"✈️ "+HTN+" Airport",x:-50,z:-50,y:14,go:[-52.5,-42.5],tx:-58,tz:-48});return L}
 function cityMeshes(){
   if(HT==="chicago"){const m=new THREE.Mesh(new THREE.SphereGeometry(1,40,24),new THREE.MeshPhongMaterial({color:"#cfd8dc",specular:"#ffffff",shininess:140,emissive:"#37474f"}));m.scale.set(5.5,2.6,3.6);m.position.set(20.5,3.4,47.5);scene.add(m);HTM.push(m)}
   if(HT==="seattle"){const g=new THREE.Group(),mt=(c)=>new THREE.MeshBasicMaterial({color:c,fog:false,depthWrite:false});const a=new THREE.Mesh(new THREE.ConeGeometry(42,30,7),mt("#a7b8cc"));a.position.y=15;const b=new THREE.Mesh(new THREE.ConeGeometry(19,13.6,7),mt("#ffffff"));b.position.y=23.2;g.add(a,b);g.children.forEach(o=>o.renderOrder=-5);g.renderOrder=-5;scene.add(g);RAIN=g}
 }
-function cityTick(){for(const m of HTM)m.visible=!away;if(RAIN){RAIN.visible=!away;RAIN.position.set(cam.position.x-50,-1,cam.position.z+72)}}
+const PG={};function playgroundMeshes(){const g=new THREE.Group(),M2=c=>new THREE.MeshLambertMaterial({color:c}),B=(w,h,d,c,x,y,z,par=g)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M2(c));m.position.set(x,y,z);par.add(m);return m};
+ // slide
+ B(.15,3,.15,"#9e9e9e",-1,1.5,0);B(.15,3,.15,"#9e9e9e",-1,1.5,1);for(let y=.5;y<3;y+=.5)B(.1,.1,1,"#9e9e9e",-1,y,.5);B(1.2,.15,1.2,"#e53935",-.6,3,.5);const sl=B(4,.12,1,"#fdd835",1.3,1.6,.5);sl.rotation.z=-.62;
+ // swings
+ for(const x of[4,8])B(.15,3.4,.15,"#5d4037",x,1.7,-.2),B(.15,3.4,.15,"#5d4037",x,1.7,1.2);B(4.2,.15,.15,"#5d4037",6,3.4,.5);PG.sw=[];for(const x of[5.2,6.8]){const p=new THREE.Group();p.position.set(x,3.35,.5);g.add(p);B(.04,2.4,.04,"#424242",-.25,-1.2,0,p);B(.04,2.4,.04,"#424242",.25,-1.2,0,p);B(.7,.1,.35,"#1e88e5",0,-2.4,0,p);PG.sw.push(p)}
+ // monkey bars
+ for(const x of[-1,4])for(const z of[4,5.2])B(.15,2.6,.15,"#1e88e5",x,1.3,z);for(let x=-1;x<=4;x+=.6)B(.08,.08,1.2,"#90caf9",x,2.6,4.6);B(5,.1,.1,"#1e88e5",1.5,2.6,4);B(5,.1,.1,"#1e88e5",1.5,2.6,5.2);
+ // merry-go-round
+ const mg=new THREE.Group();mg.position.set(7,.3,5);g.add(mg);const d=new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.6,.2,20),M2("#e53935"));mg.add(d);for(let i=0;i<4;i++){const a=i*Math.PI/2;B(.08,.9,.08,"#fdd835",Math.cos(a)*1.2,.5,Math.sin(a)*1.2,mg)}PG.mg=mg;
+ g.position.set(-29,1,9);scene.add(g);HTM.push(g)}
+function cityTick(){if(!PG.mg)playgroundMeshes();const tt=performance.now()/1000;PG.mg.rotation.y=tt*.8;PG.sw.forEach((p,i)=>p.rotation.x=Math.sin(tt*1.6+i*1.3)*.55);playTick();for(const m of HTM)m.visible=!away;if(RAIN){RAIN.visible=!away;RAIN.position.set(cam.position.x-50,-1,cam.position.z+72)}}
+// place mini-games
+const PLAYS=[{t:"football",x:HTL?48:-48,z:HTL?46:-14,r:12,lab:"🏈 Play flag football!"},{t:"park",x:-25,z:12,r:7,lab:"🛝 Play at the playground!"},{t:"beach",x:HTL?48:35.5,z:HTL?-25.5:-26,r:4.5,lab:"🏰 Build a sand castle!"}];
+let playBtn=null,playNear=null;function playTick(){if(!playBtn){playBtn=document.createElement("button");playBtn.id="playBtn";playBtn.style.cssText="position:fixed;left:0;right:0;bottom:340px;margin:auto;width:fit-content;font-size:14px;background:#66bb6a;padding:12px 18px;z-index:12;box-shadow:0 4px 0 #000;display:none";document.body.appendChild(playBtn);playBtn.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();if(!playNear)return;if(playNear.t==="football")openFootball();else if(playNear.t==="park")openPlayground();else openSandcastle("realcraft_sandcastle_v1_"+HT)})}
+ let n=null;if(!away&&!ride&&!playOpen())for(const q of PLAYS)if(Math.hypot(P.x-q.x,P.z-q.z)<q.r)n=q;if(n!==playNear){playNear=n;playBtn.style.display=n?"block":"none";if(n)playBtn.textContent=n.lab}}
 // landmark fact button
 let htBtn=null,htNear=null;
 function htFactTick(){if(away||HTL){if(htBtn)htBtn.style.display="none";htNear=null;return}
@@ -407,7 +423,7 @@ function genBase(){
   [[-20,14],[-19,18],[-14,18],[-10,12],[-16,8]].forEach(([x,z])=>tree(x,z));
   for(let i=0;i<12;i++){const x=-18+((i*3)%10),z=8+(i%5);if(get(x,0,z)===1)set(x,1,z,19)}
   oldHouse(-10,-14);oldHouse(-4,-14);oldHouse(2,-14);oldHouse(8,-14);
-  school(16,-4);garage(-16,-14);helipad(-6,-4);
+  school(16,-4);garage(-16,-14);helipad(-6,-4);flat(-31,-20,8,15,17);
   // fountain on Centennial Mall
   for(let x=4;x<=8;x++)for(let z=16;z<=20;z++)set(x,1,z,(x===4||x===8||z===16||z===20)?3:18);
   // downtown north of O Street
@@ -419,7 +435,7 @@ function genBase(){
   // Pioneers Park
   lake(-54,20,3,2);for(const[x,z]of[[-58,10],[-40,8],[-38,22],[-44,24],[-60,24],[-52,6],[-36,14]])tree(x,z,5);bison(-48,12);bison(-44,16);bison(-51,16);
   // the lake
-  lake(48,-16,11,8);for(let x=36;x<=60;x+=6)tree(x,-28,4);
+  lake(48,-16,11,8);for(let x=40;x<=56;x++)for(let z=-29;z<=-24;z++)if(get(x,0,z)===1)set(x,0,z,17);for(let x=36;x<=60;x+=6)if(x<40||x>56)tree(x,-28,4);
   airport();
   // more neighborhoods
   const R=rng(42),walls=[5,15,10,12,14,2,9],roofs=[7,12,3,16,13,8];
@@ -442,6 +458,7 @@ LM=[
  {k:"antelope",n:"🌲 Antelope Park",x:48,z:21,y:9,go:[34.5,21.5]},
  {k:"pioneers",n:"🦬 Pioneers Park",x:-48,z:15,y:9,go:[-48.5,2.5]},
  {k:"lake",n:"🛶 The Lake",x:48,z:-16,y:7,go:[34.5,-16.5]},
+ {k:"beach",n:"🏖️ Sandy Beach",x:48,z:-25.5,y:5,go:[48.5,-30.5]},
  {k:"airport",n:"✈️ Lincoln Airport",x:-50,z:-50,y:14,go:[-52.5,-42.5],tx:-58,tz:-48},
 ];
 if(!HTL)LM=cityLM();else if(window.RCA_LINCOLN)window.RCA_LINCOLN.patchLM(LM);
@@ -685,7 +702,7 @@ function vstep(dt,t){const v=ride;let fx=inp.jx,fy=inp.jy;const k=inp.keys;if(k.
     if(eng)eng.o.frequency.value=50+v.s*3;
   }
   // stay in Lincoln
-  const lim=OX-3;if(Math.abs(v.x)>lim||Math.abs(v.z)>lim){v.x=Math.max(-lim,Math.min(lim,v.x));v.z=Math.max(-lim,Math.min(lim,v.z));if(v.t==="plane"){const want=Math.atan2(-v.x,-v.z);let d=want-v.h;d=Math.atan2(Math.sin(d),Math.cos(d));v.h+=d*Math.min(1,dt*2)}if(away){if(v.t==="plane"&&air){edgeHold=(edgeHold||0)+dt;if(edgeHold>1.5)askHome(t)}}else if(t-edgeT>3){edgeT=t;toast("🔄 That's the edge of Lincoln, turning back!")}}
+  const lim=OX-3;if(!(Math.abs(v.x)>lim||Math.abs(v.z)>lim))edgeHold=0;if(Math.abs(v.x)>lim||Math.abs(v.z)>lim){v.x=Math.max(-lim,Math.min(lim,v.x));v.z=Math.max(-lim,Math.min(lim,v.z));if(v.t==="plane"){const want=Math.atan2(-v.x,-v.z);let d=want-v.h;d=Math.atan2(Math.sin(d),Math.cos(d));v.h+=d*Math.min(1,dt*2)}if(away){if(v.t==="plane"&&air){edgeHold=(edgeHold||0)+dt;if(edgeHold>1.5)askHome(t)}}else if(t-edgeT>3){edgeT=t;toast("🔄 That's the edge of Lincoln, turning back!")}}
   v.g.position.set(v.x,v.y,v.z);P.x=v.x;P.z=v.z;P.y=v.y;if(v.t==="plane")trickStep(v,dt);if(away)destRingStep(v);
   // rings
   if(!away)for(let i=0;i<RINGS.length;i++){if(ringGot.includes(i))continue;const r=RINGS[i];if(Math.hypot(v.x-r[0],v.y+1.2-r[1],v.z-r[2])<3.3){ringGot.push(i);ringObjs[i].visible=false;localStorage.setItem(KEYR,JSON.stringify(ringGot));beep(988,.12);setTimeout(()=>beep(1318,.15),120);toast(ringGot.length===RINGS.length?"🏆 You flew through ALL the rings! Super pilot!":"⭐ Ring "+ringGot.length+" of "+RINGS.length+"!")}}
@@ -1132,7 +1149,7 @@ fremont(){flat(-OX,OX-1,-OZ,OZ-1,1);terrain((x,z)=>{const d=Math.hypot(x-30,z-44
 // --- travel ---
 let destInfo=null;
 function destVehicles(show){VEH[0].g.visible=VEH[1].g.visible=show;ringObjs.forEach((r,i)=>r.visible=show&&!ringGot.includes(i));for(const s of SPR)s.userData.hideAway=!show;for(const r of ringObjs)r.userData.hideAway=!show}
-function clearDest(){DA.length=0;AUTOS.length=0;arriveT=performance.now()/1000;edgeHold=0;try{hideCard()}catch(e){}for(const o of destObjs){scene.remove(o);o.geometry&&o.geometry.dispose()}for(const s of DSPR){scene.remove(s);s.material.map.dispose();s.material.dispose()}destObjs=[];DSPR=[];destRings=[];people=[]}
+function clearDest(){DA.length=0;AUTOS.length=0;arriveT=performance.now()/1000;edgeHold=0;askSnooze=0;try{hideCard()}catch(e){}for(const o of destObjs){scene.remove(o);o.geometry&&o.geometry.dispose()}for(const s of DSPR){scene.remove(s);s.material.map.dispose();s.material.dispose()}destObjs=[];DSPR=[];destRings=[];people=[]}
 function genDest(k){for(const q of smP)q.life=Math.min(q.life,.001);vox.fill(0);count=0;for(const c of chunks.values())c.dirty=true;clearDest();const info=DB[k]();destInfo=info;rings6(info.lm[0],info.lm[2],info.r,info.ry);return info}
 function travel(k){if(!PLACES[k]||travelling)return;closeOv("trip");const from=away;if(!away)saveNow();playTravel(from||"lincoln",k,()=>{away=k;document.body.classList.add("away");destVehicles(false);const info=genDest(k);const v=VEH[2];if(ride!==v){if(ride)exitNow(true);getIn(v)}
   v.x=info.sp[0];v.z=info.sp[2];v.y=info.sp[1];v.h=Math.atan2(info.lm[0]-v.x,info.lm[2]-v.z);v.s=14;landing=false;P.x=v.x;P.z=v.z;P.y=v.y;camInit=false;rebuildNear(60);drawMapBase();
@@ -1186,7 +1203,7 @@ function trickStep(v,dt){let ox=0,oz=0,oyaw=0,oy=0;if(trick){trick.t+=dt;const T
   updSmoke(dt)}
 function updSmoke(dt){let any=false;for(let i=0;i<300;i++){const s=smP[i];if(s.life<=0)continue;s.life-=dt;any=true;const k=Math.max(0,s.life/2.5)*1.4+.1;smk.setMatrixAt(i,_m4.makeScale(k,k,k).setPosition(s.x,s.y,s.z));if(s.life<=0)smk.setMatrixAt(i,_m4.makeScale(0,0,0))}if(any)smk.instanceMatrix.needsUpdate=true}
 function cycleSmoke(){smokeMode=(smokeMode+1)%SMOKE.length;const n=["Smoke off","White smoke","Red smoke","Blue smoke","Rainbow smoke!"][smokeMode];document.getElementById("tSmoke").classList.toggle("on",!!smokeMode);toast("💨 "+n);beep(600+smokeMode*80,.06)}
-let askT=-99,edgeHold=0,arriveT=0;function askHome(t){edgeHold=0;if(t-askT<30||performance.now()/1000-arriveT<15)return;askT=t;openOv("askHome");setTimeout(()=>document.getElementById("askNo").focus(),50)}
+let askT=-99,edgeHold=0,arriveT=0,askSnooze=0;function askHome(t){edgeHold=0;const nw=performance.now()/1000;if(nw-askT<30||nw<askSnooze||nw-arriveT<15)return;askT=nw;window.__askCount=(window.__askCount||0)+1;openOv("askHome");setTimeout(()=>document.getElementById("askNo").focus(),50)}
 function greetOf(p){if(!Array.isArray(p.greet))return p.greet;p.gi=((p.gi??-1)+1)%p.greet.length;return p.greet[p.gi]}
 function peopleStep(t){for(const p of people){if(p.pet){const fd=Math.hypot(P.x-p.x,P.z-p.z),tx=fd<10&&fd>1.6?P.x+Math.sin(p.ph)*1.2:p.hx+Math.cos(t*.4+p.ph)*2.5,tz=fd<10&&fd>1.6?P.z+Math.cos(p.ph)*1.2:p.hz+Math.sin(t*.4+p.ph)*2.5,dx=tx-p.x,dz=tz-p.z,dl=Math.hypot(dx,dz);if(dl>.3){const sp=Math.min(dl,.05);p.x+=dx/dl*sp;p.z+=dz/dl*sp;p.g.rotation.y=Math.atan2(dx,dz)}const gy=groundTop(p.x,p.z);p.g.position.set(p.x,gy,p.z);if(p.lab)p.lab.position.set(p.x,gy+1.8,p.z);p.arm.rotation.x=Math.sin(t*5+p.ph)*.5-.4;const d=Math.hypot(P.x-p.x,P.z-p.z);if(d<3&&t-p.said>15&&!ride){p.said=t;toast("🐱 "+p.name+": "+greetOf(p));beep(1200,.05)}continue}p.arm.rotation.z=Math.PI*.85+Math.sin(t*4+p.x)*.35;const d=Math.hypot(P.x-p.x,P.z-p.z);if(d<6&&t-p.said>20&&!ride){p.said=t;toast("👋 "+greetOf(p));beep(700,.06);setTimeout(()=>beep(880,.08),120)}}
  for(const o of destObjs)if(o.userData.geyser){const c=(t%14);const h=c<4?Math.sin(c/4*Math.PI)*20:0;o.scale.set(1,Math.max(.01,h),1);o.position.y=3+h/2;o.visible=h>.2}}
@@ -1212,7 +1229,7 @@ window.BWA={openTrip:()=>{renderTrip();openOv("trip")},ZA,DA,VOXAN,tapAnimal,nea
 // trip UI wiring
 tapBtn("tLoop",()=>doTrick("loop"));tapBtn("tRoll",()=>doTrick("roll"));tapBtn("tFlip",()=>doTrick("flip"));tapBtn("tSpin",()=>doTrick("spin"));tapBtn("tSmoke",cycleSmoke);document.getElementById("tTrip").onclick=openTrip;tapBtn("flyHome",flyHome);
 document.getElementById("btnPass").onclick=openPassport;document.querySelectorAll(".ovClose").forEach(b=>b.onclick=()=>closeOv(b.dataset.c));
-document.getElementById("askYes").onclick=()=>{closeOv("askHome");flyHome()};document.getElementById("askNo").onclick=()=>closeOv("askHome");
+document.getElementById("askYes").onclick=()=>{closeOv("askHome");flyHome()};document.getElementById("askNo").onclick=()=>{closeOv("askHome");askSnooze=performance.now()/1000+120;edgeHold=0};
 {const mk=(t,f)=>{const b=document.createElement("button");b.textContent=t;b.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();gp.classList.add("hidden");document.getElementById("goBtn").classList.remove("on");f()});gp.appendChild(b)};
  mk("🌍 World Trip",()=>{if(ride&&ride.t==="plane")openTrip();else{goTo("airport");toast("✈️ Walk to the plane, get in, then tap 🌍 World Trip!")}});mk("🏙️ My City",openCityCard);mk("🛂 Passport",openPassport);mk("📖 Animal Book",()=>openBook("land"));mk("⏳ Time Machine",()=>{goTo("unl");P.x=TMX.x-3;P.z=TMX.z;toast("⏳ Walk to the Time Machine and tap Enter!")});mk("🌊 Sea Mode",()=>{goTo("lake");P.x=SUB.x-3;P.z=SUB.z;toast("🌊 Walk to the yellow submarine and tap Get in!")});mk("🚀 Space Mode",()=>{goTo("airport");P.x=ROCKET.x+3;P.z=ROCKET.z+1;toast("🚀 Walk up to the rocket and tap Get in!")})}
 if(location.hash==="#time")setTimeout(()=>{try{goTo("unl");P.x=TMX.x-3;P.z=TMX.z;P.y=groundTop(P.x,P.z)+.1;history.replaceState(null,"",location.pathname)}catch(e){}},600);
@@ -1226,7 +1243,7 @@ requestAnimationFrame(frame);
 if(window.Music)Music.play("build");
 
 document.getElementById("btnChar").onclick=()=>openDressUp({onChange:reAv});
-window.BW={enterSchool,openGradePicker,nearSchool:()=>nearSchool,HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
+window.BW={PLAYS,openFootball,openPlayground,openSandcastle,enterSchool,openGradePicker,nearSchool:()=>nearSchool,HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
 
 </script>
 <script>
