@@ -1,0 +1,130 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script src="mobile.js"></script><title>Fun Sound House - Real Craft Adventures</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#311b92;color:#fff;font-family:"Trebuchet MS",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+body{min-height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:0 env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 16px) env(safe-area-inset-left)}
+header{position:sticky;top:0;z-index:5;background:#4527a0;border-bottom:4px solid #000;display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:calc(6px + env(safe-area-inset-top)) 8px 6px}
+header h1{font-size:18px;margin:0;flex:1;min-width:150px}.st{background:#ffca28;color:#000;padding:5px 9px;border:3px solid #000;font-weight:bold}
+button{font:inherit;font-size:16px;padding:10px 13px;border:3px solid #000;background:#fff;color:#000;box-shadow:0 3px 0 #000;cursor:pointer;border-radius:6px;touch-action:manipulation}button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}button:disabled{opacity:.45}
+button.on{background:#ffca28}button.go{background:#66bb6a}button.b{background:#4fc3f7}button.r{background:#ef5350;color:#fff}
+main{max-width:900px;margin:0 auto;padding:10px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.tabs button{flex:1 1 140px}
+.card{background:#fffde7;color:#212121;border:4px solid #000;padding:14px;margin:10px 0;border-radius:6px;line-height:1.5;font-size:16px}.card h2{margin:0 0 6px;font-size:21px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+canvas{display:block;width:100%;max-width:520px;margin:6px auto;background:#b3e5fc;border:4px solid #000;border-radius:6px;touch-action:pan-y}
+.meter{height:16px;background:#ddd;border:2px solid #000;border-radius:8px;overflow:hidden;margin:6px 0}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#66bb6a,#fdd835,#ef5350)}
+.status{font-weight:bold;font-size:18px;text-align:center;min-height:26px}
+.tip{background:#e3f2fd;border:2px solid #1565c0;padding:8px;border-radius:6px;margin-top:8px;font-size:14px}
+#gate{text-align:center}#micBtn{font-size:22px;padding:18px 22px;background:#ffca28}
+.badge{display:inline-flex;flex-direction:column;align-items:center;width:110px;padding:6px;margin:4px;background:#fff;border:3px solid #000;border-radius:6px;font-size:12px;text-align:center}.badge b{font-size:30px}.badge.off{opacity:.35;filter:grayscale(1)}
+#toast{position:fixed;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom));margin:auto;width:fit-content;max-width:92vw;background:#000c;color:#ffeb3b;padding:10px 14px;border:3px solid #ffca28;z-index:20;display:none}
+html.phone header h1{font-size:15px}html.phone button{font-size:14px;padding:8px 10px}html.phone .card{font-size:15px;padding:10px}html.phone .tabs button{flex:1 1 44%}
+html.phone.land canvas{max-height:52dvh;width:auto;max-width:100%}
+</style></head><body>
+<header><button onclick="location.href='buildworld.html'">🌍 Build World</button><button onclick="location.href='index.html'">🏠 Home</button><h1>🎵 Fun Sound House</h1><span class="st" id="stars">⭐ 0</span></header>
+<main>
+<div class="card" id="gate"><h2>🎤 Let's play with sound!</h2><p>The Sound House listens to your voice and plays it back in silly ways. Your sounds stay on this device — nothing is saved or sent anywhere.</p>
+ <button id="micBtn">🎤 Tap to turn on the microphone</button><p id="gateMsg" style="font-size:14px"></p>
+ <div class="tip">🎧 Tip: use headphones, or keep the volume medium, so the speaker doesn't make a squeal.</div>
+ <div class="row" style="justify-content:center"><button class="b" id="noMic">🔈 Play with sample sounds instead</button></div></div>
+<div id="app" style="display:none">
+ <div class="tabs"><button data-r="parrot" class="on">🦜 Parrot Room</button><button data-r="cave">🏔️ Echo Cave</button><button data-r="robot">🤖 Robot Room</button><button data-r="music">🎶 Music Room</button></div>
+ <div class="meter"><i id="lvl"></i></div><div class="row" style="justify-content:space-between;margin-top:0"><small id="micState">🎤 Mic on</small><span><button id="micOff" class="r">⏹ Mic off</button> <button id="badgeBtn">🏅 Badges</button></span></div>
+ <section id="r-parrot" class="card"><h2>🦜 Parrot Room</h2><p>Say something, then stop — your friend will repeat it in a funny voice!</p>
+  <canvas id="pc" width="520" height="340"></canvas><div class="status" id="pStat">Say hello! 👋</div>
+  <div class="row"><b>Friend:</b><button data-pet="parrot" class="on">🦜 Parrot</button><button data-pet="cat">🐱 Cat</button></div>
+  <div class="row"><b>Voice:</b><button data-pv="1.6" class="on">⬆️ Squeaky</button><button data-pv="0.7">⬇️ Deep</button></div>
+  <div class="row"><button class="b" id="pSample">🔈 Play a sample for the parrot</button></div></section>
+ <section id="r-cave" class="card" style="display:none"><h2>🏔️ Echo Cave</h2>
+  <p>An <b>echo</b> is sound that bounces off a hard surface — like a cave wall or a cliff — and comes back to your ears.</p>
+  <p>Sound travels through air at about <b>340 meters per second</b> (about 1,100 feet per second). If a cliff is 170 meters away, your "HELLO!" takes about 1 second to get there and back!</p>
+  <canvas id="cc" width="520" height="200"></canvas>
+  <div class="row"><button id="echoBtn" class="go">🔊 Turn echo ON</button><b>Cave size:</b><button data-dl="0.18">Small</button><button data-dl="0.35" class="on">Medium</button><button data-dl="0.6">Giant</button></div>
+  <div class="row"><button class="b" id="cSample">🔈 Shout a sample into the cave</button></div>
+  <div class="tip">🎧 Echo plays your live voice on the speaker. Headphones work best! Echo turns off when you leave the cave.</div></section>
+ <section id="r-robot" class="card" style="display:none"><h2>🤖 Robot Room</h2><p>Record your voice (up to 5 seconds), then pick a silly effect!</p>
+  <canvas id="rc" width="520" height="160"></canvas><div class="status" id="rStat">Tap Record and talk!</div>
+  <div class="row"><button id="recBtn" class="r">⏺ Record</button><button class="b" id="rSample">🔈 Use a sample sound</button></div>
+  <div class="row"><button data-fx="robot">🤖 Robot</button><button data-fx="chipmunk">🐿️ Chipmunk</button><button data-fx="giant">🦖 Giant</button><button data-fx="alien">👽 Alien</button><button data-fx="normal">🙂 Normal</button></div></section>
+ <section id="r-music" class="card" style="display:none"><h2>🎶 Music Room</h2>
+  <p><b>Sound is vibration!</b> When you talk, sing or clap, the air wiggles back and forth, and your ears feel those wiggles.</p>
+  <canvas id="mc" width="520" height="260"></canvas>
+  <div class="row"><button data-vz="bars" class="on">📊 Bars</button><button data-vz="wave">〰️ Wave</button><span id="mInfo" style="font-weight:bold"></span></div>
+  <ul><li><b>Loud vs quiet:</b> loud sounds make <b>bigger</b> vibrations — taller waves.</li><li><b>High vs low pitch:</b> high sounds vibrate <b>faster</b> (waves squeezed together); low sounds vibrate slower.</li><li>People can hear from about 20 to 20,000 vibrations per second (called <b>hertz</b>).</li></ul>
+  <div class="row"><button data-tone="220,0.15">🐻 Low quiet</button><button data-tone="220,0.5">🐻 Low LOUD</button><button data-tone="880,0.15">🐦 High quiet</button><button data-tone="880,0.5">🐦 High LOUD</button></div>
+  <p style="font-size:14px">Try clapping, humming low, then squeaking high, and watch the picture change!</p></section>
+ <div class="card" id="badges" style="display:none"></div>
+</div></main><div id="toast"></div>
+<script>
+(()=>{const $=id=>document.getElementById(id),KEY="realcraft_sound_v1";let S;try{S=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){S={}}S.tried=S.tried||{};
+const ROOMS={parrot:["🦜","Parrot Pal"],cave:["🏔️","Echo Explorer"],robot:["🤖","Robot Voice"],music:["🎶","Sound Scientist"]};
+const toast=t=>{const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(e._t);e._t=setTimeout(()=>e.style.display="none",2600)};
+const stars=()=>Object.keys(S.tried).length;const upd=()=>$("stars").textContent="⭐ "+stars();upd();
+function tried(r){if(S.tried[r])return;S.tried[r]=new Date().toISOString().slice(0,10);localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem("realcraft_bw_stars",(+localStorage.getItem("realcraft_bw_stars")||0)+1);upd();toast("🏅 Badge: "+ROOMS[r][0]+" "+ROOMS[r][1]+"! +1 ⭐");if(stars()===4)setTimeout(()=>toast("🌟 You tried every room! Sound House Star!"),2700)}
+function renderBadges(){$("badges").innerHTML="<h2>🏅 Sound House Badges</h2>"+Object.entries(ROOMS).map(([k,[e,n]])=>`<span class="badge ${S.tried[k]?"":"off"}"><b>${e}</b>${n}<br><small>${S.tried[k]?"✅ "+S.tried[k]:"Try the room!"}</small></span>`).join("")+`<span class="badge ${stars()===4?"":"off"}"><b>🌟</b>Sound House Star<br><small>All 4 rooms</small></span>`}
+$("badgeBtn").onclick=()=>{const b=$("badges");renderBadges();b.style.display=b.style.display==="none"?"block":"none";if(b.style.display==="block")b.scrollIntoView({behavior:"smooth"})};
+// ---------- audio core ----------
+let ctx=null,stream=null,src=null,an=null,rec=null,ring=[],RING=24,micOn=false;const SR=()=>ctx.sampleRate;
+function ensureCtx(){if(!ctx){const AC=window.AudioContext||window.webkitAudioContext;ctx=new AC();an=ctx.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.6}if(ctx.state!=="running")ctx.resume();try{window.Music&&Music.pause&&Music.pause()}catch(e){}}
+async function startMic(){ensureCtx();$("gateMsg").textContent="Asking for permission…";
+ try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error("nomic");stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  src=ctx.createMediaStreamSource(stream);src.connect(an);rec=ctx.createScriptProcessor(2048,1,1);src.connect(rec);const z=ctx.createGain();z.gain.value=0;rec.connect(z);z.connect(ctx.destination);
+  rec.onaudioprocess=e=>{const d=new Float32Array(e.inputBuffer.getChannelData(0));ring.push(d);if(ring.length>RING)ring.shift();if(cap)cap.push(d);if(rcap){rcap.push(d);if(rcap.length*2048>SR()*5)stopRec()}};
+  micOn=true;open(true)}
+ catch(e){$("gateMsg").innerHTML=e&&e.name==="NotAllowedError"?"No problem! The microphone is off. You can still play with sample sounds 🔈 (a grown-up can allow the mic in the browser settings).":"This device can't use the microphone here, but sample sounds still work! 🔈";$("noMic").focus()}}
+function stopMic(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;if(src)try{src.disconnect()}catch(e){}if(rec){rec.onaudioprocess=null;try{rec.disconnect()}catch(e){}}src=rec=null;micOn=false;echoOff();cap=null;rcap=null;$("micState").textContent="🎤 Mic is off — sample sounds only";$("micOff").textContent="🎤 Mic on";}
+$("micBtn").onclick=startMic;$("noMic").onclick=()=>{ensureCtx();open(false)};
+$("micOff").onclick=()=>{if(micOn)stopMic();else{startMic()}};
+function open(m){$("gate").style.display="none";$("app").style.display="block";$("micState").textContent=m?"🎤 Mic on — sounds stay on this device":"🎤 Mic is off — sample sounds only";$("micOff").textContent=m?"⏹ Mic off":"🎤 Mic on";if(!raf)loop()}
+addEventListener("pagehide",stopMic);document.addEventListener("visibilitychange",()=>{if(document.hidden&&micOn)stopMic()});
+// sample "voice" (synthesized la-la-la) — no mic needed
+function sample(){const n=Math.floor(SR()*1.3),b=ctx.createBuffer(1,n,SR()),d=b.getChannelData(0);const notes=[262,330,392,330];for(let i=0;i<n;i++){const t=i/SR(),k=Math.min(3,Math.floor(t/.32)),lt=t-k*.32,f=notes[k]*(1+.01*Math.sin(t*30)),env=Math.min(1,lt*30)*Math.max(0,1-lt/.3);d[i]=env*.35*(Math.sin(2*Math.PI*f*t)+.5*Math.sin(4*Math.PI*f*t)+.25*Math.sin(6*Math.PI*f*t))}return b}
+const join=a=>{const n=a.reduce((s,x)=>s+x.length,0),o=new Float32Array(n);let p=0;for(const x of a){o.set(x,p);p+=x.length}return o};
+const toBuf=f=>{const b=ctx.createBuffer(1,f.length,SR());b.getChannelData(0).set(f);return b};
+let outAn=null;function play(buf,{rate=1,fx="normal"}={},done){ensureCtx();const s=ctx.createBufferSource();s.buffer=buf;s.playbackRate.value=rate;let node=s;const extra=[];
+ if(fx==="robot"||fx==="alien"){const g=ctx.createGain();g.gain.value=0;const o=ctx.createOscillator();o.frequency.value=fx==="robot"?55:420;o.type=fx==="robot"?"square":"sine";o.connect(g.gain);o.start();extra.push(o);node.connect(g);node=g;if(fx==="alien"){const l=ctx.createOscillator(),lg=ctx.createGain();l.frequency.value=6;lg.gain.value=.25;l.connect(lg);lg.connect(s.playbackRate);l.start();extra.push(l)}}
+ const vol=ctx.createGain();vol.gain.value=fx==="robot"?1.6:1;node.connect(vol);if(!outAn){outAn=ctx.createAnalyser();outAn.fftSize=1024}vol.connect(outAn);vol.connect(an);vol.connect(ctx.destination);
+ s.onended=()=>{extra.forEach(o=>{try{o.stop()}catch(e){}});try{vol.disconnect()}catch(e){}done&&done()};s.start();return s}
+function level(a){const d=new Float32Array(a.fftSize);a.getFloatTimeDomainData(d);let s=0;for(const v of d)s+=v*v;return Math.sqrt(s/d.length)}
+// ---------- rooms ----------
+let room="parrot";document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{room=b.dataset.r;document.querySelectorAll("[data-r]").forEach(x=>x.classList.toggle("on",x===b));for(const k in ROOMS)$("r-"+k).style.display=k===room?"block":"none";if(room!=="cave")echoOff()});
+const pick=(sel,f)=>document.querySelectorAll(sel).forEach(b=>b.onclick=()=>{document.querySelectorAll(sel).forEach(x=>x.classList.toggle("on",x===b));f(b)});
+// Parrot
+let pet="parrot",pv=1.6,pState="idle",cap=null,quiet=0,talkT=0,floor=.01,mouth=0,blink=0;pick("[data-pet]",b=>pet=b.dataset.pet);pick("[data-pv]",b=>pv=+b.dataset.pv);
+function parrotSay(buf){pState="talk";$("pStat").textContent=pet==="cat"?"😸 Meow-peat!":"🦜 Squawk! I can say that!";play(buf,{rate:pv},()=>{pState="idle";$("pStat").textContent="Your turn! Say something 👋";tried("parrot")})}
+$("pSample").onclick=()=>{ensureCtx();if(pState==="talk")return;parrotSay(sample())};
+function parrotTick(dt){const L=an&&micOn?level(an):0;if(pState==="idle"&&micOn){floor=floor*.98+Math.min(L,.05)*.02;if(L>Math.max(.03,floor*3)){pState="listen";cap=ring.slice(-4);quiet=0;talkT=0;$("pStat").textContent="👂 Listening…"}}
+ else if(pState==="listen"){talkT+=dt;quiet=L<Math.max(.02,floor*2)?quiet+dt:0;if((quiet>.7&&talkT>.4)||talkT>5){const f=join(cap);cap=null;if(talkT<.5){pState="idle";$("pStat").textContent="Say something 👋"}else parrotSay(toBuf(f))}}
+ const target=pState==="talk"&&outAn?Math.min(1,level(outAn)*8):pState==="listen"?.1:0;mouth+=(target-mouth)*.4;blink=(blink+dt)%4;drawPet()}
+function drawPet(){const c=$("pc"),g=c.getContext("2d"),W=520,H=340;g.fillStyle=pState==="listen"?"#c8e6c9":"#b3e5fc";g.fillRect(0,0,W,H);g.fillStyle="#8d6e63";g.fillRect(60,280,400,18);const R=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect(x,y,w,h)};const bob=pState==="talk"?Math.sin(performance.now()/90)*4:0,m=mouth*36;
+ if(pet==="parrot"){R(200,120+bob,120,150,"#43a047");R(180,150+bob,30,90,"#2e7d32");R(310,150+bob,30,90,"#2e7d32");R(215,60+bob,90,80,"#66bb6a");R(225,40+bob,30,24,"#e53935");R(235,252,16,30,"#f9a825");R(270,252,16,30,"#f9a825");R(210,265+bob,100,10,"#1b5e20");
+  R(232,80+bob,18,blink<.15?4:18,"#000");R(270,80+bob,18,blink<.15?4:18,"#000");R(300,92+bob,40,16,"#fdd835");R(300,108+bob+m,34,12,"#f9a825");R(300,106+bob,6,2+m,"#5d4037")}
+ else{R(190,130+bob,140,140,"#9e9e9e");R(200,50+bob,120,100,"#bdbdbd");R(200,30+bob,26,30,"#9e9e9e");R(294,30+bob,26,30,"#9e9e9e");R(207,38+bob,12,18,"#f48fb1");R(301,38+bob,12,18,"#f48fb1");R(225,80+bob,20,blink<.15?4:20,"#2e7d32");R(275,80+bob,20,blink<.15?4:20,"#2e7d32");R(253,105+bob,14,10,"#f06292");R(240,118+bob,40,4+m,"#5d4037");R(330,200,60,16,"#9e9e9e");R(380,170,16,40,"#9e9e9e");for(const s of[-1,1]){R(260+s*45-15,110+bob,30,2,"#fff");R(260+s*45-15,118+bob,30,2,"#fff")}}
+ if(pState==="listen"){g.fillStyle="#2e7d32";g.font="bold 28px sans-serif";g.fillText("👂",60,80)}if(pState==="talk"){g.font="bold 28px sans-serif";g.fillText("💬",380,70)}}
+// Echo cave
+let echo=null,dl=.35;pick("[data-dl]",b=>{dl=+b.dataset.dl;if(echo)echo.d.delayTime.setTargetAtTime(dl,ctx.currentTime,.05)});
+function echoOn(){if(echo||!ctx)return;const d=ctx.createDelay(1.5),fb=ctx.createGain(),wet=ctx.createGain(),lp=ctx.createBiquadFilter();d.delayTime.value=dl;fb.gain.value=.45;wet.gain.value=.45;lp.type="lowpass";lp.frequency.value=3000;d.connect(lp);lp.connect(fb);fb.connect(d);lp.connect(wet);wet.connect(ctx.destination);wet.connect(an);if(src)src.connect(d);echo={d,fb,wet,lp};$("echoBtn").textContent="🔇 Turn echo OFF";$("echoBtn").className="r";tried("cave")}
+function echoOff(){if(!echo)return;try{if(src)src.disconnect(echo.d)}catch(e){}const e=echo;e.wet.gain.setTargetAtTime(0,ctx.currentTime,.1);setTimeout(()=>{try{e.d.disconnect();e.fb.disconnect();e.wet.disconnect();e.lp.disconnect()}catch(x){}},400);echo=null;$("echoBtn").textContent="🔊 Turn echo ON";$("echoBtn").className="go"}
+$("echoBtn").onclick=()=>{ensureCtx();echo?echoOff():echoOn()};
+$("cSample").onclick=()=>{ensureCtx();if(!echo)echoOn();const s=ctx.createBufferSource();s.buffer=sample();s.connect(echo.d);s.connect(ctx.destination);s.connect(an);s.start()};
+// Robot
+let rcap=null,rbuf=null;function stopRec(){if(!rcap)return;rbuf=rcap.length?toBuf(join(rcap)):null;rcap=null;$("recBtn").textContent="⏺ Record";$("rStat").textContent=rbuf?"Got it! Pick an effect 👇":"Hmm, I didn't hear anything."}
+$("recBtn").onclick=()=>{ensureCtx();if(!micOn){$("rStat").textContent="🎤 The mic is off — try a sample sound!";return}if(rcap)return stopRec();rcap=[];$("recBtn").textContent="⏹ Stop";$("rStat").textContent="🔴 Recording… (max 5 seconds)"};
+$("rSample").onclick=()=>{ensureCtx();rbuf=sample();$("rStat").textContent="Sample ready! Pick an effect 👇"};
+const FX={robot:{rate:1},chipmunk:{rate:1.7},giant:{rate:.6},alien:{rate:1.15},normal:{rate:1}};
+document.querySelectorAll("[data-fx]").forEach(b=>b.onclick=()=>{ensureCtx();if(rcap)stopRec();if(!rbuf){$("rStat").textContent="Record something first (or use a sample)!";return}const f=b.dataset.fx;$("rStat").textContent=b.textContent+" voice!";play(rbuf,{rate:FX[f].rate,fx:f});tried("robot")});
+// Music
+let vz="bars",mT=0;pick("[data-vz]",b=>vz=b.dataset.vz);
+document.querySelectorAll("[data-tone]").forEach(b=>b.onclick=()=>{ensureCtx();const[f,v]=b.dataset.tone.split(",").map(Number);const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=f;g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(v,ctx.currentTime+.05);g.gain.linearRampToValueAtTime(0,ctx.currentTime+1.2);o.connect(g);g.connect(ctx.destination);g.connect(an);o.start();o.stop(ctx.currentTime+1.25);tried("music")});
+function pitch(){const d=new Float32Array(an.fftSize);an.getFloatTimeDomainData(d);let rms=0;for(const v of d)rms+=v*v;rms=Math.sqrt(rms/d.length);if(rms<.02)return 0;let best=0,bk=-1;for(let k=Math.floor(SR()/1000);k<Math.floor(SR()/70);k++){let c=0;for(let i=0;i<d.length-k;i+=2)c+=d[i]*d[i+k];if(c>best){best=c;bk=k}}return bk>0?SR()/bk:0}
+function musicTick(dt){const c=$("mc"),g=c.getContext("2d"),W=520,H=260;g.fillStyle="#0d0b2a";g.fillRect(0,0,W,H);if(!an)return;
+ if(vz==="bars"){const f=new Uint8Array(an.frequencyBinCount);an.getByteFrequencyData(f);const n=48;for(let i=0;i<n;i++){const v=f[Math.floor(i*i/n*4)+1]/255,h=v*(H-20);g.fillStyle=`hsl(${i/n*300},90%,60%)`;g.fillRect(i*(W/n)+1,H-h,W/n-2,h)}g.fillStyle="#fff";g.font="12px sans-serif";g.fillText("low pitch",6,14);g.fillText("high pitch",W-70,14)}
+ else{const d=new Float32Array(an.fftSize);an.getFloatTimeDomainData(d);g.strokeStyle="#76ff03";g.lineWidth=3;g.beginPath();for(let i=0;i<W;i++){const v=d[Math.floor(i*d.length/W/2)];g.lineTo(i,H/2-v*H*1.6)}g.stroke()}
+ const L=level(an);if(L>.03){mT+=dt;if(mT>2.5)tried("music")}const p=L>.03?pitch():0;$("mInfo").textContent=(L>.15?"📢 LOUD":L>.03?"🔉 quiet":"🤫 silent")+(p?` · ${p<250?"🐻 low":p<500?"🙂 middle":"🐦 high"} (~${Math.round(p)} Hz)`:"")}
+// cave visual
+function caveTick(){const c=$("cc"),g=c.getContext("2d");g.fillStyle="#4e342e";g.fillRect(0,0,520,200);g.fillStyle="#795548";for(let i=0;i<10;i++)g.fillRect(i*52,0,40,20+((i*37)%30));g.fillStyle="#6d4c41";g.fillRect(470,20,50,180);const L=an?level(an):0;g.strokeStyle="#ffeb3b";g.lineWidth=3;const t=performance.now()/1000;for(let k=0;k<4;k++){const r=((t*120+k*110)%440);if(!echo&&L<.02)break;g.globalAlpha=Math.max(0,1-r/440)*(echo?1:.4);g.beginPath();g.arc(60,120,r>410?820-r:r,-.6,.6);g.stroke()}g.globalAlpha=1;g.fillStyle="#fff";g.font="bold 16px sans-serif";g.fillText(echo?"🗣️ → wall → 👂  echo ON":"Echo is off",14,190);g.font="28px sans-serif";g.fillText("🧒",30,130)}
+// main loop
+let raf=0,last=performance.now();function loop(){raf=requestAnimationFrame(loop);const n=performance.now(),dt=Math.min(.1,(n-last)/1000);last=n;const L=an?level(an):0;$("lvl").style.width=Math.min(100,L*400)+"%";
+ if(room==="parrot")parrotTick(dt);else if(room==="music")musicTick(dt);else if(room==="cave")caveTick();else if(room==="robot"){const c=$("rc"),g=c.getContext("2d");g.fillStyle="#263238";g.fillRect(0,0,520,160);g.fillStyle="#b0bec5";g.fillRect(200,20,120,90);g.fillStyle=rcap?"#ef5350":"#76ff03";g.fillRect(222,45,22,22);g.fillRect(276,45,22,22);g.fillStyle="#455a64";const m=Math.min(30,(outAn?level(outAn):0)*200+L*120);g.fillRect(230,85,60,6+m*.4);g.fillRect(255,0,10,20);g.fillStyle="#ffca28";g.fillRect(250,0,20,8)}}
+drawPet();window.SH={S,startMic,stopMic,open,parrotSay,sample,state:()=>({pState,room,micOn,echo:!!echo,rbuf:!!rbuf,ctx:ctx&&ctx.state})};
+})();
+</script></body></html>
