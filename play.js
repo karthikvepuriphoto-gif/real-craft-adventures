@@ -78,3 +78,4 @@ export function openSandcastle(key="realcraft_sandcastle_v1"){const S=shell("üè
    if(v===4){g.fillStyle="#f8bbd0";g.beginPath();g.arc(x+cw/2,y+ch/2,10,Math.PI,0);g.fill();g.strokeStyle="#ec407a";g.beginPath();for(let i=-2;i<=2;i++){g.moveTo(x+cw/2,y+ch/2);g.lineTo(x+cw/2+i*4,y+ch/2-9)}g.stroke()}}
   g.fillStyle="#000a";g.fillRect(560,6,232,26);g.fillStyle="#fff";g.font="bold 14px sans-serif";g.fillText("Next wave in "+Math.max(0,Math.ceil(next-t))+"s",570,24)});
  st="sand"}
+export {shell,loop,kid};
