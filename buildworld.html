@@ -627,7 +627,7 @@ tapBtn("getIn",()=>{if(nearV)getIn(nearV);else if(nearRocket)goSpace();else if(n
 // --- Time Machine near UNL / Morrill Hall (opens timemachine.html) ---
 const TMX={x:28,z:36};let nearTM=false,nearSchool=false;
 const KEYG="realcraft_grade_v1";
-async function enterSchool(){try{const r=await fetch("school.html",{method:"HEAD",cache:"no-store"});if(r.ok){location.href="school.html";return}}catch(e){}openGradePicker()}
+async function enterSchool(){try{const r=await fetch("school.html",{method:"HEAD",cache:"no-store"});if(r.ok){location.href="school.html#grade";return}}catch(e){}openGradePicker()}
 function openGradePicker(){let o=document.getElementById("gradeOv");if(!o){o=document.createElement("div");o.id="gradeOv";o.className="ov";document.body.appendChild(o)}const cur=localStorage.getItem(KEYG);
  o.innerHTML=`<div class="card2"><button class="ovClose" id="gClose">✖</button><div class="big">🏫</div><h3>Welcome to Elementary School!</h3><p>Which grade are you in?</p><div class="tgrid">${["K","1","2","3","4","5"].map(g=>`<button class="tcard" data-g="${g}" style="${cur===g?"background:#ffca28":""}"><span class="te">${g==="K"?"🧸":"📘"}</span><b>${g==="K"?"Kindergarten":"Grade "+g}</b></button>`).join("")}</div><p id="gMsg"></p></div>`;
  o.classList.remove("hidden");o.querySelector("#gClose").onclick=()=>o.classList.add("hidden");
