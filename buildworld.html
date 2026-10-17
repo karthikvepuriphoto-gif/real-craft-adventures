@@ -11,6 +11,7 @@ html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;-webkit-
 #goto{position:fixed;top:120px;left:8px;z-index:9;font-size:9px}#gopanel{margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:5px;background:rgba(0,0,0,.6);padding:6px;border-radius:8px;max-height:calc(100vh - 360px);overflow-y:auto;touch-action:pan-y;width:300px}#gopanel button{font-size:8px;text-align:left;padding:6px}#gopanel.hidden{display:none}
 #mm{position:fixed;right:8px;top:70px;width:130px;height:130px;border:3px solid #000;border-radius:8px;z-index:8;background:#5fa83a;image-rendering:pixelated}
 #lm{position:fixed;top:118px;left:0;right:0;margin:auto;width:fit-content;background:rgba(0,0,0,.65);color:#ffeb3b;padding:8px 12px;border-radius:8px;font-size:11px;z-index:7;pointer-events:none}#lm.hidden{display:none}
+#ringArrow{display:none;position:fixed;top:190px;left:0;right:0;margin:auto;width:fit-content;align-items:center;gap:6px;background:rgba(0,0,0,.55);color:#ffd600;padding:4px 10px;border-radius:20px;font-size:13px;z-index:7;pointer-events:none}#ringArrow b{display:inline-block;font-size:30px;line-height:1;color:#ffd600;text-shadow:0 0 3px #000}body:not(.riding) #ringArrow{display:none!important}html.phone #ringArrow{top:calc(112px + env(safe-area-inset-top))}html.phone.land #vui{flex-direction:row!important;flex-wrap:wrap;width:154px;justify-content:flex-end}
 #hud{display:none;position:fixed;top:160px;left:0;right:0;margin:auto;width:fit-content;background:rgba(0,0,0,.55);padding:6px 10px;border-radius:6px;font-size:9px;z-index:7;pointer-events:none}
 #getIn{position:fixed;left:0;right:0;bottom:170px;margin:auto;width:fit-content;font-size:15px;background:#ffeb3b;padding:14px 20px;z-index:12;box-shadow:0 4px 0 #000;animation:pulse 1s infinite alternate}#getIn.hidden{display:none}@keyframes pulse{to{transform:scale(1.08)}}
 #vui{display:none;position:fixed;right:12px;bottom:24px;flex-direction:column;gap:8px;z-index:6}#vui button{width:96px;height:66px;font-size:22px;padding:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}#vui small{font-size:8px}#btnOut{background:#ef5350;color:#fff}
@@ -74,7 +75,7 @@ body.away #goto,body.away #btnSlot,body.away #btnReset,body.away #btnCar,body.aw
 <canvas id="mm" width="256" height="256"></canvas>
 <div id="lm" class="hidden"></div><div id="hud"></div>
 <button id="getIn" class="hidden">🚁 Get in!</button>
-<div id="vui"><button id="vUp" class="hc">⬆️<small>Up</small></button><button id="vDown" class="hc">⬇️<small>Down</small></button><button id="vFast" class="pl">⏩<small>Faster</small></button><button id="vSlow" class="pl">⏪<small>Slower</small></button><button id="btnTop">🗺️<small>Top view</small></button><button id="btnOut">🚪<small>Get out</small></button></div>
+<div id="ringArrow"><b>⬆</b><span></span></div><div id="vui"><button id="vUp" class="hc">⬆️<small>Up</small></button><button id="vDown" class="hc">⬇️<small>Down</small></button><button id="vFast" class="pl">⏩<small>Faster</small></button><button id="vSlow" class="pl">⏪<small>Slower</small></button><button id="vEasy" class="pl">🪶<small>Easy ON</small></button><button id="btnTop">🗺️<small>Top view</small></button><button id="btnOut">🚪<small>Get out</small></button></div>
 <div id="modes">
  <button id="modePlace" class="on">🧱 Place</button>
  <button id="modeBreak">⛏️ Break</button>
@@ -511,8 +512,17 @@ let ride=null,topView=false,landing=false;const hold={up:0,down:0,fast:0,slow:0}
 
 // rings mini quest
 const RINGS=[[0,44,30],[0,26,8],[-20,20,48],[48,20,46],[22,14,14],[48,14,-16],[-48,14,15],[-40,12,-48],[16,14,-4],[-22,16,-30],[30,18,-50],[22,22,46]];
+const RINGS0=RINGS.map(r=>r.slice()),RING_R=5.5;let EASY=localStorage.getItem("realcraft_easyfly")!=="0",ringAudit={home:0,dest:0};
+function ringOK(x,y,z){const lim=OX-10;if(Math.abs(x)>lim||Math.abs(z)>lim||y>H+17||y<5)return false;
+ for(let a=0;a<8;a++)for(const rr of[0,2.5,5]){if(groundTop(x+Math.cos(a*Math.PI/4)*rr,z+Math.sin(a*Math.PI/4)*rr)>y-4)return false}
+ for(let a=0;a<4;a++){const dx=Math.cos(a*Math.PI/4),dz=Math.sin(a*Math.PI/4);let c=true;for(let q=-26;q<=26;q+=2){const X=x+dx*q,Z=z+dz*q;if(Math.abs(X)>OX-5||Math.abs(Z)>OX-5||groundTop(X,Z)>y-4){c=false;break}}if(c)return true}return false}
+function fixRing(o){if(ringOK(o.x,o.y,o.z))return false;let best=null,bc=1e9;const lim=OX-10;
+ for(let d=0;d<=24;d+=3)for(let a=0;a<(d?12:1);a++){let x=o.x+Math.cos(a*Math.PI/6)*d,z=o.z+Math.sin(a*Math.PI/6)*d;x=Math.max(-lim,Math.min(lim,x));z=Math.max(-lim,Math.min(lim,z));for(let dy=-6;dy<=26;dy+=2){const y=o.y+dy;const c=Math.hypot(x-o.x,z-o.z)+Math.abs(dy)*.7;if(c<bc&&ringOK(x,y,z)){bc=c;best=[x,y,z]}}}
+ if(best){o.x=best[0];o.y=best[1];o.z=best[2]}else{o.y=Math.min(H+17,Math.max(o.y,groundTop(o.x,o.z)+8))}return true}
+function fixHomeRings(){let n=0;RINGS.forEach((r,i)=>{const o={x:RINGS0[i][0],y:RINGS0[i][1],z:RINGS0[i][2]};if(fixRing(o))n++;r[0]=o.x;r[1]=o.y;r[2]=o.z;if(ringObjs[i])ringObjs[i].position.set(o.x,o.y,o.z)});ringAudit.home=n}
+function nearRing(v){let b=null;const c=(x,y,z,i)=>{const d=Math.hypot(x-v.x,y-1.2-v.y,z-v.z);if(!b||d<b.d)b={x,y,z,d,i}};if(away){for(const r of destRings)if(r.m.visible)c(r.x,r.y,r.z,r.i)}else RINGS.forEach((r,i)=>{if(!ringGot.includes(i))c(r[0],r[1],r[2],i)});return b}
 let ringGot=[];try{ringGot=JSON.parse(localStorage.getItem(KEYR)||"[]")}catch(e){}
-const ringObjs=RINGS.map(([x,y,z],i)=>{const m=new THREE.Mesh(new THREE.TorusGeometry(3,.35,6,20),new THREE.MeshBasicMaterial({color:"#ffd600"}));m.position.set(x,y,z);m.rotation.y=i*.7;m.visible=!ringGot.includes(i);scene.add(m);return m});
+const ringObjs=RINGS.map(([x,y,z],i)=>{const m=new THREE.Mesh(new THREE.TorusGeometry(4.2,.5,8,24),new THREE.MeshBasicMaterial({color:"#ffd600"}));m.position.set(x,y,z);m.rotation.y=i*.7;m.visible=!ringGot.includes(i);scene.add(m);return m});
 
 function solid(x,y,z){const id=get(Math.floor(x),Math.floor(y),Math.floor(z));return id&&id!==18&&id!==6}
 function collide(nx,ny,nz){const r=.3,h=1.7;for(let y=0;y<=h;y+=.4)for(const[dx,dz]of[[-r,0],[r,0],[0,-r],[0,r]])if(solid(nx+dx,ny+y,nz+dz))return true;return false}
@@ -574,7 +584,8 @@ function diffFromBase(){const d={};for(let i=0;i<vox.length;i++)if(vox[i]!==base
 function applyDiff(d){for(const k in d){const[x,y,z]=k.split(",").map(Number);if(Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(z))set(x,y,z,d[k]|0)}}
 function saveNow(){if(away)return;let all={};try{all=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}all.slots=all.slots||[{},{},{}];all.slots[slot]={v:VER,diff:diffFromBase(),p:{x:P.x,y:P.y,z:P.z,cy:P.cy},t:Date.now()};all.slot=slot;localStorage.setItem(KEYW,JSON.stringify(all))}
 function saveSoon(){if(away)return;clearTimeout(saveT);saveT=setTimeout(saveNow,800);document.getElementById("saved").textContent="💾 Saving…";setTimeout(()=>document.getElementById("saved").textContent="💾 Saved",900)}
-function loadSlot(s){slot=s;if(ride)exitNow(true);genBase();base=vox.slice();let all={};try{all=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}const sl=(all.slots||[])[s];let msg="📂 Slot "+(s+1)+" loaded";
+function loadSlot(s){try{return loadSlot0(s)}finally{try{fixHomeRings()}catch(e){console.warn(e)}}}
+function loadSlot0(s){slot=s;if(ride)exitNow(true);genBase();base=vox.slice();let all={};try{all=JSON.parse(localStorage.getItem(KEYW)||"{}")}catch(e){}const sl=(all.slots||[])[s];let msg="📂 Slot "+(s+1)+" loaded";
   if(sl&&sl.diff){try{applyDiff(sl.diff)}catch(e){}if(!sl.v&&Object.keys(sl.diff).length)msg="🌆 "+HTN+" got BIGGER! Your builds are still here.";if(sl.p&&Math.abs(sl.p.x)<OX&&Math.abs(sl.p.z)<OZ){P.x=sl.p.x;P.y=sl.p.y;P.z=sl.p.z;P.cy=sl.p.cy||P.cy}}
   else if(!sl||!sl.v)msg="🌆 Welcome to "+HTN+"! Find the 🚁 helicopter next to you!";
   parkVehicles();let n=0;while(rebuildNear(56)&&n++<99);renderHotbar();drawMapBase();toast(msg)}
@@ -674,7 +685,7 @@ function goSpace(){try{saveNow()}catch(e){}location.href="space.html"}
  try{const lb=label("🚀 Space Rocket",ROCKET.x,groundTop(ROCKET.x,ROCKET.z)+10.5,ROCKET.z);if(lb&&!lb.parent)scene.add(lb)}catch(e){}}
 function setBody(){document.body.classList.toggle("riding",!!ride);document.body.classList.toggle("heli",!!ride&&ride.t==="heli");document.body.classList.toggle("plane",!!ride&&ride.t==="plane");document.getElementById("btnTop").classList.toggle("on",topView)}
 function getIn(v){ride=v;landing=false;v.s=0;av.g.visible=false;outline.visible=false;P.fly=false;camInit=false;setBody();if(window.Music)Music.play("sky");engine(true);beep(660,.08);
-  toast(v.t==="heli"?"🚁 Hold ⬆️ Up to lift off, then use the stick to fly!":"✈️ Hold ⏩ Faster to zoom down the runway and take off!")}
+  toast(v.t==="heli"?"🚁 Hold ⬆️ Up to lift off, then use the stick to fly!":EASY?"✈️ Easy flying is ON: the plane takes off by itself! Steer with the stick and follow the yellow arrow to the rings.":"✈️ Hold ⏩ Faster to zoom down the runway and take off!")}
 function getOut(){if(!ride)return;const v=ride;if(v.y>groundTop(v.x,v.z)+.3||v.s>3){landing=true;toast("🛬 Landing gently…");return}exitNow()}
 function exitNow(force){const v=ride;if(!v)return;ride=null;if(topView){topView=false;SPR.forEach(o=>o.visible=true)}landing=false;v.s=0;if(force){v.y=groundTop(v.x,v.z);v.g.position.y=v.y;v.g.rotation.set(0,v.h,0)}engine(false);av.g.visible=true;
   const offs=[[2.6,0],[-2.6,0],[0,-3.5],[0,4],[4,4],[-4,-4]];for(const[a,b]of offs){const x=v.x+Math.cos(v.h)*a+Math.sin(v.h)*b,z=v.z-Math.sin(v.h)*a+Math.cos(v.h)*b,y=groundTop(x,z);if(Math.abs(x)<OX-1&&Math.abs(z)<OZ-1&&!collide(x,y,z)){P.x=x;P.z=z;P.y=y;break}}
@@ -696,6 +707,7 @@ function drawMap(){if(!mapImg)return;const S=mm.width/W;mg.imageSmoothingEnabled
 // ---- loop ----
 let last=performance.now(),camInit=false,camDist=11,fc=0,lmShown="",bonkT=0,edgeT=0;
 const lmEl=document.getElementById("lm"),hud=document.getElementById("hud");
+const rArr=document.getElementById("ringArrow");function ringArrow(v){if(!rArr)return;const n=v?nearRing(v):null;if(!n){rArr.style.display="none";return}rArr.style.display="flex";let d=Math.atan2(n.x-v.x,n.z-v.z)-v.h;d=Math.atan2(Math.sin(d),Math.cos(d));const dy=n.y-1.2-v.y;rArr.firstChild.style.transform="rotate("+(-d)+"rad)";rArr.lastChild.textContent=Math.round(n.d)+" m"+(dy>4?" ⬆️":dy<-4?" ⬇️":"")}
 function vstep(dt,t){const v=ride;let fx=inp.jx,fy=inp.jy;const k=inp.keys;if(k.w||k.ArrowUp)fy=1;if(k.s||k.ArrowDown)fy=-1;if(k.a||k.ArrowLeft)fx=-1;if(k.d||k.ArrowRight)fx=1;inp.jump=0;
   const gt=groundTop(v.x,v.z);let air=v.y>gt+.25;
   if(v.t==="heli"){
@@ -711,12 +723,18 @@ function vstep(dt,t){const v=ride;let fx=inp.jx,fy=inp.jy;const k=inp.keys;if(k.
     hud.textContent="🚁 Height "+Math.max(0,Math.round(v.y-g2))+" · ⭐ "+ringGot.length+"/"+RINGS.length;
     if(eng)eng.o.frequency.value=55+(air?15:0)+Math.abs(fy)*10;
   }else{
-    v.s=Math.max(0,Math.min(24,v.s+((hold.fast||k.e?1:0)-(hold.slow||k.q?1:0))*7*dt));if(landing)v.s=Math.max(air?7:0,v.s-(air?3:10)*dt);
+    const ez=EASY&&!landing&&!trick;
+    if(ez){const tg=(hold.fast||k.e)?24:(hold.slow||k.q)?11.5:15;v.s+=Math.max(-6*dt,Math.min(7*dt,tg-v.s))}else v.s=Math.max(0,Math.min(24,v.s+((hold.fast||k.e?1:0)-(hold.slow||k.q?1:0))*7*dt));if(landing)v.s=Math.max(air?7:0,v.s-(air?3:10)*dt);
+    let asst=null;if(ez){v.fxs=(v.fxs||0)+(fx-(v.fxs||0))*Math.min(1,dt*5);v.fys=(v.fys||0)+(fy-(v.fys||0))*Math.min(1,dt*5);fx=v.fxs*.75;fy=v.fys;
+      if(air){asst=nearRing(v);if(asst&&asst.d<28){let d=Math.atan2(asst.x-v.x,asst.z-v.z)-v.h;d=Math.atan2(Math.sin(d),Math.cos(d));if(Math.abs(d)<1.3)v.h+=d*Math.min(1,dt*1.6*(1-Math.min(1,Math.abs(fx))));else asst=null}else asst=null}}
     v.h-=fx*(air?1.1:.7)*dt*Math.min(1,v.s/3);
-    let climb=0;if(v.s>=11&&!landing){const ag=v.y-gt;climb=Math.abs(fy)>.1?fy*7:Math.max(-2,Math.min(4,(14-ag)*.6));if(ag<4)climb=Math.max(climb,3.5)}else if(air)climb=landing?-4:-3;
+    let climb=0;if(v.s>=11&&!landing){const ag=v.y-gt;
+      if(ez){if(Math.abs(fy)>.1){climb=fy*5;v.alt=v.y}else{if(v.alt==null||!air)v.alt=Math.max(v.y,gt+12);let want=asst?asst.y-1.2:v.alt;if(asst)v.alt=v.y;want=Math.max(want,gt+3);climb=Math.max(-4,Math.min(5,(want-v.y)*1.2))}
+        let ah=gt;for(const q of[4,8,13,18])ah=Math.max(ah,groundTop(v.x+Math.sin(v.h)*q*v.s/15,v.z+Math.cos(v.h)*q*v.s/15));if(v.y<ah+3){climb=Math.max(climb,Math.min(10,(ah+3-v.y)*3+3));if(v.alt<ah+3)v.alt=ah+3}if(ag<4)climb=Math.max(climb,4)}
+      else{climb=Math.abs(fy)>.1?fy*7:Math.max(-2,Math.min(4,(14-ag)*.6));if(ag<4)climb=Math.max(climb,3.5)}}else if(air)climb=landing?-4:-3;
     if(!air&&climb<0)climb=0;
     v.y+=climb*dt;v.x+=Math.sin(v.h)*v.s*dt;v.z+=Math.cos(v.h)*v.s*dt;
-    const g2=groundTop(v.x,v.z);if(v.y<g2){v.y=g2;if(air&&t-bonkT>2&&g2>2){bonkT=t;toast("🦘 Hop! Pull the stick back to climb.")}}v.y=Math.min(v.y,H+22);air=v.y>g2+.25;
+    const g2=groundTop(v.x,v.z);if(v.y<g2){v.y=g2;if(air&&!ez&&t-bonkT>2&&g2>2){bonkT=t;toast("🦘 Hop! Pull the stick back to climb.")}}v.y=Math.min(v.y,H+22);air=v.y>g2+.25;
     v.tx=(v.tx||0)+(-climb*.05-(v.tx||0))*Math.min(1,dt*3);v.tz=(v.tz||0)+((air?fx*.45:0)-(v.tz||0))*Math.min(1,dt*3);
     v.rotor.rotation.z+=dt*(6+v.s*3);
     if(landing&&!air&&v.s<1){v.s=0;exitNow()}
@@ -727,7 +745,8 @@ function vstep(dt,t){const v=ride;let fx=inp.jx,fy=inp.jy;const k=inp.keys;if(k.
   const lim=OX-3;if(!(Math.abs(v.x)>lim||Math.abs(v.z)>lim))edgeHold=0;if(Math.abs(v.x)>lim||Math.abs(v.z)>lim){v.x=Math.max(-lim,Math.min(lim,v.x));v.z=Math.max(-lim,Math.min(lim,v.z));if(v.t==="plane"){const want=Math.atan2(-v.x,-v.z);let d=want-v.h;d=Math.atan2(Math.sin(d),Math.cos(d));v.h+=d*Math.min(1,dt*2)}if(away){if(v.t==="plane"&&air){edgeHold=(edgeHold||0)+dt;if(edgeHold>1.5)askHome(t)}}else if(t-edgeT>3){edgeT=t;toast("🔄 That's the edge of Lincoln, turning back!")}}
   v.g.position.set(v.x,v.y,v.z);P.x=v.x;P.z=v.z;P.y=v.y;if(v.t==="plane")trickStep(v,dt);if(away)destRingStep(v);
   // rings
-  if(!away)for(let i=0;i<RINGS.length;i++){if(ringGot.includes(i))continue;const r=RINGS[i];if(Math.hypot(v.x-r[0],v.y+1.2-r[1],v.z-r[2])<3.3){ringGot.push(i);ringObjs[i].visible=false;localStorage.setItem(KEYR,JSON.stringify(ringGot));beep(988,.12);setTimeout(()=>beep(1318,.15),120);toast(ringGot.length===RINGS.length?"🏆 You flew through ALL the rings! Super pilot!":"⭐ Ring "+ringGot.length+" of "+RINGS.length+"!")}}
+  if(!away)for(let i=0;i<RINGS.length;i++){if(ringGot.includes(i))continue;const r=RINGS[i];if(Math.hypot(v.x-r[0],v.y+1.2-r[1],v.z-r[2])<RING_R){ringGot.push(i);ringObjs[i].visible=false;localStorage.setItem(KEYR,JSON.stringify(ringGot));beep(988,.12);setTimeout(()=>beep(1318,.15),120);toast(ringGot.length===RINGS.length?"🏆 You flew through ALL the rings! Super pilot!":"⭐ Ring "+ringGot.length+" of "+RINGS.length+"!")}}
+  ringArrow(v);
   // camera
   const tv=new THREE.Vector3();if(topView)tv.set(v.x,v.y+48,v.z-1);else{const D=v.t==="heli"?13:17;tv.set(v.x-Math.sin(v.h)*D,v.y+6,v.z-Math.cos(v.h)*D);tv.y=Math.max(tv.y,groundTop(tv.x,tv.z)+1.5)}
   if(camInit)cam.position.lerp(tv,Math.min(1,dt*(topView?6:4)));else{cam.position.copy(tv);camInit=true}cam.lookAt(v.x,v.y+1.5,v.z);
@@ -1033,7 +1052,7 @@ function person(x,z,shirt,pants,hair,name,greet,o={}){const g=new THREE.Group(),
 function pet(x,z,fur,mark,eye,name,greet){const g=new THREE.Group(),add=(w,h,d,c,px,py,pz)=>bx(g,w,h,d,c,px,py,pz);add(.34,.3,.7,fur,0,.32,0);for(const[a,b]of[[-.11,.25],[.11,.25],[-.11,-.25],[.11,-.25]])add(.1,.2,.1,mark,a,.1,b);add(.36,.32,.32,fur,0,.6,.42);for(const sx of[-1,1]){add(.1,.12,.06,mark,sx*.11,.82,.42);add(.06,.06,.02,eye,sx*.08,.64,.59)}add(.06,.04,.02,"#f48fb1",0,.56,.59);add(.36,.08,.3,mark,0,.48,0);
  const tail=new THREE.Group();tail.position.set(0,.42,-.35);g.add(tail);bx(tail,.08,.45,.08,mark,0,.22,0);
  const y=groundTop(x,z);g.position.set(x,y,z);scene.add(g);destObjs.push(g);dlabel(name,x,y+1.8,z,.6);const q={g,arm:tail,name,greet,x,z,hx:x,hz:z,said:0,pet:1,lab:DSPR[DSPR.length-1],ph:Math.random()*6};people.push(q);return q}
-function rings6(cx,cz,r,y0){const p=loadPP(),got=p.rings[away]||[];for(let i=0;i<6;i++){const a=i*Math.PI/3,x=cx+Math.cos(a)*r,z=cz+Math.sin(a)*r,y=y0+(i%3)*6;const m=new THREE.Mesh(new THREE.TorusGeometry(3,.35,6,20),new THREE.MeshBasicMaterial({color:"#ffd600"}));m.position.set(x,y,z);m.rotation.y=-a;m.visible=!got.includes(i);scene.add(m);destObjs.push(m);destRings.push({m,i,x,y,z})}}
+function rings6(cx,cz,r,y0){const p=loadPP(),got=p.rings[away]||[];for(let i=0;i<6;i++){const a=i*Math.PI/3,x=cx+Math.cos(a)*r,z=cz+Math.sin(a)*r,y=y0+(i%3)*6;const m=new THREE.Mesh(new THREE.TorusGeometry(4.2,.5,8,24),new THREE.MeshBasicMaterial({color:"#ffd600"}));m.position.set(x,y,z);m.rotation.y=-a;m.visible=!got.includes(i);scene.add(m);destObjs.push(m);destRings.push({m,i,x,y,z})}}
 // --- destination builders: each returns {sp:[x,y,z], lm:[x,y,z], r:ringRadius, ry:ringY} ---
 const DB={
 eiffel(){flat(-OX,OX-1,22,30,18);flat(-OX,OX-1,21,21,3);flat(-OX,OX-1,31,31,3);flat(-3,3,-60,-12,17);for(let z=-58;z<=-14;z+=5){treeG(-9,z);treeG(9,z)}
@@ -1188,7 +1207,7 @@ function buildField(k,info){const[sp]=sportFor(k);const W2=sp==="tabletennis"?5:
  if(sp==="tabletennis"){box(cx-2,cx+2,lv,lv,cz-1,cz+1,12);for(let z=cz-1;z<=cz+1;z++)set(cx,lv+1,z,15)}
  if(sp==="cycling"){for(let x=cx-W2;x<=cx+W2;x++)for(let z=cz-D2;z<=cz+D2;z++){const e=Math.abs(x-cx)>W2-3||Math.abs(z-cz)>D2-3;L(x,z,e?28:1)}for(let z=cz-D2;z<cz-D2+3;z++)L(cx,z,15)}
  const S=SPORTS[sp];dlabel(S.e+" "+S.n,cx,lv+5,cz,1.1);return{x:cx+.5,z:cz+.5,y:lv,sp,r:Math.max(W2,D2)+3}}
-function genDest(k){for(const q of smP)q.life=Math.min(q.life,.001);vox.fill(0);count=0;for(const c of chunks.values())c.dirty=true;clearDest();const info=DB[k]();destInfo=info;try{destSport=buildField(k,info)}catch(e){console.warn(e);destSport=null}rings6(info.lm[0],info.lm[2],info.r,info.ry);return info}
+function genDest(k){for(const q of smP)q.life=Math.min(q.life,.001);vox.fill(0);count=0;for(const c of chunks.values())c.dirty=true;clearDest();const info=DB[k]();destInfo=info;try{destSport=buildField(k,info)}catch(e){console.warn(e);destSport=null}rings6(info.lm[0],info.lm[2],info.r,info.ry);let nf=0;for(const r of destRings){if(fixRing(r))nf++;r.m.position.set(r.x,r.y,r.z)}ringAudit.dest=nf;return info}
 function travel(k){if(!PLACES[k]||travelling)return;closeOv("trip");const from=away;if(!away)saveNow();playTravel(from||"lincoln",k,()=>{away=k;document.body.classList.add("away");destVehicles(false);const info=genDest(k);const v=VEH[2];if(ride!==v){if(ride)exitNow(true);getIn(v)}
   v.x=info.sp[0];v.z=info.sp[2];v.y=info.sp[1];v.h=Math.atan2(info.lm[0]-v.x,info.lm[2]-v.z);v.s=14;landing=false;P.x=v.x;P.z=v.z;P.y=v.y;camInit=false;rebuildNear(60);drawMapBase();
   curLM=[{n:PLACES[k].e+" "+PLACES[k].n,x:info.lm[0],z:info.lm[2]}];const pp=loadPP(),first=!pp.stamps[k];if(first){pp.stamps[k]=new Date().toISOString().slice(0,10);savePP(pp)}showFact(k,first);offerLocalOutfit(k,s=>{reAv(s);toast("👕 Local outfit on! Change it anytime with 👕 Character")})})}
@@ -1245,7 +1264,7 @@ let askT=-99,edgeHold=0,arriveT=0,askSnooze=0;function askHome(t){edgeHold=0;con
 function greetOf(p){if(!Array.isArray(p.greet))return p.greet;p.gi=((p.gi??-1)+1)%p.greet.length;return p.greet[p.gi]}
 function peopleStep(t){for(const p of people){if(p.pet){const fd=Math.hypot(P.x-p.x,P.z-p.z),tx=fd<10&&fd>1.6?P.x+Math.sin(p.ph)*1.2:p.hx+Math.cos(t*.4+p.ph)*2.5,tz=fd<10&&fd>1.6?P.z+Math.cos(p.ph)*1.2:p.hz+Math.sin(t*.4+p.ph)*2.5,dx=tx-p.x,dz=tz-p.z,dl=Math.hypot(dx,dz);if(dl>.3){const sp=Math.min(dl,.05);p.x+=dx/dl*sp;p.z+=dz/dl*sp;p.g.rotation.y=Math.atan2(dx,dz)}const gy=groundTop(p.x,p.z);p.g.position.set(p.x,gy,p.z);if(p.lab)p.lab.position.set(p.x,gy+1.8,p.z);p.arm.rotation.x=Math.sin(t*5+p.ph)*.5-.4;const d=Math.hypot(P.x-p.x,P.z-p.z);if(d<3&&t-p.said>15&&!ride){p.said=t;toast("🐱 "+p.name+": "+greetOf(p));beep(1200,.05)}continue}p.arm.rotation.z=Math.PI*.85+Math.sin(t*4+p.x)*.35;const d=Math.hypot(P.x-p.x,P.z-p.z);if(d<6&&t-p.said>20&&!ride){p.said=t;toast("👋 "+greetOf(p));beep(700,.06);setTimeout(()=>beep(880,.08),120)}}
  for(const o of destObjs)if(o.userData.geyser){const c=(t%14);const h=c<4?Math.sin(c/4*Math.PI)*20:0;o.scale.set(1,Math.max(.01,h),1);o.position.y=3+h/2;o.visible=h>.2}}
-function destRingStep(v){for(const r of destRings){if(!r.m.visible)continue;r.m.rotation.y+=.01;if(Math.hypot(v.x-r.x,v.y+1.2-r.y,v.z-r.z)<3.4){r.m.visible=false;const pp=loadPP();(pp.rings[away]=pp.rings[away]||[]).push(r.i);savePP(pp);addStars(1);beep(988,.12);setTimeout(()=>beep(1318,.15),120);const n=pp.rings[away].length;toast(n>=6?"🏆 All 6 rings at "+PLACES[away].n+"!":"⭐ Ring "+n+" of 6!")}}}
+function destRingStep(v){for(const r of destRings){if(!r.m.visible)continue;r.m.rotation.y+=.01;if(Math.hypot(v.x-r.x,v.y+1.2-r.y,v.z-r.z)<RING_R){r.m.visible=false;const pp=loadPP();(pp.rings[away]=pp.rings[away]||[]).push(r.i);savePP(pp);addStars(1);beep(988,.12);setTimeout(()=>beep(1318,.15),120);const n=pp.rings[away].length;toast(n>=6?"🏆 All 6 rings at "+PLACES[away].n+"!":"⭐ Ring "+n+" of 6!")}}}
 
 // --- Animals: zoo, Pioneers Park bison, Omaha zoo (Animal Book shared with Sea Mode) ---
 const ZA=[],DA=[];const VOXAN=[["giraffe",43,9],["elephant",51.5,9],["lion",56,11],["bison",-47,12],["bison",-43,16],["bison",-50,16]];
@@ -1281,7 +1300,8 @@ requestAnimationFrame(frame);
 if(window.Music)Music.play("build");
 
 document.getElementById("btnChar").onclick=()=>openDressUp({onChange:reAv});
-window.BW={PLAYS,goFarm,FM:()=>FMX,nearFarm:()=>nearFarm,goSH,SH:()=>SHX,nearSH:()=>nearSH,goSport,openSport,destSport:()=>destSport,openFootball,openPlayground,openSandcastle,enterSchool,openGradePicker,nearSchool:()=>nearSchool,HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
+{const eb=document.getElementById("vEasy");const sh=()=>{eb.querySelector("small").textContent=EASY?"Easy ON":"Easy OFF";eb.classList.toggle("on",EASY)};sh();eb.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();EASY=!EASY;localStorage.setItem("realcraft_easyfly",EASY?"1":"0");sh();toast(EASY?"🪶 Easy flying ON: the plane flies itself level, helps you reach rings and pulls up near the ground.":"🛩️ Easy flying OFF: full manual control!")})}
+window.BW={PLAYS,FLY:{vstep,nearRing,ringOK,inp,hold,VEH,getIn,exitNow,ride:()=>ride,rings:()=>RINGS,got:()=>ringGot,destRings:()=>destRings,audit:()=>ringAudit,setEasy:b=>EASY=b,doTrick,trick:()=>trick,dest:k=>{away=k;document.body.classList.add("away");destVehicles(false);const info=genDest(k);rebuildNear(60);return info},places:()=>Object.keys(DB)},goFarm,FM:()=>FMX,nearFarm:()=>nearFarm,goSH,SH:()=>SHX,nearSH:()=>nearSH,goSport,openSport,destSport:()=>destSport,openFootball,openPlayground,openSandcastle,enterSchool,openGradePicker,nearSchool:()=>nearSchool,HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
 
 </script>
 <script>
