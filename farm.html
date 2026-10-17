@@ -1,0 +1,125 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><script src="mobile.js"></script><title>My First Farm - Real Craft Adventures</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#33691e;color:#fff;font-family:"Trebuchet MS",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+body{min-height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:0 env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 16px) env(safe-area-inset-left)}
+header{position:sticky;top:0;z-index:5;background:#558b2f;border-bottom:4px solid #000;display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:calc(6px + env(safe-area-inset-top)) 8px 6px}
+header h1{font-size:18px;margin:0;flex:1;min-width:150px}.st{background:#ffca28;color:#000;padding:5px 9px;border:3px solid #000;font-weight:bold}
+button{font:inherit;font-size:16px;padding:10px 13px;border:3px solid #000;background:#fff;color:#000;box-shadow:0 3px 0 #000;cursor:pointer;border-radius:6px;touch-action:manipulation}button:active{transform:translateY(2px);box-shadow:0 1px 0 #000}button:disabled{opacity:.45}
+button.on{background:#ffca28}button.go{background:#66bb6a}button.b{background:#4fc3f7}button.r{background:#ef5350;color:#fff}
+main{max-width:900px;margin:0 auto;padding:10px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.tabs button{flex:1 1 140px}
+.card{background:#fffde7;color:#212121;border:4px solid #000;padding:14px;margin:10px 0;border-radius:6px;line-height:1.5;font-size:16px}.card h2{margin:0 0 6px;font-size:21px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+canvas{display:block;width:100%;max-width:520px;margin:6px auto;background:#b3e5fc;border:4px solid #000;border-radius:6px;touch-action:pan-y}
+.meter{height:16px;background:#ddd;border:2px solid #000;border-radius:8px;overflow:hidden;margin:6px 0}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#66bb6a,#fdd835,#ef5350)}
+.status{font-weight:bold;font-size:18px;text-align:center;min-height:26px}
+.tip{background:#e3f2fd;border:2px solid #1565c0;padding:8px;border-radius:6px;margin-top:8px;font-size:14px}
+
+.badge{display:inline-flex;flex-direction:column;align-items:center;width:110px;padding:6px;margin:4px;background:#fff;border:3px solid #000;border-radius:6px;font-size:12px;text-align:center}.badge b{font-size:30px}.badge.off{opacity:.35;filter:grayscale(1)}
+#toast{position:fixed;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom));margin:auto;width:fit-content;max-width:92vw;background:#000c;color:#ffeb3b;padding:10px 14px;border:3px solid #ffca28;z-index:20;display:none}
+html.phone header h1{font-size:15px}html.phone button{font-size:14px;padding:8px 10px}html.phone .card{font-size:15px;padding:10px}html.phone .tabs button{flex:1 1 44%}
+html.phone.land canvas{max-height:52dvh;width:auto;max-width:100%}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;margin-top:8px}
+.tile{background:#fff;border:3px solid #000;border-radius:8px;padding:8px;text-align:center;font-size:14px}.tile .e{font-size:34px;line-height:1.1}
+.tile.dirt{background:#d7b48a}.tile.wet{background:#a1887f;color:#fff}.tile.ready{background:#fff59d}.tile.sleepy{background:#e0e0e0}
+.bar{height:10px;background:#eee;border:2px solid #000;border-radius:6px;overflow:hidden;margin:4px 0}.bar i{display:block;height:100%;background:#66bb6a}
+.inv{display:flex;flex-wrap:wrap;gap:6px}.inv span{background:#fff;border:2px solid #000;border-radius:6px;padding:3px 7px;font-size:14px}
+.math{background:#e8f5e9;border:2px dashed #2e7d32;padding:8px;border-radius:6px;font-family:monospace;font-size:15px;margin-top:8px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #ccc;flex-wrap:wrap}
+.fact{background:#fff3e0;border-left:6px solid #ef6c00;padding:8px;border-radius:4px;margin-top:8px;font-size:15px}
+html.phone .grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}html.phone .tile .e{font-size:28px}
+</style></head><body>
+<header><button onclick="location.href='buildworld.html'">🌍 Build World</button><button onclick="location.href='index.html'">🏠 Home</button><h1 id="ttl">🚜 My First Farm</h1><span class="st" id="coins">🪙 0</span></header>
+<main>
+<div class="tabs"><button data-t="fields" class="on">🌱 Fields</button><button data-t="animals">🐔 Animals</button><button data-t="market">🧺 Farmers Market</button><button data-t="badges">🏅 Badges</button></div>
+<div class="card" style="padding:8px 12px"><b>🧺 Basket:</b> <div class="inv" id="inv"></div></div>
+<section id="t-fields" class="card"><h2>🌱 My Fields</h2><p>Pick a seed, tap an empty plot to plant, then <b>water</b> it 💧. Plants only grow while the soil is wet — check back later!</p>
+ <div class="row" id="seedPick"></div><div class="row"><button class="b" id="waterAll">💧 Water all</button><button class="go" id="harvAll">🧺 Harvest all ready</button><span id="tractorTip" style="font-size:13px"></span></div>
+ <div class="grid" id="plots"></div><div class="fact" id="cropFact"></div></section>
+<section id="t-animals" class="card" style="display:none"><h2>🐔 My Animals</h2><p>Feed your animals so they stay happy and busy. Hungry animals just get sleepy 😴 and take a nap until you feed them — they're always safe!</p>
+ <div class="row"><button class="go" id="feedAll">🌾 Feed everyone</button><button id="collect">🥚 Collect eggs &amp; milk</button><button id="trade" class="b">🔄 Trade 100 eggs for a hen</button></div>
+ <div class="grid" id="pens"></div><div class="fact" id="animFact"></div></section>
+<section id="t-market" class="card" style="display:none"><h2>🧺 Farmers Market</h2>
+ <div class="math" id="profit"></div>
+ <h3>💰 Sell</h3><div id="sell"></div>
+ <h3>🛒 Buy</h3><div id="buy"></div><div class="math" id="afford">Tap 🤔 next to anything to check: can I afford it?</div></section>
+<section id="t-badges" class="card" style="display:none"><h2>🏅 Farm Badges</h2><div id="bdg"></div><div class="fact" id="factAll"></div></section>
+</main><div id="toast"></div>
+<script type="module">
+import {HOMES,HT_KEY} from "./hometown.js";
+const $=id=>document.getElementById(id);let off=0;const now=()=>Date.now()+off;const MIN=60e3,HR=60*MIN,DAY=24*HR;
+let ht={id:"lincoln"};try{ht=JSON.parse(localStorage.getItem(HT_KEY))||ht}catch(e){}
+const HID=ht.id||"lincoln",HOME=HOMES[HID],TOWN=HOME?HOME.n:(ht.name||"My Town");
+const LOCAL={lincoln:{k:"beans",e:"🫘",n:"Great Northern beans",g:100,p:7,f:"Nebraska grows more Great Northern beans than any other state — about 3 out of every 4 grown in the U.S.! (USDA NASS)"},
+ sacramento:{k:"tomato",e:"🍅",n:"Tomatoes",g:75,p:6,f:"California grows over 90% of the tomatoes the U.S. uses for things like ketchup and pasta sauce! (USDA)"},
+ newyork:{k:"apple",e:"🍎",n:"Apples",g:180,p:9,f:"New York grows the second-most apples of any state — only Washington grows more! (USDA NASS)"},
+ chicago:{k:"pumpkin",e:"🎃",n:"Pumpkins",g:150,p:8,f:"Illinois grows more pumpkins than any other state, and most of them become canned pumpkin for pie! (USDA)"},
+ dallas:{k:"cotton",e:"☁️",n:"Cotton",g:160,p:8,f:"Texas grows more cotton than any other state. Cotton is a plant fiber used to make T-shirts and jeans! (USDA)"},
+ seattle:{k:"rasp",e:"🔴",n:"Red raspberries",g:90,p:7,f:"Washington grows more red raspberries than any other state, mostly up north in Whatcom County! (WSDA / USDA)"},
+ custom:{k:"carrot",e:"🥕",n:"Carrots",g:45,p:4,f:"Carrots are roots! The orange part we eat grows underground and stores food for the plant."}};
+const L=LOCAL[HID]||LOCAL.custom;
+const CROPS={corn:{e:"🌽",n:"Corn",g:120,p:6,s:3,f:"An ear of corn usually has an even number of rows — often 16 — with about 800 kernels! Iowa, Illinois and Nebraska grow the most corn."},
+ wheat:{e:"🌾",n:"Wheat",g:60,p:4,s:2,f:"Wheat is ground into flour for bread and noodles. Kansas grows more wheat than any other state! (USDA NASS)"},
+ soy:{e:"🫛",n:"Soybeans",g:90,p:5,s:2,f:"Soybeans grow in fuzzy pods with 2 to 4 beans inside. Illinois and Iowa grow the most soybeans in the U.S.!"}};
+CROPS[L.k]={e:L.e,n:L.n,g:L.g,p:L.p,s:Math.ceil(L.p/2),f:L.f,local:1};
+const ANI={hen:{e:"🐔",n:"Hen",gives:"egg",every:DAY,f:"A hen lays at most about one egg a day — it takes about 24 to 26 hours to make one egg!"},
+ cow:{e:"🐄",n:"Cow",gives:"milk",every:12*HR,f:"A U.S. dairy cow gives about 67 pounds of milk a day on average — nearly 8 gallons! (USDA NASS 2025). Cows are usually milked 2 or 3 times a day."}};
+const PRICE={egg:1,milk:5};
+const KEY="realcraft_farm_v1_"+HID;
+function fresh(){const t=now();return{coins:30,spent:0,earned:0,plots:Array.from({length:4},()=>({c:null})),seeds:{corn:3,wheat:3,[L.k]:2},inv:{},animals:[{t:"hen",acc:0,fed:t+DAY}],eggs:0,milk:0,eggTotal:0,up:{},badges:{},grown:{},last:t,sel:"corn"}}
+let F;try{F=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!F)F=fresh();
+const save=()=>localStorage.setItem(KEY,JSON.stringify(F));
+function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display="none",2600)}
+function badge(k,n){if(F.badges[k])return;F.badges[k]=new Date(now()).toISOString().slice(0,10);localStorage.setItem("realcraft_bw_stars",(+localStorage.getItem("realcraft_bw_stars")||0)+1);setTimeout(()=>toast("🏅 Badge: "+n+"! +1 ⭐"),400)}
+const BADGES=[["plant","🌱","First Seed"],["harvest","🧺","First Harvest"],["egg","🥚","First Egg"],["sell","💰","First Sale"],["profit","📈","Profit 100 coins"],["cow","🐄","Got a Cow"],["trade","🔄","Egg Trader (100 eggs)"],["expand","🟫","Bigger Fields"],["tractor","🚜","Tractor Driver"],["local","⭐","Grew the "+TOWN+" crop"],["all","🌈","Grew every crop"]];
+const ovl=(a,b,e)=>Math.max(0,Math.min(b,e)-a);// overlap of [a,b] with (-inf,e]
+function tick(){const t=now(),a=F.last;if(t<=a)return;
+ for(const p of F.plots)if(p.c){p.pg=(p.pg||0)+ovl(a,t,p.wet||0)}
+ const cap=F.up.barn?99:99;for(const an of F.animals){const A=ANI[an.t];an.acc+=ovl(a,t,an.fed||0);while(an.acc>=A.every){an.acc-=A.every;if(A.gives==="egg"){F.eggs++;F.eggTotal++;badge("egg","First Egg")}else F.milk++}}
+ F.last=t;save()}
+const grow=p=>CROPS[p.c].g*MIN*(F.up.tractor?.8:1);
+const add=(k,n)=>F.inv[k]=(F.inv[k]||0)+n;
+function plant(i){const p=F.plots[i];if(p.c){if(p.pg>=grow(p))harvest(i);else water(i);return}const s=F.sel;if(!(F.seeds[s]>0)){toast("No "+CROPS[s].n+" seeds left — buy more at the Farmers Market 🧺");return}F.seeds[s]--;F.plots[i]={c:s,pg:0,wet:0};badge("plant","First Seed");toast(CROPS[s].e+" Planted! Now water it 💧");save();draw()}
+function water(i){const p=F.plots[i];if(!p.c||p.pg>=grow(p))return;tick();p.wet=now()+Math.max(grow(p)*.5,20*MIN);save();draw()}
+function harvest(i){const p=F.plots[i];const n=2+(F.up.tractor?1:0);add(p.c,n);F.grown[p.c]=1;badge("harvest","First Harvest");if(CROPS[p.c].local)badge("local","Grew the "+TOWN+" crop");if(Object.keys(CROPS).every(k=>F.grown[k]))badge("all","Grew every crop");toast("🧺 +"+n+" "+CROPS[p.c].e+" "+CROPS[p.c].n);F.plots[i]={c:null};save();draw()}
+function feed(){tick();let used=0;for(const an of F.animals){if((an.fed||0)-now()>DAY*.5)continue;const food=["corn","wheat","soy"].find(k=>F.inv[k]>0);if(food)F.inv[food]--;else{if(F.coins<1){toast("You need 1 grain or 1 coin of feed — harvest some crops!");break}F.coins--;F.spent++}an.fed=now()+DAY;used++}toast(used?"🌾 Fed "+used+" animal"+(used>1?"s":"")+" — they're happy and awake!":"Everyone is already full 😊");save();draw()}
+function collect(){tick();const e=F.eggs,m=F.milk;add("egg",e);add("milk",m);F.eggs=0;F.milk=0;toast(e||m?`🥚 ${e} egg${e==1?"":"s"}, 🥛 ${m} milk`:"Nothing to collect yet — check back later!");save();draw()}
+const UPS=[["seed_corn","🌽 Corn seeds ×3",()=>9,()=>{F.seeds.corn=(F.seeds.corn||0)+3}],["seed_wheat","🌾 Wheat seeds ×3",()=>6,()=>{F.seeds.wheat=(F.seeds.wheat||0)+3}],["seed_soy","🫛 Soybean seeds ×3",()=>6,()=>{F.seeds.soy=(F.seeds.soy||0)+3}],["seed_l",L.e+" "+L.n+" seeds ×3",()=>CROPS[L.k].s*3,()=>{F.seeds[L.k]=(F.seeds[L.k]||0)+3}],
+ ["hen","🐔 Hen",()=>40,()=>F.animals.push({t:"hen",acc:0,fed:now()+DAY})],
+ ["fence","🪵 Fence for a cow pen",()=>F.up.fence?null:60,()=>{F.up.fence=1}],
+ ["cow","🐄 Cow (needs a fence)",()=>F.up.fence?(F.up.barn?150:F.animals.filter(a=>a.t==="cow").length<1?150:null):null,()=>{F.animals.push({t:"cow",acc:0,fed:now()+DAY});badge("cow","Got a Cow")}],
+ ["barn","🏚️ Big red barn (room for more cows)",()=>F.up.barn?null:200,()=>{F.up.barn=1}],
+ ["field","🟫 Bigger field (+2 plots)",()=>F.plots.length>=20?null:20+F.plots.length*10,()=>{F.plots.push({c:null},{c:null});badge("expand","Bigger Fields")}],
+ ["tractor","🚜 Tractor (faster growing, bigger harvests)",()=>F.up.tractor?null:300,()=>{F.up.tractor=1;badge("tractor","Tractor Driver")}]];
+function buy(k){const u=UPS.find(x=>x[0]===k),c=u[2]();if(c==null)return;if(F.coins<c){afford(k);return}F.coins-=c;F.spent+=c;u[3]();toast("🛒 Bought "+u[1]+"!");save();draw();afford(k,1)}
+function afford(k,done){const u=UPS.find(x=>x[0]===k),c=u[2]();if(c==null)return;const h=F.coins,l=h-c;$("afford").innerHTML=done?`✅ You bought ${u[1]}.<br>Coins left: ${h}`:`🤔 Can I afford ${u[1]}?<br>I have ${h} 🪙 − it costs ${c} 🪙 = ${l} 🪙<br>`+(l>=0?"✅ Yes! You'd still have "+l+" coins.":"❌ Not yet — you need "+(-l)+" more coins. Sell some crops, eggs or milk!")}
+function sell(k,all){const n=all?F.inv[k]||0:Math.min(1,F.inv[k]||0);if(!n)return;const pr=PRICE[k]||CROPS[k].p;F.inv[k]-=n;F.coins+=n*pr;F.earned+=n*pr;badge("sell","First Sale");if(F.earned-F.spent>=100)badge("profit","Profit 100 coins");toast(`💰 Sold ${n} for ${n*pr} coins (${n} × ${pr})`);save();draw()}
+function trade(){const e=F.inv.egg||0;if(e<100){toast(`You have ${e} eggs. You need ${100-e} more for a new hen 🥚`);return}F.inv.egg-=100;F.animals.push({t:"hen",acc:0,fed:now()+DAY});badge("trade","Egg Trader (100 eggs)");toast("🔄 100 eggs → 1 new hen! 🐔");save();draw()}
+const fmt=ms=>ms<HR?Math.ceil(ms/MIN)+" min":(ms/HR).toFixed(1).replace(".0","")+" hr";
+const nm=k=>k==="egg"?"🥚 Eggs":k==="milk"?"🥛 Milk":CROPS[k].e+" "+CROPS[k].n;
+function draw(){tick();const t=now();$("coins").textContent="🪙 "+F.coins;$("ttl").textContent="🚜 "+TOWN+" Farm";
+ $("inv").innerHTML=Object.entries(F.inv).filter(([k,n])=>n>0).map(([k,n])=>`<span>${nm(k)} ${n}</span>`).join("")+Object.entries(F.seeds).filter(([k,n])=>n>0).map(([k,n])=>`<span>${CROPS[k].e} seeds ${n}</span>`).join("")||"<span>empty</span>";
+ $("seedPick").innerHTML="Seed: "+Object.keys(CROPS).map(k=>`<button data-s="${k}" class="${F.sel===k?"on":""}">${CROPS[k].e} ${F.seeds[k]||0}</button>`).join("");
+ $("plots").innerHTML=F.plots.map((p,i)=>{if(!p.c)return`<button class="tile dirt" data-p="${i}"><div class="e">🟫</div>Empty — tap to plant</button>`;const C=CROPS[p.c],g=grow(p),pc=Math.min(1,p.pg/g),wet=(p.wet||0)>t,rd=pc>=1;
+  return`<button class="tile ${rd?"ready":wet?"wet":"dirt"}" data-p="${i}"><div class="e">${rd?C.e:pc>.5?"🌿":"🌱"}</div>${C.n}<div class="bar"><i style="width:${pc*100}%"></i></div>${rd?"✅ Ready! Tap to pick":wet?"💧 Growing · "+fmt((g-p.pg))+" left":"🥀 Thirsty — tap to water"}</button>`}).join("");
+ $("tractorTip").textContent=F.up.tractor?"🚜 Tractor: grows 20% faster, +1 per harvest":"";
+ $("cropFact").textContent="🌽 Fact: "+CROPS[F.sel].f;
+ $("pens").innerHTML=F.animals.map((a,i)=>{const A=ANI[a.t],aw=(a.fed||0)>t;return`<div class="tile ${aw?"":"sleepy"}"><div class="e">${A.e}${aw?"":"💤"}</div>${A.n} ${i+1}<div class="bar"><i style="width:${a.acc/A.every*100}%"></i></div>${aw?(A.gives==="egg"?"🥚":"🥛")+" next in "+fmt(A.every-a.acc):"😴 Sleepy — feed me!"}</div>`}).join("")+(F.eggs||F.milk?`<div class="tile ready"><div class="e">🧺</div>Waiting: 🥚${F.eggs} 🥛${F.milk}</div>`:"");
+ $("trade").textContent=`🔄 Trade 100 eggs for a hen (${F.inv.egg||0}/100)`;
+ $("animFact").textContent=(F.animals.some(a=>a.t==="cow")?ANI.cow.f:ANI.hen.f);
+ const pr=F.earned-F.spent;$("profit").innerHTML=`Earned 💰 ${F.earned} − Spent 🛒 ${F.spent} = Profit ${pr>=0?"📈":"📉"} ${pr}<br><small>${pr>=0?"You've earned more than you spent!":"You've spent more than you earned so far — that's normal when a farm is just starting!"}</small>`;
+ const sk=["egg","milk",...Object.keys(CROPS)];$("sell").innerHTML=sk.map(k=>{const n=F.inv[k]||0,p=PRICE[k]||CROPS[k].p;return`<div class="item"><span>${nm(k)} · ${p} 🪙 each · have ${n}</span><span><button data-sell="${k}" ${n?"":"disabled"}>Sell 1</button> <button class="go" data-sellall="${k}" ${n?"":"disabled"}>Sell all = ${n*p} 🪙</button></span></div>`}).join("");
+ $("buy").innerHTML=UPS.map(u=>{const c=u[2]();if(c==null)return"";return`<div class="item"><span>${u[1]} · ${c} 🪙</span><span><button data-chk="${u[0]}">🤔</button> <button class="${F.coins>=c?"go":""}" data-buy="${u[0]}">Buy</button></span></div>`}).join("");
+ $("bdg").innerHTML=BADGES.map(([k,e,n])=>`<div class="badge ${F.badges[k]?"":"off"}"><b>${e}</b>${n}</div>`).join("");
+ $("factAll").innerHTML=Object.values(CROPS).map(c=>c.e+" "+c.f).join("<br>")+"<br>"+ANI.hen.e+" "+ANI.hen.f+"<br>"+ANI.cow.e+" "+ANI.cow.f}
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+ if(d.t){document.querySelectorAll("[data-t]").forEach(x=>x.classList.toggle("on",x===b));for(const s of["fields","animals","market","badges"])$("t-"+s).style.display=s===d.t?"":"none";draw()}
+ else if(d.s){F.sel=d.s;save();draw()}else if(d.p)plant(+d.p);else if(d.sell)sell(d.sell);else if(d.sellall)sell(d.sellall,1);else if(d.buy)buy(d.buy);else if(d.chk)afford(d.chk)});
+$("waterAll").onclick=()=>{F.plots.forEach((p,i)=>water(i));toast("💧 Watered!")};$("harvAll").onclick=()=>{let n=0;F.plots.forEach((p,i)=>{if(p.c&&p.pg>=grow(p)){harvest(i);n++}});if(!n)toast("Nothing is ready yet 🌱")};
+$("feedAll").onclick=feed;$("collect").onclick=collect;$("trade").onclick=trade;
+setInterval(draw,5000);draw();
+window.FARM={F:()=>F,warp:ms=>{off+=ms;draw()},plant,water,harvest,feed,collect,buy,sell,trade,draw,KEY,CROPS};
+</script>
+<script>// helps iOS reach panels
+</script></body></html>

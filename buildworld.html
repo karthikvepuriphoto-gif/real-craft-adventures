@@ -414,6 +414,14 @@ function openCityCard(){const H=HOMES[HT];let body;if(HT==="custom")body=`<div c
 
 let LM=[];
 let SHX=null;
+let FMX=null;function farmArea(){let best=null,hw=5;for(;hw>=3&&!best;hw--){const ok=(x,z)=>{if(PLAYS.some(q=>Math.hypot(x-q.x,z-q.z)<q.r+hw+4)||(SHX&&Math.hypot(x-SHX.x,z-SHX.z)<hw+8))return false;for(let dx=-hw;dx<=hw;dx++)for(let dz=-7;dz<=hw;dz++){const X=x+dx,Z=z+dz;if(X<-OX+2||X>=OX-2||Z<-OZ+2||Z>=OZ-2)return false;if(groundTop(X,Z)!==1||![1,2,17].includes(get(X,0,Z)))return false}return true};
+ let bd=1e9;for(let x=-OX;x<=OX;x++)for(let z=-OZ;z<=OZ;z++){const d=Math.hypot(x+10,z-10);if(d<bd&&ok(x,z)){bd=d;best=[x,z]}}}hw++;
+ if(!best){FMX=null;return}const[cx,cz]=best;FMX={x:cx+.5,z:cz+.5};
+ for(let dx=-hw;dx<=hw;dx++){set(cx+dx,1,cz+hw,4);if(Math.abs(dx)>1)set(cx+dx,1,cz-hw,4)}for(let dz=-hw;dz<=hw;dz++){set(cx-hw,1,cz+dz,4);set(cx+hw,1,cz+dz,4)}
+ for(const sx of[-1,1])for(let a=3;a<hw;a++)for(let dz=1-hw;dz<hw;dz++){set(cx+sx*a,0,cz+dz,2);if(dz%2===0)set(cx+sx*a,1,cz+dz,a===4?10:11)}
+ if(hw<4)for(let dx=-1;dx<=1;dx+=2)for(let dz=-2;dz>=1-hw-2&&dz>-7;dz--){if(dz%2===0){set(cx+dx*2,0,cz+dz,2);set(cx+dx*2,1,cz+dz,11)}}
+ const bz=hw<4?Math.min(0,hw-4):0;box(cx-2,cx+2,1,4,cz+bz,cz+bz+4,8,true);box(cx-2,cx+2,5,5,cz+bz,cz+bz+4,15);box(cx-1,cx+1,6,6,cz+bz,cz+bz+4,8);
+ for(let y=1;y<=3;y++)set(cx,y,cz+bz,0);set(cx-1,4,cz+bz,15);set(cx+1,4,cz+bz,15);for(let dz=-7;dz<bz;dz++)if(get(cx,1,cz+dz)===0||get(cx,1,cz+dz)===4){set(cx,1,cz+dz,0);set(cx,0,cz+dz,5)}}
 function soundHouse(){const ok=(x,z)=>{for(let dx=-4;dx<=4;dx++)for(let dz=-5;dz<=4;dz++){const X=x+dx,Z=z+dz;if(X<-OX+2||X>=OX-2||Z<-OZ+2||Z>=OZ-2)return false;if(groundTop(X,Z)!==1||![1,2].includes(get(X,0,Z)))return false}return true};
  let best=null,bd=1e9;for(let x=-56;x<=56;x++)for(let z=-56;z<=56;z++){const d=Math.hypot(x-8,z-8);if(d<bd&&ok(x,z)){bd=d;best=[x,z]}}
  if(!best){SHX=null;return}const[cx,cz]=best;SHX={x:cx+.5,z:cz+.5};
@@ -422,7 +430,7 @@ function soundHouse(){const ok=(x,z)=>{for(let dx=-4;dx<=4;dx++)for(let dz=-5;dz
  set(cx-1,4,cz-3,10);set(cx+1,4,cz-3,10);set(cx,5,cz-3,12);set(cx,9,cz,10);for(let dz=-5;dz<=-4;dz++)set(cx,0,cz+dz,3)}
 function genBase(){
   vox.fill(0);count=0;for(const c of chunks.values())c.dirty=true;
-  if(!HTL){genCity();soundHouse();return}
+  if(!HTL){genCity();soundHouse();farmArea();return}
   flat(-OX,OX-1,-OZ,OZ-1,1);
   for(let x=-24;x<24;x++)for(let z=-24;z<24;z++)if((z===-8&&Math.abs(x)<18)||(x===12&&z>-20&&z<16))set(x,0,z,3);
   const road=(x0,x1,z0,z1)=>flat(x0,x1,z0,z1,28);
@@ -453,7 +461,7 @@ function genBase(){
   hood(-28,-6,-28,-20);hood(4,28,-28,-16);hood(-60,-38,-28,-6);hood(-28,28,-62,-38);hood(37,60,-62,-38);hood(-26,-6,4,6);
   // trees
   const T=rng(7);for(let n=0;n<500;n++){const x=-OX+2+(T()*(W-4)|0),z=-OZ+2+(T()*(W-4)|0);let ok=true;for(let dx=-2;dx<=2&&ok;dx++)for(let dz=-2;dz<=2;dz++){if(get(x+dx,0,z+dz)!==1||get(x+dx,1,z+dz)){ok=false;break}}if(ok)tree(x,z,3+(T()*2|0))}
-  soundHouse();
+  soundHouse();farmArea();
 }
 LM=[
  {k:"home",n:"🏡 Home Street",x:0,z:-14,y:7,go:[0.5,-9.5]},
@@ -628,6 +636,7 @@ function toggleFly(){P.fly=!P.fly;document.getElementById("btnFly").classList.to
 // go-to panel
 const gp=document.getElementById("gopanel");gp.innerHTML=LM.map(L=>`<button data-go="${L.k}">${L.n.replace("Lincoln Children's Zoo","Zoo").replace("Nebraska State ","").replace("Pinnacle Bank ","").replace("Lincoln ","")}</button>`).join("");
 tapBtn("goBtn",()=>{gp.classList.toggle("hidden");document.getElementById("goBtn").classList.toggle("on",!gp.classList.contains("hidden"))});
+function goFarm(){if(away){toast("🚜 Your farm is in your hometown — fly home first!");return}if(!FMX)return;if(ride)exitNow(true);P.x=FMX.x;P.z=FMX.z-7;P.fly=false;P.vy=0;let y=groundTop(P.x,P.z);while(collide(P.x,y,P.z)&&y<H)y++;P.y=y;P.yaw=0;P.cy=P.yaw-Math.PI;camInit=false;rebuildNear(40);toast("🚜 Here's My First Farm! Walk to the red barn door.")}
 function goSH(){if(away){toast("🏠 The Fun Sound House is in your hometown — fly home first!");return}if(!SHX)return;if(ride)exitNow(true);P.x=SHX.x;P.z=SHX.z-6.5;P.fly=false;P.vy=0;let y=groundTop(P.x,P.z);while(collide(P.x,y,P.z)&&y<H)y++;P.y=y;P.yaw=0;P.cy=P.yaw-Math.PI;camInit=false;rebuildNear(40);toast("🎵 Here's the Fun Sound House! Walk to the door.")}
 function goSport(){if(!away||!destSport){toast("🌍 Fly to a World Trip place first — every stop has a sports field!");return}if(ride)exitNow(true);P.x=destSport.x-destSport.r+2;P.z=destSport.z;P.fly=false;P.vy=0;let y=groundTop(P.x,P.z);while(collide(P.x,y,P.z)&&y<H)y++;P.y=y;P.yaw=Math.PI/2;P.cy=P.yaw-Math.PI;camInit=false;rebuildNear(40);toast("🏟️ Here's the "+SPORTS[destSport.sp].n+" field!")}
 function goTo(key){const g=GO[key];if(!g)return;if(ride)exitNow(true);P.x=g[0];P.z=g[1];P.y=1;P.vy=0;P.fly=false;document.getElementById("btnFly").classList.remove("on");P.yaw=g[2];P.cy=g[2]-Math.PI;P.cp=.7;camInit=false;let y=groundTop(P.x,P.z);while(collide(P.x,y,P.z)&&y<H)y++;P.y=y;rebuildNear(40)}
@@ -636,9 +645,9 @@ gp.querySelectorAll("button").forEach(b=>b.addEventListener("pointerdown",e=>{e.
 // vehicle UI
 function nearVeh(){let best=null,bd=4.5;for(const v of VEH){if(!v.g.visible)continue;const d=Math.hypot(v.x-P.x,v.z-P.z);if(d<bd&&Math.abs(v.y-P.y)<3){bd=d;best=v}}return best}
 const getInBtn=document.getElementById("getIn");let nearV=null;
-tapBtn("getIn",()=>{if(nearV)getIn(nearV);else if(nearRocket)goSpace();else if(nearSub)location.href="sea.html";else if(nearTM)location.href="timemachine.html";else if(nearSchool)enterSchool();else if(nearSH)location.href="soundhouse.html"});
+tapBtn("getIn",()=>{if(nearV)getIn(nearV);else if(nearRocket)goSpace();else if(nearSub)location.href="sea.html";else if(nearTM)location.href="timemachine.html";else if(nearSchool)enterSchool();else if(nearSH)location.href="soundhouse.html";else if(nearFarm)location.href="farm.html"});
 // --- Time Machine near UNL / Morrill Hall (opens timemachine.html) ---
-const TMX={x:28,z:36};let nearTM=false,nearSchool=false,nearSH=false;
+const TMX={x:28,z:36};let nearTM=false,nearSchool=false,nearSH=false,nearFarm=false;
 const KEYG="realcraft_grade_v1";
 async function enterSchool(){try{const r=await fetch("school.html",{method:"HEAD",cache:"no-store"});if(r.ok){location.href="school.html#grade";return}}catch(e){}openGradePicker()}
 function openGradePicker(){let o=document.getElementById("gradeOv");if(!o){o=document.createElement("div");o.id="gradeOv";o.className="ov";document.body.appendChild(o)}const cur=localStorage.getItem(KEYG);
@@ -756,6 +765,7 @@ function step(dt,t){
   {const nt=!nearV&&!nearRocket&&!nearSub&&!away&&Math.hypot(P.x-TMX.x,P.z-TMX.z)<4;if(nt){if(!nearTM||getInBtn.classList.contains("hidden")){getInBtn.textContent="⏳ Enter the Time Machine!";getInBtn.classList.remove("hidden")}}else if(nearTM&&!nearV&&!nearRocket&&!nearSub)getInBtn.classList.add("hidden");nearTM=nt}
   {const ns=!nearV&&!nearRocket&&!nearSub&&!nearTM&&!away&&!ride&&Math.abs(P.x-16)<5.5&&P.z>-10&&P.z<0;if(ns){if(!nearSchool||getInBtn.classList.contains("hidden")){getInBtn.textContent="🏫 Enter the Elementary School!";getInBtn.classList.remove("hidden")}}else if(nearSchool&&!nearV&&!nearRocket&&!nearSub&&!nearTM)getInBtn.classList.add("hidden");nearSchool=ns}
   {const nh=!nearV&&!nearRocket&&!nearSub&&!nearTM&&!nearSchool&&!away&&!ride&&SHX&&Math.abs(P.x-SHX.x)<4.5&&P.z>SHX.z-7&&P.z<SHX.z+4;if(nh){if(!nearSH||getInBtn.classList.contains("hidden")){getInBtn.textContent="🎵 Enter the Fun Sound House!";getInBtn.classList.remove("hidden")}}else if(nearSH&&!nearV&&!nearRocket&&!nearSub&&!nearTM&&!nearSchool)getInBtn.classList.add("hidden");nearSH=nh}
+  {const nf=!nearV&&!nearRocket&&!nearSub&&!nearTM&&!nearSchool&&!nearSH&&!away&&!ride&&FMX&&Math.abs(P.x-FMX.x)<5&&P.z>FMX.z-9&&P.z<FMX.z+2;if(nf){if(!nearFarm||getInBtn.classList.contains("hidden")){getInBtn.textContent="🚜 Enter My First Farm!";getInBtn.classList.remove("hidden")}}else if(nearFarm&&!nearV&&!nearRocket&&!nearSub&&!nearTM&&!nearSchool&&!nearSH)getInBtn.classList.add("hidden");nearFarm=nf}
   }
   if(ride&&nearV){nearV=null;getInBtn.classList.add("hidden")}
   {const nw=performance.now();for(const o of _fd){const hit=!ride&&nw-o.userData.ft<150,m=o.material;m.opacity+=((hit?.22:(o.userData.om.opacity))-m.opacity)*Math.min(1,dt*10);m.depthWrite=m.opacity>.95;if(!hit&&Math.abs(m.opacity-o.userData.om.opacity)<.02){m.dispose();o.material=o.userData.om;o.userData.fm=0;_fd.delete(o)}}}
@@ -1258,7 +1268,7 @@ window.BWA={openTrip:()=>{renderTrip();openOv("trip")},ZA,DA,VOXAN,tapAnimal,nea
 tapBtn("tLoop",()=>doTrick("loop"));tapBtn("tRoll",()=>doTrick("roll"));tapBtn("tFlip",()=>doTrick("flip"));tapBtn("tSpin",()=>doTrick("spin"));tapBtn("tSmoke",cycleSmoke);document.getElementById("tTrip").onclick=openTrip;tapBtn("flyHome",flyHome);
 document.getElementById("btnPass").onclick=openPassport;document.querySelectorAll(".ovClose").forEach(b=>b.onclick=()=>closeOv(b.dataset.c));
 document.getElementById("askYes").onclick=()=>{closeOv("askHome");flyHome()};document.getElementById("askNo").onclick=()=>{closeOv("askHome");askSnooze=performance.now()/1000+120;edgeHold=0};
-{const mk=(t,f)=>{const b=document.createElement("button");b.textContent=t;b.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();gp.classList.add("hidden");document.getElementById("goBtn").classList.remove("on");f()});gp.appendChild(b)};mk("🏟️ Sports field (World Trip)",goSport);mk("🏅 Sports Passport",openSportsPassport);mk("🎵 Fun Sound House",goSH);mk("💡 Suggest an idea",()=>window.open("https://form.jotform.com/262885186811063","_blank","noopener"));
+{const mk=(t,f)=>{const b=document.createElement("button");b.textContent=t;b.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();gp.classList.add("hidden");document.getElementById("goBtn").classList.remove("on");f()});gp.appendChild(b)};mk("🏟️ Sports field (World Trip)",goSport);mk("🏅 Sports Passport",openSportsPassport);mk("🎵 Fun Sound House",goSH);mk("🚜 My First Farm",goFarm);mk("💡 Suggest an idea",()=>window.open("https://form.jotform.com/262885186811063","_blank","noopener"));
  mk("🌍 World Trip",()=>{if(ride&&ride.t==="plane")openTrip();else{goTo("airport");toast("✈️ Walk to the plane, get in, then tap 🌍 World Trip!")}});mk("🏙️ My City",openCityCard);mk("🛂 Passport",openPassport);mk("📖 Animal Book",()=>openBook("land"));mk("⏳ Time Machine",()=>{goTo("unl");P.x=TMX.x-3;P.z=TMX.z;toast("⏳ Walk to the Time Machine and tap Enter!")});mk("🌊 Sea Mode",()=>{goTo("lake");P.x=SUB.x-3;P.z=SUB.z;toast("🌊 Walk to the yellow submarine and tap Get in!")});mk("🚀 Space Mode",()=>{goTo("airport");P.x=ROCKET.x+3;P.z=ROCKET.z+1;toast("🚀 Walk up to the rocket and tap Get in!")})}
 if(location.hash==="#time")setTimeout(()=>{try{goTo("unl");P.x=TMX.x-3;P.z=TMX.z;P.y=groundTop(P.x,P.z)+.1;history.replaceState(null,"",location.pathname)}catch(e){}},600);
 if(location.hash==="#sub")setTimeout(()=>{try{goTo("lake");P.x=SUB.x-3;P.z=SUB.z;P.y=groundTop(P.x,P.z)+.1;history.replaceState(null,"",location.pathname)}catch(e){}},600);
@@ -1271,7 +1281,7 @@ requestAnimationFrame(frame);
 if(window.Music)Music.play("build");
 
 document.getElementById("btnChar").onclick=()=>openDressUp({onChange:reAv});
-window.BW={PLAYS,goSH,SH:()=>SHX,nearSH:()=>nearSH,goSport,openSport,destSport:()=>destSport,openFootball,openPlayground,openSandcastle,enterSchool,openGradePicker,nearSchool:()=>nearSchool,HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
+window.BW={PLAYS,goFarm,FM:()=>FMX,nearFarm:()=>nearFarm,goSH,SH:()=>SHX,nearSH:()=>nearSH,goSport,openSport,destSport:()=>destSport,openFootball,openPlayground,openSandcastle,enterSchool,openGradePicker,nearSchool:()=>nearSchool,HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
 
 </script>
 <script>
