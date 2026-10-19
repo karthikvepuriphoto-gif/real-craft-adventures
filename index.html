@@ -172,9 +172,15 @@ const BADGES = [
  {id:"day3",n:"Full Day",ic:"☀️",t:"All 3 missions in one day",f:s=>Object.values(s.daily).some(a=>a.length>=3)},
  {id:"lvl5",n:"Diamond Rank",ic:"💎",t:"Reach level 5",f:s=>level(s.xp).lvl>=5},
  {id:"snap",n:"Snapshot Pro",ic:"🖼️",t:"Pick a snapshot",f:s=>Object.values(s.biomes).some(b=>b.snap)||Object.keys(s.msnap||{}).length>0},
+ {id:"rock5",n:"Rock Hound",ic:"⛏️",t:"Find 5 minerals in the Build World mine",f:s=>Object.keys(advAll().found).length>=5},
+ {id:"dia",n:"Diamond Finder",ic:"💠",t:"Find a diamond deep in the mine",f:s=>!!advAll().found.diamond},
+ {id:"craft",n:"Master Crafter",ic:"⚒️",t:"Craft an iron pickaxe",f:s=>!!advAll().made.ipick},
+ {id:"portal",n:"Portal Explorer",ic:"🌀",t:"Visit all 3 portal worlds",f:s=>{const v=advAll().vis;return !!(v.crystal&&v.sky&&v.candy)}},
 ];
+function advAll(){const o={found:{},made:{},vis:{}};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("realcraft_adv_v1_")){const a=JSON.parse(localStorage.getItem(k)||"{}");for(const f of["found","made","vis"])Object.assign(o[f],a[f]||{})}}}catch(e){}return o}
 
 let S = load();migrate();
+setTimeout(()=>{try{const nb=BADGES.filter(b=>{try{return !S.badges.includes(b.id)&&b.f(S)}catch(e){return false}});if(nb.length){nb.forEach(b=>S.badges.push(b.id));save();try{render()}catch(e){}beep(990,.3);toast("🏅 Badge: "+nb.map(b=>b.n).join(", "))}}catch(e){}},1500);
 function migrate(){let ch=false;if(S.biomes&&S.biomes.school){if(!S.biomes.kahoa)S.biomes.kahoa=S.biomes.school;delete S.biomes.school;ch=true}
  if(S.deco&&S.deco["b:school"]){if(!S.deco["b:kahoa"])S.deco["b:kahoa"]=S.deco["b:school"];delete S.deco["b:school"];ch=true}if(ch)save()}
 function load(){try{return Object.assign({name:"",xp:0,missionsDone:0,biomes:{},daily:{},inv:{},badges:[],msnap:{},deco:{},packs:[],sound:true},JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){return {name:"",xp:0,missionsDone:0,biomes:{},daily:{},inv:{},badges:[],msnap:{},deco:{},packs:[],sound:true}}}
