@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><script src="mobile.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><script src="mobile.js"></script><script src="survival.js" defer></script>
 <link rel="icon" href="data:,">
 <title>Build World · Real Craft Adventures</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -99,7 +99,7 @@ body.realm #adv{top:120px}html.phone body.realm #adv{top:calc(48px + env(safe-ar
 <div id="look">👉 Drag to look · tap to build</div>
 <div id="zoom"><button id="zIn" title="Zoom in">➕</button><button id="zOut" title="Zoom out">➖</button></div>
 <div id="help" class="hidden"><div class="card"><h3>🌍 How to play</h3>
-🕹️ <b>Move:</b> drag the round stick (bottom left)<br>👉 <b>Look:</b> drag anywhere on the world<br>👆 <b>Build:</b> tap a block. <b>🧱 Place</b> adds a block, <b>⛏️ Break</b> removes one<br>🎨 <b>Pick a block</b> from the bar at the bottom<br>⬆️ <b>Jump</b> · 🕊️ <b>Fly</b> · ➕➖ <b>Zoom</b><br>⛏️ <b>Mine:</b> tap ⛏️ Mine, then hold ⛏️ Break on a block. Deeper = rarer minerals! 🛗 Elevator or the wooden ramp brings you back up<br>⚒️ <b>Craft:</b> 🎒 Bag → open your gift, make a 🛠️ Crafting Table, place it and tap it for tools<br>🌀 <b>Portal:</b> craft 14 frames + a crystal, build it, walk in!<br>🚀 <b>Go to</b> any <span class="htn">Lincoln</span> place: landmarks, parks, the Airport…<br>🚁 <b>Helicopter:</b> walk up and tap <b>Get in</b>. Hold ⬆️ Up, stick to fly<br>✈️ <b>Plane</b> at the Airport: hold ⏩ Faster to take off, stick to steer<br>🗺️ <b>Top view</b> looks down on the city · ⭐ fly through gold rings!<br>🔁 <b>Tricks</b> in the plane: Loop, Roll, Flip, Spin and colored 💨 Smoke!<br>🌍 <b>World Trip</b> (in the plane): fly to Paris, India, the USA<span id="htFam"> and family</span>! 🛂 Collect passport stamps<br>🏠 <b>Fly Home</b> brings you back to <span class="htn">Lincoln</span> anytime<br>🔒 Locked blocks unlock when you do real quests!<br><br><button class="go" id="helpOk" style="font-size:12px">Let's build!</button></div></div>
+🕹️ <b>Move:</b> drag the round stick (bottom left)<br>👉 <b>Look:</b> drag anywhere on the world<br>👆 <b>Build:</b> tap a block. <b>🧱 Place</b> adds a block, <b>⛏️ Break</b> removes one<br>🎨 <b>Pick a block</b> from the bar at the bottom<br>⬆️ <b>Jump</b> · 🕊️ <b>Fly</b> · ➕➖ <b>Zoom</b><br>⛏️ <b>Mine:</b> tap ⛏️ Mine, then hold ⛏️ Break on a block. Deeper = rarer minerals! 🛗 Elevator or the wooden ramp brings you back up<br>⚒️ <b>Craft:</b> 🎒 Bag → open your gift, make a 🛠️ Crafting Table, place it and tap it for tools<br>🏕️ <b>Survival</b> (button at the top, optional): eat to keep ⚡ energy up, build a shelter with a bed, door and torches before night, then 😴 Sleep. No monsters!<br>🌀 <b>Portal:</b> craft 14 frames + a crystal, build it, walk in!<br>🚀 <b>Go to</b> any <span class="htn">Lincoln</span> place: landmarks, parks, the Airport…<br>🚁 <b>Helicopter:</b> walk up and tap <b>Get in</b>. Hold ⬆️ Up, stick to fly<br>✈️ <b>Plane</b> at the Airport: hold ⏩ Faster to take off, stick to steer<br>🗺️ <b>Top view</b> looks down on the city · ⭐ fly through gold rings!<br>🔁 <b>Tricks</b> in the plane: Loop, Roll, Flip, Spin and colored 💨 Smoke!<br>🌍 <b>World Trip</b> (in the plane): fly to Paris, India, the USA<span id="htFam"> and family</span>! 🛂 Collect passport stamps<br>🏠 <b>Fly Home</b> brings you back to <span class="htn">Lincoln</span> anytime<br>🔒 Locked blocks unlock when you do real quests!<br><br><button class="go" id="helpOk" style="font-size:12px">Let's build!</button></div></div>
 <div id="toast" class="hidden"></div>
 <div id="tricks"><button id="tLoop">🔁<small>Loop</small></button><button id="tRoll">🌀<small>Roll</small></button><button id="tFlip">🤸<small>Flip</small></button><button id="tSpin">💫<small>Spin</small></button><button id="tSmoke">💨<small>Smoke</small></button><button id="tTrip" class="go">🌍<small>World Trip</small></button></div>
 <button id="flyHome">🏠 Fly Home</button>
@@ -165,7 +165,7 @@ const BLOCKS=[
  // mining / crafting / portal blocks
  {id:38,n:"Coal Ore",c:"#4f4f4f",tex:1},{id:39,n:"Copper Ore",c:"#b0704a",tex:1},{id:40,n:"Iron Ore",c:"#a88a72",tex:1},{id:41,n:"Gold Ore",c:"#c9a83a",tex:1},{id:42,n:"Diamond Ore",c:"#4fc3d6",tex:1},{id:43,n:"Emerald Ore",c:"#2fa866",tex:1},{id:44,n:"Amethyst",c:"#9b59d0",tex:1},{id:45,n:"Deep Stone",c:"#5f6670",tex:1},{id:46,n:"Bedrock",c:"#3a3a3a",tex:1},{id:47,n:"Clay",c:"#a9b3c1",tex:1},
  {id:48,n:"Crafting Table",c:"#b07a43",tex:1},{id:49,n:"Torch",c:"#ffb300",glow:1},{id:50,n:"Door",c:"#8d5a2b",tex:1},{id:51,n:"Bed",c:"#e53935",tex:1},{id:52,n:"Lantern",c:"#ffe082",glow:1},{id:53,n:"Ladder",c:"#8d6e63",tex:1,cut:1},{id:54,n:"Rails",c:"#9e9e9e",tex:1},{id:55,n:"Portal Frame",c:"#2e1f4f",tex:1},{id:56,n:"Portal",c:"#b04dff",glow:1,a:.6},
- {id:57,n:"Quartz",c:"#efebe4",tex:1},{id:58,n:"Glow Crystal",c:"#7dfcff",glow:1},{id:59,n:"Cloud",c:"#ffffff"},{id:60,n:"Sky Stone",c:"#b8c7e0",tex:1},{id:61,n:"Chocolate",c:"#6d3b1f",tex:1},{id:62,n:"Candy Cane",c:"#e53935",tex:1},{id:63,n:"Gumdrop",c:"#ff5fa2",tex:1},{id:64,n:"Frosting",c:"#fff0f6",tex:1},{id:65,n:"Cotton Candy",c:"#ffb3de",tex:1},{id:66,n:"Elevator",c:"#b0bec5",tex:1},
+ {id:57,n:"Quartz",c:"#efebe4",tex:1},{id:58,n:"Glow Crystal",c:"#7dfcff",glow:1},{id:59,n:"Cloud",c:"#ffffff"},{id:60,n:"Sky Stone",c:"#b8c7e0",tex:1},{id:61,n:"Chocolate",c:"#6d3b1f",tex:1},{id:62,n:"Candy Cane",c:"#e53935",tex:1},{id:63,n:"Gumdrop",c:"#ff5fa2",tex:1},{id:64,n:"Frosting",c:"#fff0f6",tex:1},{id:65,n:"Cotton Candy",c:"#ffb3de",tex:1},{id:66,n:"Elevator",c:"#b0bec5",tex:1},{id:67,n:"Berry Bush",c:"#2e7d32",tex:1},{id:68,n:"Campfire",c:"#ff8f00",tex:1},
 ];
 if(HTL&&window.RCA_LINCOLN)window.RCA_LINCOLN.patchBlocks(BLOCKS);if(!HTL)for(const b of BLOCKS)if(b.hint)b.hint=b.hint.replace("Nebraska State Capitol","State Capitol");
 const BASIC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
@@ -188,7 +188,7 @@ const scene=new THREE.Scene();scene.background=new THREE.Color("#87ceeb");scene.
 const cam=new THREE.PerspectiveCamera(70,1,.1,100);
 const ren=new THREE.WebGLRenderer({antialias:false,powerPreference:"high-performance"});ren.setPixelRatio(window.RCA_DPR?RCA_DPR(1.5):Math.min(1.5,devicePixelRatio||1));
 const view=document.getElementById("view");view.appendChild(ren.domElement);
-const sun=new THREE.DirectionalLight("#fff8e1",1.1);sun.position.set(30,50,20);scene.add(sun,new THREE.HemisphereLight("#ffffff","#7cb342",.9),new THREE.AmbientLight("#ffffff",.25));
+const sun=new THREE.DirectionalLight("#fff8e1",1.1);sun.position.set(30,50,20);const hemi=new THREE.HemisphereLight("#ffffff","#7cb342",.9),amb=new THREE.AmbientLight("#ffffff",.25);scene.add(sun,hemi,amb);
 const mats={};function mat(id){if(mats[id])return mats[id];const B=BLOCKS[id];let m;if(B.glow)m=new THREE.MeshBasicMaterial({color:B.c,transparent:!!B.a,opacity:B.a||1,depthWrite:!B.a});else if(B.tex&&TEXF[id])m=new THREE.MeshLambertMaterial({map:pxTex(TEXF[id]),transparent:!!B.cut,alphaTest:B.cut?.5:0,side:B.cut?THREE.DoubleSide:THREE.FrontSide});else m=new THREE.MeshLambertMaterial({color:B.c||"#fff",transparent:!!B.a,opacity:B.a||1,depthWrite:!B.a});mats[id]=m;return m}
 
 // ---- dense voxel world ----
@@ -584,11 +584,11 @@ function doAction(){
   if(!target)return toast("👀 Look at a block first!");
   const tid=get(target.x,target.y,target.z);
   if(tid===56)return portalMenu();
-  if(tid===48&&mode==="place")return openAdv("craft");
+  if(tid===48&&mode==="place")return openAdv("craft");if(tid===68&&mode==="place"&&window.SURV)return SURV.cook();
   if(mode==="break"){
     if(realm){mineHit(target,.3);return}
     if(UNBRK.has(tid))return;
-    set(target.x,target.y,target.z,0);beep(320,.06);saveSoon();const it=DROP[tid];if(it){ADV.mined++;gainItem(it)}
+    set(target.x,target.y,target.z,0);beep(320,.06);saveSoon();const it=DROP[tid];if(it){ADV.mined++;gainItem(it,tid===67?3:1);if(tid===67&&window.SURV)SURV.picked()}
   }
   else{
     if(selItem){if(!(ADV.inv[selItem]>0)){selItem=null;renderHotbar();return toast("🎒 You're out of that! Mine or craft more.")}}
@@ -598,7 +598,7 @@ function doAction(){
     if(y<0||y>=H)return;
     if(!NSB.has(sel)&&Math.abs(x+.5-P.x)<.7&&Math.abs(z+.5-P.z)<.7&&y<=P.y+1.7&&y+1>=P.y)return toast("🚧 Too close!");
     if(get(x,y,z))return;
-    set(x,y,z,sel);beep(620,.05);saveSoon();
+    set(x,y,z,sel);beep(620,.05);saveSoon();if(!realm&&sel===51){ADV.bed={x,y,z};saveADV()}
     if(selItem){ADV.inv[selItem]--;saveADV();if(sel===48&&!ADV.tableTip){ADV.tableTip=1;saveADV();toast("🛠️ Crafting Table placed! Tap it (in 🧱 Place mode) to craft.")}if(!ADV.inv[selItem]){selItem=null;if(realm)sel=0}renderHotbar()}
   }
 }
@@ -637,7 +637,7 @@ function placeCar(){
 function renderHotbar(){
   const bar=document.getElementById("hotbar");
   const ids=realm?[]:[...BASIC,19,20,21,22,23,24,25,26,27,28,29];
-  const bag=Object.keys(ADV.inv).filter(k=>ADV.inv[k]>0&&ITM[k].b&&(realm||!ids.includes(ITM[k].b)));
+  const bag=Object.keys(ADV.inv).filter(k=>ADV.inv[k]>0&&ITM[k]&&ITM[k].b&&(realm||!ids.includes(ITM[k].b)));
   bar.innerHTML=ids.map(id=>{const B=BLOCKS[id],ok=unlocked(id);return`<button class="hb${!selItem&&sel===id?" on":""}${ok?"":" lock"}" data-id="${id}" title="${ok?B.n:(B.hint||"Locked")}" style="background:${B.c||"#333"}">${ok?"":"🔒"}</button>`}).join("")
    +bag.map(k=>`<button class="hb bagi${selItem===k?" on":""}" data-item="${k}" title="${ITM[k].n}" style="background:${BLOCKS[ITM[k].b].c}">${ITM[k].e}<b class="cnt">${ADV.inv[k]}</b></button>`).join("")+(realm&&!bag.length?`<span class="hbtip">⛏️ Mine blocks to fill your bag!</span>`:"");
   bar.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>{const id=+b.dataset.id;if(!unlocked(id))return toast("🔒 "+(BLOCKS[id].hint||"Locked!"));sel=id;selItem=null;mode="place";document.getElementById("modePlace").classList.add("on");document.getElementById("modeBreak").classList.remove("on");renderHotbar();beep(500,.04)});
@@ -1357,14 +1357,16 @@ const ITM={
  cotton:{n:"Cotton Candy",e:"🍭",b:65,bk:1,f:"Cotton candy is sugar that is melted and spun through tiny holes into thin threads that cool into fluff."},
  wood:{n:"Wood",e:"🪵",b:4,bk:1,f:"Trees grow a new ring of wood every year, so you can count the rings to find out how old a tree was."},
  leaves:{n:"Leaves",e:"🍃",b:16},planks:{n:"Planks",e:"🟧",b:5},glass:{n:"Glass",e:"🪟",b:6},brick:{n:"Bricks",e:"🧱",b:7},
- stick:{n:"Stick",e:"🥢"},table:{n:"Crafting Table",e:"🛠️",b:48},torch:{n:"Torch",e:"🔥",b:49},door:{n:"Door",e:"🚪",b:50},bed:{n:"Bed",e:"🛏️",b:51},
+ stick:{n:"Stick",e:"🥢"},corn:{n:"Corn",e:"🌽"},wheat:{n:"Wheat",e:"🌾"},soy:{n:"Soybeans",e:"🫛"},beans:{n:"Beans",e:"🫘"},tomato:{n:"Tomato",e:"🍅"},apple:{n:"Apple",e:"🍎"},pumpkin:{n:"Pumpkin",e:"🎃"},rasp:{n:"Raspberries",e:"🔴"},carrot:{n:"Carrot",e:"🥕"},potato:{n:"Potato",e:"🥔"},egg:{n:"Egg",e:"🥚"},milk:{n:"Milk",e:"🥛"},
+ roastcorn:{n:"Roasted Corn",e:"🌽"},cornsoup:{n:"Corn Soup",e:"🍲"},eggs:{n:"Scrambled Eggs",e:"🍳"},bread:{n:"Bread",e:"🍞"},beansoup:{n:"Bean Soup",e:"🥣"},bakedpot:{n:"Baked Potato",e:"🥔"},jam:{n:"Berry Toast",e:"🫙"},
+ berries:{n:"Berries",e:"🫐"},campfire:{n:"Campfire",e:"🏕️",b:68},table:{n:"Crafting Table",e:"🛠️",b:48},torch:{n:"Torch",e:"🔥",b:49},door:{n:"Door",e:"🚪",b:50},bed:{n:"Bed",e:"🛏️",b:51},
  lantern:{n:"Lantern",e:"🏮",b:52},ladder:{n:"Ladder",e:"🪜",b:53},rail:{n:"Rails",e:"🛤️",b:54},pframe:{n:"Portal Frame",e:"🟪",b:55},pcrystal:{n:"Portal Crystal",e:"🔷"},
  wpick:{n:"Wooden Pickaxe",e:"⛏️",tool:"pick",m:2},spick:{n:"Stone Pickaxe",e:"⛏️",tool:"pick",m:3.5},ipick:{n:"Iron Pickaxe",e:"⛏️",tool:"pick",m:5.5},
  wshovel:{n:"Wooden Shovel",e:"🥄",tool:"shovel",m:2},sshovel:{n:"Stone Shovel",e:"🥄",tool:"shovel",m:3},ishovel:{n:"Iron Shovel",e:"🥄",tool:"shovel",m:4.5},
 };
 const BOOK=Object.keys(ITM).filter(k=>ITM[k].bk);
-const DROP={1:"dirt",2:"dirt",3:"stone",36:"stone",45:"stone",4:"wood",5:"planks",16:"leaves",17:"sand",6:"glass",7:"brick",38:"coal",39:"copper",40:"iron",41:"gold",42:"diamond",43:"emerald",44:"amethyst",47:"clay",48:"table",49:"torch",50:"door",51:"bed",52:"lantern",53:"ladder",54:"rail",55:"pframe",57:"quartz",58:"glow",59:"cloud",60:"skystone",61:"choc",62:"cane",63:"gum",64:"frost",65:"cotton"};
-const HARD={1:.6,2:.6,17:.5,47:.7,16:.3,4:1.2,5:1,3:2.2,36:2.2,45:2.8,38:2.6,39:2.8,40:3.2,41:3.6,42:5,43:4.5,44:3,57:2.6,58:2,59:.4,60:1.6,61:.8,62:.8,63:.6,64:.5,65:.4,6:.6,7:2};
+const DROP={1:"dirt",2:"dirt",3:"stone",36:"stone",45:"stone",4:"wood",5:"planks",16:"leaves",17:"sand",6:"glass",7:"brick",38:"coal",39:"copper",40:"iron",41:"gold",42:"diamond",43:"emerald",44:"amethyst",47:"clay",48:"table",49:"torch",50:"door",51:"bed",52:"lantern",53:"ladder",54:"rail",55:"pframe",57:"quartz",58:"glow",59:"cloud",60:"skystone",61:"choc",62:"cane",63:"gum",64:"frost",65:"cotton",67:"berries",68:"campfire"};
+const HARD={1:.6,2:.6,17:.5,47:.7,16:.3,4:1.2,5:1,3:2.2,36:2.2,45:2.8,38:2.6,39:2.8,40:3.2,41:3.6,42:5,43:4.5,44:3,57:2.6,58:2,59:.4,60:1.6,61:.8,62:.8,63:.6,64:.5,65:.4,6:.6,7:2,67:.4,68:.6};
 const SHOV=new Set([1,2,17,47,59,64,65]),PICKB=new Set([3,36,45,38,39,40,41,42,43,44,57,58,60,7,55]),UNBRK=new Set([46,56,66]);
 function bestTool(kind){let b=null;for(const k in ITM)if(ITM[k].tool===kind&&ADV.inv[k]&&(!b||ITM[k].m>ITM[b].m))b=k;return b}
 function mineTime(id){const kind=SHOV.has(id)?"shovel":PICKB.has(id)?"pick":null,t=kind&&bestTool(kind);return Math.max(.15,(HARD[id]??1.2)/(t?ITM[t].m:1))}
@@ -1379,6 +1381,7 @@ const RC=[
  {k:"sshovel",need:{stone:1,stick:2}},
  {k:"ipick",need:{iron:3,coal:1,stick:2},t:"Heating iron ore with coal gives us metal iron. Mines 5× faster!"},
  {k:"ishovel",need:{iron:1,coal:1,stick:2}},
+ {k:"campfire",need:{stick:3,coal:1},hand:1,t:"Cook food here! Tap it to see cooking recipes."},
  {k:"ladder",n:3,need:{stick:3},t:"Walk into a ladder and push forward to climb."},
  {k:"door",need:{planks:6}},
  {k:"bed",need:{planks:3,leaves:3},t:"A cozy leaf mattress!"},
@@ -1405,7 +1408,7 @@ const TEXF={38:spk("#8f8f8f",["#1e1e1e","#2b2b2b"]),39:spk("#8f8f8f",["#e07b45",
  53:g=>{g.clearRect(0,0,16,16);g.fillStyle="#8d6e63";g.fillRect(2,0,2,16);g.fillRect(12,0,2,16);for(let y=1;y<16;y+=4)g.fillRect(2,y,12,2)},
  54:g=>{g.fillStyle="#9e9e9e";g.fillRect(0,0,16,16);g.fillStyle="#795548";for(let y=1;y<16;y+=4)g.fillRect(0,y,16,2);g.fillStyle="#cfd8dc";g.fillRect(3,0,2,16);g.fillRect(11,0,2,16)},
  55:spk("#2e1f4f",["#8e44c9","#b27cf0"],12),61:g=>{g.fillStyle="#6d3b1f";g.fillRect(0,0,16,16);g.fillStyle="#4e2914";g.fillRect(0,7,16,1);g.fillRect(7,0,1,16);g.fillStyle="#8a5230";g.fillRect(1,1,3,3);g.fillRect(9,9,3,3)},
- 62:g=>{for(let i=0;i<16;i++){g.fillStyle=(Math.floor(i/3)%2)?"#fafafa":"#e53935";g.fillRect(0,i,16,1)}},64:spk("#fff0f6",["#ff8fc7","#8fd3ff","#ffe066"],10,1),66:g=>{g.fillStyle="#b0bec5";g.fillRect(0,0,16,16);g.fillStyle="#ffca28";g.fillRect(0,6,16,4);g.fillStyle="#455a64";g.fillRect(7,0,2,16)}};
+ 62:g=>{for(let i=0;i<16;i++){g.fillStyle=(Math.floor(i/3)%2)?"#fafafa":"#e53935";g.fillRect(0,i,16,1)}},64:spk("#fff0f6",["#ff8fc7","#8fd3ff","#ffe066"],10,1),67:spk("#2e7d32",["#3949ab","#c62828","#1b5e20"],14,2),68:g=>{g.fillStyle="#5d4037";g.fillRect(0,0,16,16);g.fillStyle="#ff6f00";g.fillRect(3,4,10,10);g.fillStyle="#ffd54f";g.fillRect(6,6,4,7);g.fillStyle="#3e2723";g.fillRect(0,13,16,3)},66:g=>{g.fillStyle="#b0bec5";g.fillRect(0,0,16,16);g.fillStyle="#ffca28";g.fillRect(0,6,16,4);g.fillStyle="#455a64";g.fillRect(7,0,2,16)}};
 // --- crack overlay ---
 const CRK=[1,2,3,4,5].map(s=>{const c=document.createElement("canvas");c.width=c.height=32;const g=c.getContext("2d"),r=rng(s*99);g.strokeStyle="rgba(0,0,0,.85)";g.lineWidth=2;for(let i=0;i<s*2;i++){let x=16,y=16;g.beginPath();g.moveTo(x,y);for(let j=0;j<3+s;j++){x+=(r()-.5)*14;y+=(r()-.5)*14;g.lineTo(x,y)}g.stroke()}const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;return t});
 const crackM=new THREE.Mesh(new THREE.BoxGeometry(1.02,1.02,1.02),new THREE.MeshBasicMaterial({map:CRK[0],transparent:true,depthWrite:false}));crackM.visible=false;scene.add(crackM);
@@ -1507,7 +1510,7 @@ let advTab="bag";
 function openAdv(tab){advTab=tab||advTab;renderAdv();openOv("advOv")}
 function closeAdv(){closeOv("advOv");closeOv("advFind");closeOv("portalOv")}
 function renderAdv(){const b=document.getElementById("advBody"),tabs=[["bag","🎒 Bag"],["craft","⚒️ Craft"],["book","📖 Minerals"],["quests","📜 Quests"]];let h=`<div class="ttabs">${tabs.map(([k,t])=>`<button data-at="${k}" class="${k===advTab?"on":""}">${t}</button>`).join("")}</div>`;
- if(advTab==="bag"){const ks=Object.keys(ADV.inv).filter(k=>ADV.inv[k]>0);const pk=bestTool("pick"),sh=bestTool("shovel");h+=`<p>⛏️ Pickaxe: <b>${pk?ITM[pk].n:"just your hands"}</b> · 🥄 Shovel: <b>${sh?ITM[sh].n:"none"}</b></p>`+(ks.length?`<div class="igrid">${ks.map(k=>`<button class="icard" data-it="${k}"><span>${ITM[k].e}</span><b>${ITM[k].n}</b><small>× ${ADV.inv[k]}</small>${ITM[k].b?"<i>tap to hold</i>":""}</button>`).join("")}</div>`:`<p>Your bag is empty. Go ⛏️ mining, or break trees and blocks in ${HTN}!</p>`)+(!ADV.gift?`<button class="go" id="advGift">🎁 Open your starter gift</button>`:"")}
+ if(advTab==="bag"){const ks=Object.keys(ADV.inv).filter(k=>ADV.inv[k]>0&&ITM[k]);const pk=bestTool("pick"),sh=bestTool("shovel");h+=`<p>⛏️ Pickaxe: <b>${pk?ITM[pk].n:"just your hands"}</b> · 🥄 Shovel: <b>${sh?ITM[sh].n:"none"}</b></p>`+(ks.length?`<div class="igrid">${ks.map(k=>`<button class="icard" data-it="${k}"><span>${ITM[k].e}</span><b>${ITM[k].n}</b><small>× ${ADV.inv[k]}</small>${ITM[k].b?"<i>tap to hold</i>":""}</button>`).join("")}</div>`:`<p>Your bag is empty. Go ⛏️ mining, or break trees and blocks in ${HTN}!</p>`)+(!ADV.gift?`<button class="go" id="advGift">🎁 Open your starter gift</button>`:"")}
  else if(advTab==="craft"){const nt=nearTable();h+=nt?`<p>🛠️ You're at your Crafting Table: every recipe is ready!</p>`:`<p>✋ Hand recipes work anywhere. For tools and more, <b>place a 🛠️ Crafting Table and tap it</b>.</p>`;
   h+=`<div class="rgrid2">${RC.map((r,i)=>{const can=Object.entries(r.need).every(([k,n])=>(ADV.inv[k]||0)>=n),tool=ITM[r.k].tool,has=tool&&ADV.inv[r.k],lock=!r.hand&&!nt;return `<div class="rcard2 ${can&&!lock&&!has?"can":""}"><div class="rout">${ITM[r.k].e}<b>${ITM[r.k].n}${r.n>1?" ×"+r.n:""}</b></div><div class="rneed">${Object.entries(r.need).map(([k,n])=>itemChip(k,n,ADV.inv[k]||0)).join(" + ")}</div>${r.t?`<small>${r.t}</small>`:""}${has?`<div class="rdone">✅ You have it</div>`:`<button class="${can&&!lock?"go":""}" data-rc="${i}">${lock?"🛠️ Needs table":can?"✨ Make it":"Need more"}</button>`}</div>`}).join("")}</div>`;
   h+=`<h4>🌀 Portal</h4><p>Craft 14 🟪 Portal Frames and 1 🔷 Portal Crystal, then stand in ${HTN} and build it. Frames: ${ADV.inv.pframe||0}/14 · Crystal: ${ADV.inv.pcrystal||0}/1</p><button id="advPortal" class="${(ADV.inv.pframe||0)>=14&&ADV.inv.pcrystal&&!away?"go":""}">🌀 Build portal in front of me</button>`}
@@ -1546,7 +1549,7 @@ if(window.Music)Music.play("build");
 document.getElementById("btnChar").onclick=()=>openDressUp({onChange:reAv});
 {const eb=document.getElementById("vEasy");const sh=()=>{eb.querySelector("small").textContent=EASY?"Easy ON":"Easy OFF";eb.classList.toggle("on",EASY)};sh();eb.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();EASY=!EASY;localStorage.setItem("realcraft_easyfly",EASY?"1":"0");sh();toast(EASY?"🪶 Easy flying ON: the plane flies itself level, helps you reach rings and pulls up near the ground.":"🛩️ Easy flying OFF: full manual control!")})}
 window.BW={PLAYS,FLY:{vstep,nearRing,ringOK,inp,hold,VEH,getIn,exitNow,ride:()=>ride,rings:()=>RINGS,got:()=>ringGot,destRings:()=>destRings,audit:()=>ringAudit,setEasy:b=>EASY=b,doTrick,trick:()=>trick,dest:k=>{away=k;document.body.classList.add("away");destVehicles(false);const info=genDest(k);rebuildNear(60);return info},places:()=>Object.keys(DB)},goFarm,FM:()=>FMX,nearFarm:()=>nearFarm,goSH,SH:()=>SHX,nearSH:()=>nearSH,goSport,openSport,destSport:()=>destSport,openFootball,openPlayground,openSandcastle,enterSchool,openGradePicker,nearSchool:()=>nearSchool,HT,HTN,HOMES,openCityCard,showHomeFact,openHomeLearn,av,openDressUp,loadAvatar,GO,LM,VEH,get,set,P,world,unlocks,unlocked,placeCar,loadSlot,saveNow,doAction,mode:()=>mode,sel:()=>sel,setSel:i=>{sel=i;renderHotbar()},setMode:m=>{mode=m},target:()=>target,BLOCKS,rebuildDirty,chunks,getIn,getOut,exitNow,goTo,hold,ride:()=>ride,toggleTop,groundTop,rings:()=>ringGot,cam,ren,travel,flyHome,doTrick,trick:()=>trick,away:()=>away,PLACES,openPassport,openLearn,loadPP,cycleSmoke,DB,people:()=>people};
-Object.assign(window.BW,{ADV,ITM,RC,enterRealm,leaveRealm,realm:()=>realm,mineHit,gainItem,craft,buildPortal,portalMenu,mineLevel,openAdv,MJ:()=>MJ,checkQ,AQ,saveADV,pickBlock,setTarget:t=>{target=t},rStars:()=>rStars,RINFO:()=>RINFO});
+Object.assign(window.BW,{scene,sun,hemi,amb,THREE,KEYA,toast,openOv,closeOv,addStars,beep,advSay,renderAdvBar,renderHotbar,collide,inp,FMX:()=>FMX,ADV,ITM,RC,enterRealm,leaveRealm,realm:()=>realm,mineHit,gainItem,craft,buildPortal,portalMenu,mineLevel,openAdv,MJ:()=>MJ,checkQ,AQ,saveADV,pickBlock,setTarget:t=>{target=t},rStars:()=>rStars,RINFO:()=>RINFO});
 
 </script>
 <script>

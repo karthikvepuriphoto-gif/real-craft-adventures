@@ -176,7 +176,11 @@ const BADGES = [
  {id:"dia",n:"Diamond Finder",ic:"💠",t:"Find a diamond deep in the mine",f:s=>!!advAll().found.diamond},
  {id:"craft",n:"Master Crafter",ic:"⚒️",t:"Craft an iron pickaxe",f:s=>!!advAll().made.ipick},
  {id:"portal",n:"Portal Explorer",ic:"🌀",t:"Visit all 3 portal worlds",f:s=>{const v=advAll().vis;return !!(v.crystal&&v.sky&&v.candy)}},
+ {id:"cozy",n:"Cozy Base",ic:"🏡",t:"Build World Survival: sleep in a shelter with a roof, walls, door, torches and bed",f:s=>!!survAll().cozy},
+ {id:"chef",n:"Campfire Chef",ic:"🍳",t:"Build World Survival: cook food at a campfire",f:s=>!!survAll().chef},
+ {id:"nights3",n:"Night Owl Builder",ic:"🌙",t:"Build World Survival: sleep 3 cozy nights",f:s=>!!survAll().nights3},
 ];
+function survAll(){const o={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("realcraft_survival_v1_"))Object.assign(o,(JSON.parse(localStorage.getItem(k)||"{}").badges)||{})}}catch(e){}return o}
 function advAll(){const o={found:{},made:{},vis:{}};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("realcraft_adv_v1_")){const a=JSON.parse(localStorage.getItem(k)||"{}");for(const f of["found","made","vis"])Object.assign(o[f],a[f]||{})}}}catch(e){}return o}
 
 let S = load();migrate();
