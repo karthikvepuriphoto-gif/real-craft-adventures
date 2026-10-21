@@ -223,8 +223,8 @@ function closeOv(id){$(id).classList.add("hidden")}
 document.addEventListener("click",e=>{const c=e.target.closest("[data-c]");if(c)closeOv(c.dataset.c)});
 document.addEventListener("touchmove",e=>{if(!e.target.closest(".pan"))e.preventDefault()},{passive:false});
 // picker
-function openTM(){const p=loadPP();$("tmBody").innerHTML=ERA_ORDER.map(k=>{const E=ERAS[k];return`<button class="era" data-k="${k}"><span class="e">${E.e}</span>${E.n}<small>${E.when}</small>${p.stamps[k]?"<i>✅</i>":""}</button>`}).join("");$("tmBody").querySelectorAll(".era").forEach(b=>b.onclick=()=>{closeOv("tmOv");goEra(b.dataset.k)});openOv("tmOv")}
-$("bTM").onclick=openTM;
+function openTM(){const p=loadPP();$("tmBody").innerHTML=ERA_ORDER.map(k=>{const E=ERAS[k];return`<button class="era" data-k="${k}"><span class="e">${E.e}</span>${E.n}<small>${E.when}</small>${p.stamps[k]?"<i>✅</i>":""}</button>`}).join("")+`<button class="era" data-h="stops" style="background:#ffebee"><span class="e">🇺🇸</span>US History Trail<small>16 stops · 1607 to today</small></button><button class="era" data-h="pres" style="background:#e3f2fd"><span class="e">🏛️</span>Presidents Hall<small>All 47 presidencies</small></button>`;$("tmBody").querySelectorAll(".era").forEach(b=>b.onclick=()=>{closeOv("tmOv");if(b.dataset.h){window.openHistory&&window.openHistory(b.dataset.h);return}goEra(b.dataset.k)});openOv("tmOv")}
+$("bTM").onclick=openTM;window.goEra=k=>goEra(k);window.tmAddStars=addStars;
 // learn + quiz
 function openLearn(k=cur){const E=ERAS[k],L=E.learn,p=loadPP();const got=p.quiz[k]||{};
  $("learnBody").innerHTML=`<h2>${E.e} ${E.n}</h2><p style="font-family:'Press Start 2P',monospace;font-size:11px;color:#6a1b9a">${E.when}</p>
@@ -605,4 +605,5 @@ window.Music={play,setRate:r=>{rate=r},isOn:()=>on,setOn,get ctx(){return ctx},g
 })();
 Music.play("time");
 </script>
+<script src="history.js"></script>
 </body></html>
